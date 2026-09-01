@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=25">
+  <link rel="manifest" href="manifest.json?v=26">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=25">
+  <link rel="stylesheet" href="css/style.css?v=26">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <section class="home-screen" id="homeScreen">
       <div class="hero">
-        <p class="eyebrow">LA MIA SPESA · V1.4.13</p>
+        <p class="eyebrow">LA MIA SPESA · V1.4.14</p>
         <p class="subtitle">Crea una nuova lista, consulta le spese precedenti o tieni d'occhio ciò che è finito.</p>
       </div>
       <div class="actions">
@@ -71,6 +71,17 @@
           <label>Prezzo abituale <span class="optional">(facoltativo)</span><input id="productPrice" inputmode="decimal" placeholder="Es. 1,50"></label>
           <label>Peso<input id="productWeight" type="number" min="0" step="any" value="" inputmode="decimal" placeholder="Es. 375"></label>
           <label>Pezzi<input id="productPieces" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
+          <label>Negozio di riferimento
+            <select id="productStore">
+              <option value="">Seleziona un negozio</option>
+              <option value="Conad">Conad</option>
+              <option value="Triscount">Triscount</option>
+              <option value="Alimentarista">Alimentarista</option>
+              <option value="Todis">Todis</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </label>
+          <label id="customStoreWrap" hidden>Nome del negozio<input id="productCustomStore" autocomplete="off" placeholder="Inserisci il nome del negozio"></label>
           <label>Foto prodotto <span class="optional">(facoltativa)</span><input id="productPhoto" type="file" accept="image/*"></label>
           <div class="photo-preview" id="photoPreview" hidden><img id="photoPreviewImg" alt="Anteprima foto prodotto"></div>
           <button class="save-product-btn" type="submit">Salva prodotto</button>
@@ -104,5 +115,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/app.js?v=26"></script>
 </body></html>
