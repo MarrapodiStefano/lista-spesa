@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=17", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=18", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -32,6 +32,7 @@ if ("serviceWorker" in navigator) {
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
   let pendingPhoto="";
+  let editingProductId=null;
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   const $=id=>document.getElementById(id);
@@ -49,15 +50,59 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   const renderLibrary=(q="")=>{
     const products=state.products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
-    $("libraryList").innerHTML=products.length?products.map(p=>'<div class="library-item">'+productImage(p)+'<div><strong>'+p.name+'</strong><small>Quantità: '+(p.quantity||1)+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div><button data-id="'+p.id+'">Aggiungi</button></div>').join(""):'<div class="empty-state"><span>📦</span><h2>Nessun prodotto</h2><p>Aggiungi il primo prodotto alla tua libreria.</p></div>';
-    [...$("libraryList").querySelectorAll("button[data-id]")].forEach(b=>b.onclick=()=>{const p=state.products.find(x=>x.id===b.dataset.id);state.currentShopping.push({...p});save();renderShopping();close("productPanel");});
+    $("libraryList").innerHTML=products.length
+      ?products.map(p=>'<div class="library-item">'+
+          productImage(p)+
+          '<div class="library-item-info"><strong>'+p.name+'</strong><small>Quantità: '+(p.quantity||1)+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
+          '<div class="library-actions"><button class="library-add-btn" data-id="'+p.id+'">Aggiungi</button><button class="library-edit-btn" data-edit-id="'+p.id+'" aria-label="Modifica '+p.name+'">✎</button></div>'+
+        '</div>').join("")
+      :'<div class="empty-state"><span>📦</span><h2>Nessun prodotto</h2><p>Aggiungi il primo prodotto alla tua libreria.</p></div>';
+
+    [...$("libraryList").querySelectorAll("button[data-id]")].forEach(b=>b.onclick=()=>{
+      const p=state.products.find(x=>x.id===b.dataset.id);
+      if(!p)return;
+      state.currentShopping.push({...p});
+      save();renderShopping();close("productPanel");
+    });
+
+    [...$("libraryList").querySelectorAll("button[data-edit-id]")].forEach(b=>b.onclick=()=>{
+      const p=state.products.find(x=>x.id===b.dataset.editId);
+      if(!p)return;
+      editingProductId=p.id;
+      $("productName").value=p.name||"";
+      $("productPrice").value=p.price||"";
+      $("productQuantity").value=p.quantity||1;
+      pendingPhoto=p.photo||"";
+      $("newProductForm").dataset.barcode=p.barcode||"";
+      $("newProductForm").dataset.editing="1";
+      $("newProductPanel").querySelector(".eyebrow").textContent="MODIFICA PRODOTTO";
+      $("newProductPanel").querySelector(".panel-header h1").textContent="Modifica prodotto";
+      $("newProductForm").querySelector(".save-product-btn").textContent="Salva modifiche";
+      if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
+      else $("photoPreview").hidden=true;
+      open("newProductPanel");
+    });
+  };
+
+  const resetProductForm=()=>{
+    editingProductId=null;
+    pendingPhoto="";
+    const form=$("newProductForm");
+    form.reset();
+    delete form.dataset.barcode;
+    delete form.dataset.editing;
+    $("productQuantity").value=1;
+    $("photoPreview").hidden=true;
+    $("newProductPanel").querySelector(".eyebrow").textContent="NUOVO PRODOTTO";
+    $("newProductPanel").querySelector(".panel-header h1").textContent="Aggiungi alla libreria";
+    form.querySelector(".save-product-btn").textContent="Salva prodotto";
   };
   $("newShoppingBtn").onclick=()=>{$("homeScreen").hidden=true;$("shoppingScreen").hidden=false;renderShopping();};
   $("backHomeBtn").onclick=()=>{$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("addProductBtn").onclick=()=>{renderLibrary();open("productPanel");};
   $("closeProducts").onclick=$("closeProductsBtn").onclick=()=>close("productPanel");
-  $("newProductBtn").onclick=()=>open("newProductPanel");
-  $("closeNewProduct").onclick=$("closeNewProductBtn").onclick=()=>close("newProductPanel");
+  $("newProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
+  $("closeNewProduct").onclick=$("closeNewProductBtn").onclick=()=>{resetProductForm();close("newProductPanel");};
   $("productSearch").oninput=e=>renderLibrary(e.target.value);
   $("productPhoto").onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file){pendingPhoto="";$("photoPreview").hidden=true;return;}const reader=new FileReader();reader.onload=()=>{pendingPhoto=reader.result;$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;};reader.readAsDataURL(file);};
   const stopScanner=async()=>{
@@ -123,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     video.srcObject=scannerStream;
     await video.play();
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.5 pronto. Puoi tenere il codice anche ruotato.";
+    $("scannerStatus").textContent="Scanner V1.4.6 pronto. Puoi tenere il codice anche ruotato.";
 
     let lastScan=0;
     const scanFrame=async now=>{
@@ -164,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.5 pronto. Inquadra il codice da qualsiasi orientamento.";
+    $("scannerStatus").textContent="Scanner V1.4.6 pronto. Inquadra il codice da qualsiasi orientamento.";
   };
 
   const startScanner=async()=>{
@@ -177,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("barcodeReader").innerHTML='<video id="zxingVideo" autoplay muted playsinline></video>';
       const video=$("zxingVideo");
 
-      // V1.4.5: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
+      // V1.4.6: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
       // EAN dei prodotti. Se non è disponibile, torniamo automaticamente a ZXing.
       if("BarcodeDetector" in window){
         await startNativeScanner(video);
@@ -202,7 +247,36 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("scanProductBtn").onclick=startScanner;
   $("closeScanner").onclick=$("closeScannerBtn").onclick=async()=>{await stopScanner();close("scannerPanel");};
-  $("newProductForm").onsubmit=e=>{e.preventDefault();const name=$("productName").value.trim();const price=$("productPrice").value.trim().replace(",",".");const quantity=Math.max(1,parseInt($("productQuantity").value,10)||1);if(!name)return;state.products.push({id:Date.now().toString(),name,price,quantity,photo:pendingPhoto,barcode:e.target.dataset.barcode||""});save();pendingPhoto="";$("photoPreview").hidden=true;delete e.target.dataset.barcode;e.target.reset();$("productQuantity").value=1;close("newProductPanel");renderLibrary();};
+  $("newProductForm").onsubmit=e=>{
+    e.preventDefault();
+    const name=$("productName").value.trim();
+    const price=$("productPrice").value.trim().replace(",",".");
+    const quantity=Math.max(1,parseInt($("productQuantity").value,10)||1);
+    if(!name)return;
+
+    const product={
+      id:editingProductId||Date.now().toString(),
+      name,
+      price,
+      quantity,
+      photo:pendingPhoto,
+      barcode:e.target.dataset.barcode||""
+    };
+
+    if(editingProductId){
+      const index=state.products.findIndex(p=>p.id===editingProductId);
+      if(index!==-1) state.products[index]=product;
+      state.currentShopping=state.currentShopping.map(p=>p.id===editingProductId?{...product}:p);
+    }else{
+      state.products.push(product);
+    }
+
+    save();
+    resetProductForm();
+    close("newProductPanel");
+    renderLibrary($("productSearch").value);
+    renderShopping();
+  };
   $("remindersBtn").onclick=()=>open("remindersPanel");
   $("closeReminders").onclick=$("closeRemindersBtn").onclick=()=>close("remindersPanel");
 });
