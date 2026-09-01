@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=30">
+  <link rel="manifest" href="manifest.json?v=31">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=30">
+  <link rel="stylesheet" href="css/style.css?v=31">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <section class="home-screen" id="homeScreen">
       <div class="hero">
-        <p class="eyebrow">LA MIA SPESA · V1.5.0</p>
+        <p class="eyebrow">LA MIA SPESA · V1.5.1</p>
       </div>
       <div class="actions">
         <button class="action-card action-primary" id="newShoppingBtn" type="button"><span class="action-icon">🛒</span><span class="action-text"><strong>Nuova spesa</strong><small>Crea una nuova lista</small></span><span class="action-arrow">›</span></button>
@@ -32,7 +32,6 @@
       <div class="panel-sheet form-sheet new-shopping-sheet"><div class="panel-handle"></div>
         <div class="panel-header"><div><p class="eyebrow">NUOVA SPESA</p><h1>Dettagli della spesa</h1></div><button class="close-btn" id="closeNewShoppingBtn" type="button">×</button></div>
         <form id="newShoppingForm">
-          <label>Nome della spesa<input id="newShoppingName" required autocomplete="off" placeholder="Es. Spesa settimanale"></label>
           <label>Negozio
             <select id="newShoppingStore" required>
               <option value="">Seleziona un negozio</option>
@@ -41,6 +40,7 @@
           </label>
           <label id="newShoppingCustomStoreWrap" hidden>Nome del negozio<input id="newShoppingCustomStore" autocomplete="off" placeholder="Inserisci il nome del negozio"></label>
           <label>Data<input id="newShoppingDate" type="date" required></label>
+          <label>Nome della spesa <span class="optional">(facoltativo)</span><input id="newShoppingName" autocomplete="off" placeholder="Es. Spesa settimanale"></label>
           <button class="save-product-btn" type="submit">Crea nuova spesa</button>
         </form>
       </div>
@@ -134,5 +134,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=30"></script>
+  <script src="js/app.js?v=31"></script>
 </body></html>
