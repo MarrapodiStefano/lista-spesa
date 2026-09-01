@@ -1294,3 +1294,41 @@ body{
   border-radius:16px;
   font-size:16px;
 }
+
+
+/* V1.6.29 — Modifica prodotto: anteprima foto in alto */
+#newProductForm[data-editing="1"]{
+  display:grid;
+}
+#newProductForm[data-editing="1"] .photo-preview{
+  order:-1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:118px;
+  margin:0 0 4px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+}
+#newProductForm[data-editing="1"] .photo-preview[hidden]{
+  display:none;
+}
+#newProductForm[data-editing="1"] .photo-preview img{
+  display:block;
+  width:96px;
+  height:96px;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  border-radius:14px;
+}
+#newProductForm[data-editing="1"] label:has(#productPhoto){
+  order:10;
+}
+#newProductForm[data-editing="1"] .save-product-btn{
+  order:11;
+}
