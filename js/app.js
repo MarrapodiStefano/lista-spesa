@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=37", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=38", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let pendingPhoto="";
   let editingProductId=null;
   let editingShoppingId=null;
+  let editingReminderId=null;
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
@@ -332,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("✓ "+product.name+" è già presente nei Promemoria.");
         return;
       }
-      state.reminders.push({...product});
+      state.reminders.push({...product,reminderQuantity:1});
       save();
       renderReminders();
       alert("✓ "+product.name+" aggiunto ai Promemoria.");
@@ -503,16 +504,66 @@ document.addEventListener("DOMContentLoaded", () => {
     renderLibrary($("productSearch").value);
     renderShopping();
   };
+  const openReminderEditor=id=>{
+    const item=state.reminders.find(p=>p.id===id);
+    if(!item)return;
+    editingReminderId=id;
+    $("reminderEditName").textContent=item.name;
+    $("reminderQuantityInput").value=Math.max(1,parseInt(item.reminderQuantity,10)||1);
+    open("reminderEditPanel");
+  };
+  const closeReminderEditor=()=>{
+    editingReminderId=null;
+    close("reminderEditPanel");
+  };
+  const saveReminderQuantity=()=>{
+    const item=state.reminders.find(p=>p.id===editingReminderId);
+    if(!item)return closeReminderEditor();
+    item.reminderQuantity=Math.max(1,parseInt($("reminderQuantityInput").value,10)||1);
+    save();
+    renderReminders();
+    closeReminderEditor();
+  };
+  const removeReminder=id=>{
+    const item=state.reminders.find(p=>p.id===id);
+    if(!item)return;
+    if(confirm('Rimuovere "'+item.name+'" dai Promemoria?')){
+      state.reminders=state.reminders.filter(x=>x.id!==id);
+      save();
+      renderReminders();
+    }
+  };
+  const bindReminderPress=(target,id)=>{
+    let timer=null, longPressed=false;
+    const clear=()=>{if(timer){clearTimeout(timer);timer=null;}};
+    target.addEventListener("pointerdown",e=>{
+      if(e.pointerType==="mouse"&&e.button!==0)return;
+      longPressed=false;
+      timer=setTimeout(()=>{
+        longPressed=true;
+        if(navigator.vibrate)navigator.vibrate(30);
+        removeReminder(id);
+      },650);
+    });
+    target.addEventListener("pointerup",clear);
+    target.addEventListener("pointercancel",clear);
+    target.addEventListener("pointerleave",clear);
+    target.addEventListener("click",e=>{
+      if(longPressed){e.preventDefault();return;}
+      openReminderEditor(id);
+    });
+  };
   const renderReminders=()=>{
     const list=$("remindersList"), empty=$("remindersEmpty");
     list.innerHTML="";
     if(!state.reminders.length){ empty.hidden=false; return; }
     empty.hidden=true;
     state.reminders.forEach(p=>{
+      if(!p.reminderQuantity)p.reminderQuantity=1;
       const item=document.createElement("div");
       item.className="library-item";
-      item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'Prodotto in promemoria')+'</small></div><button class="add-to-list" type="button">×</button>';
-      item.querySelector("button").onclick=()=>{state.reminders=state.reminders.filter(x=>x.id!==p.id);save();renderReminders();};
+      item.innerHTML=productImage(p)+'<div class="library-item-info reminder-item-info"><strong>'+p.name+'</strong><small>Da acquistare: '+p.reminderQuantity+(p.reminderQuantity===1?' pezzo':' pezzi')+(p.store?' · '+p.store:'')+'</small></div>';
+      bindReminderPress(item.querySelector(".reminder-item-info"),p.id);
       list.appendChild(item);
     });
   };
@@ -524,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const item=document.createElement("div"); item.className="library-item";
       item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'')+'</small></div><button class="add-to-list" type="button">'+(exists?"✓":"＋")+'</button>';
       const btn=item.querySelector("button"); btn.disabled=exists;
-      btn.onclick=()=>{if(!state.reminders.some(x=>x.id===p.id)){state.reminders.push({...p});save();renderReminders();renderReminderLibrary($("reminderProductSearch").value);}};
+      btn.onclick=()=>{if(!state.reminders.some(x=>x.id===p.id)){state.reminders.push({...p,reminderQuantity:1});save();renderReminders();renderReminderLibrary($("reminderProductSearch").value);}};
       list.appendChild(item);
     });
   };
@@ -540,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("✓ "+product.name+" è già presente nei Promemoria.");
       return;
     }
-    state.reminders.push({...product});
+    state.reminders.push({...product,reminderQuantity:1});
     save();
     renderReminders();
     alert("✓ "+product.name+" aggiunto ai Promemoria.");
@@ -550,6 +601,10 @@ document.addEventListener("DOMContentLoaded", () => {
     await startScanner();
   };
   $("scanReminderBtn").onclick=scanReminderBarcode;
+  $("reminderDecreaseBtn").onclick=()=>{$("reminderQuantityInput").value=Math.max(1,(parseInt($("reminderQuantityInput").value,10)||1)-1);};
+  $("reminderIncreaseBtn").onclick=()=>{$("reminderQuantityInput").value=(parseInt($("reminderQuantityInput").value,10)||1)+1;};
+  $("saveReminderEditBtn").onclick=saveReminderQuantity;
+  $("closeReminderEdit").onclick=$("closeReminderEditBtn").onclick=closeReminderEditor;
   $("remindersBtn").onclick=()=>{renderReminders();open("remindersPanel");};
   $("closeReminders").onclick=$("closeRemindersBtn").onclick=()=>close("remindersPanel");
   $("addReminderBtn").onclick=()=>{renderReminderLibrary("");$("reminderProductSearch").value="";open("reminderProductPanel");};
@@ -561,7 +616,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if($("newProductPanel").dataset.reminderMode==="1"){
       setTimeout(()=>{
         const newest=state.products[state.products.length-1];
-        if(newest&&!state.reminders.some(x=>x.id===newest.id)){state.reminders.push({...newest});save();}
+        if(newest&&!state.reminders.some(x=>x.id===newest.id)){state.reminders.push({...newest,reminderQuantity:1});save();}
         delete $("newProductPanel").dataset.reminderMode;
         renderReminders();
       },0);
