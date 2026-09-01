@@ -1,5 +1,4 @@
-/* La mia spesa - PWA offline con aggiornamenti affidabili */
-const CACHE_NAME = "la-mia-spesa-v4";
+const CACHE_NAME = "la-mia-spesa-v5";
 
 const APP_SHELL = [
   "./",
@@ -34,35 +33,35 @@ self.addEventListener("fetch", (event) => {
 
   const request = event.request;
 
-  // Strategia principale: rete prima.
-  // Così, quando Internet è disponibile, l'app riceve sempre
-  // la versione più recente pubblicata su GitHub Pages.
   event.respondWith(
-    fetch(request)
-      .then((response) => {
+    caches.match(request).then((cached) => {
+      if (cached) {
+        event.waitUntil(
+          fetch(request)
+            .then((response) => {
+              if (response && response.ok && response.type === "basic") {
+                return caches.open(CACHE_NAME).then((cache) =>
+                  cache.put(request, response.clone())
+                );
+              }
+            })
+            .catch(() => undefined)
+        );
+        return cached;
+      }
+
+      return fetch(request).then((response) => {
         if (response && response.ok && response.type === "basic") {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, copy);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         }
-
         return response;
-      })
-      .catch(async () => {
-        // Senza Internet usiamo la copia locale.
-        const cached = await caches.match(request);
-        if (cached) return cached;
-
-        // Per l'apertura dell'app offline, ripieghiamo sulla home.
-        if (request.mode === "navigate") {
-          return (
-            (await caches.match("./")) ||
-            (await caches.match("./index.html"))
-          );
-        }
-
-        return Response.error();
-      })
+      });
+    }).catch(async () => {
+      if (request.mode === "navigate") {
+        return (await caches.match("./")) || (await caches.match("./index.html"));
+      }
+      return Response.error();
+    })
   );
 });
