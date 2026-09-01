@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=43", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=44", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -61,13 +61,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const meta=$("currentShoppingHomeMeta");
     if(!btn||!meta)return;
     const count=state.currentShopping.length+state.purchasedShopping.length;
-    const hasActive=count>0;
+    // Una spesa è considerata attiva anche quando esistono i suoi dettagli,
+    // così la Home non perde il collegamento per riaprirla.
+    const hasDetails=!!(state.currentShoppingStore||state.currentShoppingDate||(state.currentShoppingName&&state.currentShoppingName!=="La mia spesa"));
+    const hasActive=count>0||hasDetails;
     btn.hidden=!hasActive;
     if(!hasActive)return;
     const bits=[];
     if(state.currentShoppingStore)bits.push(state.currentShoppingStore);
     if(state.currentShoppingDate)bits.push(state.currentShoppingDate.split("-").reverse().join("/"));
     bits.push(count+(count===1?" prodotto":" prodotti"));
+    if(!count)bits.push("spesa in corso");
     meta.textContent=bits.join(" · ");
   };
   const openCurrentShopping=()=>{
