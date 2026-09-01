@@ -111,6 +111,11 @@
           <h1>Le tue spese</h1>
           <button class="close-btn history-close-btn" id="closeHistory" type="button" aria-label="Chiudi">×</button>
         </header>
+        <div class="history-search-wrap">
+          <span class="history-search-icon">⌕</span>
+          <input id="historySearch" type="search" autocomplete="off" placeholder="Cerca un prodotto acquistato" aria-label="Cerca un prodotto acquistato">
+          <button id="clearHistorySearch" class="history-search-clear" type="button" aria-label="Cancella ricerca" hidden>×</button>
+        </div>
         <div class="history-sort-bar">
           <span>Ordina per</span>
           <select id="historySort" aria-label="Ordina lo storico">
