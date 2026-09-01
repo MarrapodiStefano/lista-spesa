@@ -676,8 +676,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if(editingProductId){
       const index=state.products.findIndex(p=>p.id===editingProductId);
       if(index!==-1) state.products[index]=product;
-      state.currentShopping=state.currentShopping.map(p=>p.id===editingProductId?{...product,_shoppingId:p._shoppingId}:p);
-      state.purchasedShopping=state.purchasedShopping.map(p=>p.id===editingProductId?{...product,_shoppingId:p._shoppingId}:p);
+
+      // La libreria contiene il prezzo di riferimento.
+      // Promemoria e Spesa sono invece contesti indipendenti: quando un
+      // prodotto è già stato inserito lì, il suo prezzo (e la quantità
+      // scelta in quel contesto) non devono essere sovrascritti.
+      state.currentShopping=state.currentShopping.map(p=>{
+        if(p.id!==editingProductId)return p;
+        return {...product,price:p.price,pieces:p.pieces,_shoppingId:p._shoppingId};
+      });
+      state.purchasedShopping=state.purchasedShopping.map(p=>{
+        if(p.id!==editingProductId)return p;
+        return {...product,price:p.price,pieces:p.pieces,_shoppingId:p._shoppingId};
+      });
+      state.reminders=state.reminders.map(p=>{
+        if(p.id!==editingProductId)return p;
+        return {...product,price:p.price,reminderQuantity:p.reminderQuantity};
+      });
     }else{
       state.products.push(product);
     }
