@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=26", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=27", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -241,6 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("savePurchaseEditBtn").onclick=savePurchaseEditor;
 
   $("newShoppingBtn").onclick=()=>{$("homeScreen").hidden=true;$("shoppingScreen").hidden=false;renderShopping();};
+  $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
   $("backHomeBtn").onclick=()=>{$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("addProductBtn").onclick=()=>{renderLibrary();open("productPanel");};
   $("closeProducts").onclick=$("closeProductsBtn").onclick=()=>close("productPanel");
