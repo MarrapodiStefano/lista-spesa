@@ -358,3 +358,52 @@ button {
 .form-sheet form{
   padding-bottom:20px;
 }
+
+
+/* V1.4.7 — Lista spesa: scorrimento, swipe e pressione prolungata */
+.shopping-screen.app-screen{
+  height:calc(100dvh - 56px);
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.shopping-screen .shopping-summary{flex:0 0 auto}
+.product-list{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:0 0 110px;
+}
+.shopping-section{display:grid;gap:10px}
+.shopping-section + .shopping-section{margin-top:22px}
+.shopping-section-title{
+  margin:4px 2px 2px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+.shopping-item{
+  position:relative;
+  overflow:hidden;
+  touch-action:pan-y;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.shopping-item.is-acquired{opacity:.72}
+.shopping-item.is-swiping{transition:transform .18s ease}
+.shopping-item-hint{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:500;
+}
+.shopping-item-action{
+  color:#4673b6;
+  font-size:13px;
+  font-weight:750;
+}
