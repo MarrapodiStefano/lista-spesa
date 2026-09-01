@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=15", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=16", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -109,12 +109,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // evitando API opzionali che non sono presenti in tutte le build UMD.
       scanner=new ZXingBrowser.BrowserMultiFormatReader();
 
+      // V1.4.4: evitiamo di forzare l'alta risoluzione, che su alcuni iPhone
+      // può far scegliere una lente/inquadratura troppo ravvicinata.
       scannerControls=await scanner.decodeFromConstraints(
         {
           video:{
             facingMode:{ideal:"environment"},
-            width:{ideal:1920},
-            height:{ideal:1080}
+            width:{ideal:1280,max:1920},
+            height:{ideal:720,max:1080},
+            aspectRatio:{ideal:1.777}
           },
           audio:false
         },
@@ -128,8 +131,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       );
 
+      // Se il browser espone il controllo zoom, riportiamolo esplicitamente
+      // al minimo disponibile: l'immagine deve restare più ampia possibile.
+      try{
+        const stream=video.srcObject;
+        const track=stream&&stream.getVideoTracks?stream.getVideoTracks()[0]:null;
+        const capabilities=track&&track.getCapabilities?track.getCapabilities():null;
+        if(track&&capabilities&&capabilities.zoom&&track.applyConstraints){
+          await track.applyConstraints({advanced:[{zoom:capabilities.zoom.min}]});
+        }
+      }catch(zoomError){
+        console.warn("Controllo zoom non disponibile",zoomError);
+      }
+
       scannerRunning=true;
-      $("scannerStatus").textContent="Scanner ZXing pronto. Inquadra il codice e tieni fermo l'iPhone.";
+      $("scannerStatus").textContent="Scanner ZXing V1.4.4 pronto. Inquadra il codice senza avvicinarti troppo.";
     }catch(e){
       console.error("Errore scanner ZXing",e);
       await stopScanner();
