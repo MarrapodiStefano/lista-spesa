@@ -7,9 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=59">
+  <link rel="manifest" href="manifest.json?v=60">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=59">
+  <link rel="stylesheet" href="css/style.css?v=60">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
@@ -18,7 +18,7 @@
       <header class="home-header">
         <div>
           <h1>La Mia Spesa</h1>
-          <p>V1.6.25</p>
+          <p>V1.6.26</p>
         </div>
         <div class="home-groceries" aria-hidden="true"><span>🥖</span><span>🥕</span><span>🍅</span><span>🥬</span></div>
       </header>
@@ -170,7 +170,7 @@
     <section class="product-panel" id="productPanel" aria-hidden="true">
       <div class="panel-backdrop" id="closeProducts"></div>
       <div class="panel-sheet product-sheet"><div class="panel-handle"></div>
-        <div class="panel-header"><div><p class="eyebrow">LIBRERIA PRODOTTI</p><h1>Aggiungi prodotti</h1></div><button class="close-btn" id="closeProductsBtn" type="button">×</button></div>
+        <div class="panel-header"><div><p class="eyebrow" id="productPanelEyebrow">LIBRERIA PRODOTTI</p><h1 id="productPanelTitle">Aggiungi prodotti</h1></div><button class="close-btn" id="closeProductsBtn" type="button">×</button></div>
         <input class="search-input" id="productSearch" type="search" placeholder="Cerca un prodotto">
         <div class="library-list" id="libraryList"></div>
         <button class="new-product-btn" id="newProductBtn" type="button">＋ Nuovo prodotto</button>
@@ -245,5 +245,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=59"></script>
+  <script src="js/app.js?v=60"></script>
 </body></html>
