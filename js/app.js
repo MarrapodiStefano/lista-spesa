@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=54", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=55", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -66,13 +66,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // così la Home non perde il collegamento per riaprirla.
     const hasDetails=!!(state.currentShoppingStore||state.currentShoppingDate||(state.currentShoppingName&&state.currentShoppingName!=="La mia spesa"));
     const hasActive=count>0||hasDetails;
-    btn.hidden=!hasActive;
-    if(!hasActive)return;
+    // Il collegamento alla spesa resta sempre visibile nella Home.
+    btn.hidden=false;
     const bits=[];
-    if(state.currentShoppingStore)bits.push(state.currentShoppingStore);
-    if(state.currentShoppingDate)bits.push(state.currentShoppingDate.split("-").reverse().join("/"));
-    bits.push(count+(count===1?" prodotto":" prodotti"));
-    if(!count)bits.push("spesa in corso");
+    if(hasActive){
+      if(state.currentShoppingStore)bits.push(state.currentShoppingStore);
+      if(state.currentShoppingDate)bits.push(state.currentShoppingDate.split("-").reverse().join("/"));
+      bits.push(count+(count===1?" prodotto":" prodotti"));
+      if(!count)bits.push("spesa in corso");
+    }else{
+      bits.push("Apri o crea la tua lista");
+    }
     meta.textContent=bits.join(" · ");
     if(totalEl){
       const total=state.purchasedShopping.reduce((sum,p)=>sum+(Number(p.price)||0)*(Number(p.pieces)||1),0);
