@@ -733,3 +733,30 @@ body{
 .shopping-screen .shopping-meta:empty{
   display:none;
 }
+
+
+/* V1.5.3 — Data più discreta rispetto al nome del negozio */
+.shopping-screen .shopping-meta{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:0;
+}
+.shopping-screen .shopping-meta-store{
+  font-size:clamp(24px,6.5vw,30px);
+  font-weight:800;
+  letter-spacing:.10em;
+}
+.shopping-screen .shopping-meta-date{
+  margin-left:10px;
+  font-size:clamp(15px,4vw,19px);
+  font-weight:650;
+  letter-spacing:.08em;
+}
+.shopping-screen .shopping-meta-name{
+  flex-basis:100%;
+  margin-top:5px;
+  font-size:clamp(17px,4.5vw,21px);
+  font-weight:650;
+  letter-spacing:.06em;
+}
