@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=19", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=20", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -117,15 +117,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const pendingCount=state.currentShopping.length;
     const purchasedCount=state.purchasedShopping.length;
     const count=pendingCount+purchasedCount;
-    $("shoppingTotal").textContent=euro(state.currentShopping.reduce((s,p)=>s+(Number(p.price)||0),0));
-    document.querySelector(".shopping-summary span").textContent=count+(count===1?" prodotto":" prodotti");
+    const cartTotal=state.purchasedShopping.reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.quantity)||1)),0);
+    $("shoppingTotal").textContent=euro(cartTotal);
+    $("cartTotal").textContent=euro(cartTotal);
+    $("cartCount").textContent=purchasedCount;
+    document.querySelector(".shopping-summary span").textContent=pendingCount+(pendingCount===1?" prodotto da acquistare":" prodotti da acquistare");
     if(!count){
       list.innerHTML='<div class="empty-state"><span>🛒</span><h2>La lista è vuota</h2><p>Aggiungi il primo prodotto dalla tua libreria.</p></div>';
       return;
     }
     let html="";
     if(pendingCount) html+='<div class="shopping-section"><div class="shopping-section-title">DA ACQUISTARE · '+pendingCount+'</div>'+state.currentShopping.map(p=>shoppingItem(p,false)).join("")+'</div>';
-    if(purchasedCount) html+='<div class="shopping-section"><div class="shopping-section-title">ACQUISTATI · '+purchasedCount+'</div>'+state.purchasedShopping.map(p=>shoppingItem(p,true)).join("")+'</div>';
+    if(purchasedCount) html+='<div class="shopping-section shopping-cart-section"><div class="shopping-section-title">🛒 CARRELLO · '+purchasedCount+'</div>'+state.purchasedShopping.map(p=>shoppingItem(p,true)).join("")+'</div>';
     list.innerHTML=html;
     bindShoppingGestures();
   };
@@ -249,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     video.srcObject=scannerStream;
     await video.play();
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.7 pronto. Puoi tenere il codice anche ruotato.";
+    $("scannerStatus").textContent="Scanner V1.4.8 pronto. Puoi tenere il codice anche ruotato.";
 
     let lastScan=0;
     const scanFrame=async now=>{
@@ -290,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.7 pronto. Inquadra il codice da qualsiasi orientamento.";
+    $("scannerStatus").textContent="Scanner V1.4.8 pronto. Inquadra il codice da qualsiasi orientamento.";
   };
 
   const startScanner=async()=>{
@@ -303,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("barcodeReader").innerHTML='<video id="zxingVideo" autoplay muted playsinline></video>';
       const video=$("zxingVideo");
 
-      // V1.4.7: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
+      // V1.4.8: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
       // EAN dei prodotti. Se non è disponibile, torniamo automaticamente a ZXing.
       if("BarcodeDetector" in window){
         await startNativeScanner(video);
