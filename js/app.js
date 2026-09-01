@@ -152,9 +152,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const renderShopping=()=>{
-    $("shoppingTitle").textContent=state.currentShoppingName;
-    const shoppingEyebrow=$("shoppingScreen").querySelector(".screen-header .eyebrow");
-    if(shoppingEyebrow) shoppingEyebrow.textContent=(state.currentShoppingStore||"NUOVA SPESA")+(state.currentShoppingDate?" · "+state.currentShoppingDate.split("-").reverse().join("/"):"");
+    const shoppingMeta=$("shoppingMeta");
+    const shoppingInfo=[];
+    if(state.currentShoppingStore) shoppingInfo.push(state.currentShoppingStore);
+    if(state.currentShoppingDate) shoppingInfo.push(state.currentShoppingDate.split("-").reverse().join("/"));
+    if(state.currentShoppingName && state.currentShoppingName!=="La mia spesa") shoppingInfo.push(state.currentShoppingName);
+    if(shoppingMeta) shoppingMeta.textContent=shoppingInfo.join(" · ");
     const list=$("shoppingList");
     const pendingCount=state.currentShopping.length;
     const purchasedCount=state.purchasedShopping.length;
