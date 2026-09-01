@@ -764,4 +764,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },0);
     }
   });
+
+  // Mostra subito dalla Home l'accesso alla spesa già aperta.
+  renderHomeCurrentShopping();
 });
