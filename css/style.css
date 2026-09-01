@@ -969,3 +969,11 @@ body{
 
 /* V1.6.10 */
 .active-shopping-card[hidden]{display:none!important;}
+
+
+/* V1.6.12 — Evita l'allargamento orizzontale della Home su Safari */
+.actions{min-width:0;max-width:100%;}
+.action-card{min-width:0;max-width:100%;overflow:hidden;}
+.action-text{flex:1;overflow:hidden;}
+.action-arrow{flex:0 0 auto;}
+.active-shopping-card small{display:block;max-width:100%;}
