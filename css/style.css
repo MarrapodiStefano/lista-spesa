@@ -1030,3 +1030,23 @@ body{
   position:static;
   margin-top:0;
 }
+
+
+/* V1.6.18 — Conclusione spesa e Storico */
+.finish-shopping-btn{
+  width:100%;min-height:54px;margin:0 0 10px;border:1px solid #4673b6;border-radius:18px;
+  background:#fff;color:#4673b6;font-size:16px;font-weight:750;
+}
+.history-panel{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;visibility:hidden;pointer-events:none}
+.history-panel.is-open{visibility:visible;pointer-events:auto}
+.history-panel.is-open .panel-sheet{transform:translateY(0)}
+.history-sheet{min-height:min(78dvh,760px);display:flex;flex-direction:column}
+.history-list{display:grid;gap:12px;overflow-y:auto;padding:8px 2px 24px;-webkit-overflow-scrolling:touch}
+.history-card{padding:18px;border:1px solid var(--border);border-radius:20px;background:#fff}
+.history-card-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.history-card-head strong{display:block;font-size:18px}
+.history-card-head small{display:block;margin-top:4px;color:var(--muted)}
+.history-card-head>b{font-size:18px;white-space:nowrap}
+.history-products{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.history-products>div{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:14px}
+.history-products b{color:var(--text);white-space:nowrap}
