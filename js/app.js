@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=11", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=12", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -102,6 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try{
       if(!window.Html5Qrcode)throw Error("Scanner non disponibile");
 
+      // Configurazione volutamente semplice: su iPhone Safari il decoder
+      // standard della libreria è più affidabile per i codici EAN lineari
+      // rispetto al BarcodeDetector sperimentale.
       scanner=new Html5Qrcode("barcodeReader",{
         formatsToSupport:[
           Html5QrcodeSupportedFormats.EAN_13,
@@ -111,46 +114,25 @@ document.addEventListener("DOMContentLoaded", () => {
           Html5QrcodeSupportedFormats.CODE_128,
           Html5QrcodeSupportedFormats.CODE_39,
           Html5QrcodeSupportedFormats.ITF
-        ],
-        verbose:false
-      });
-
-      // Configurazione pensata per iPhone/Safari: niente zoom forzato.
-      // Il decoder analizza una zona ampia e usa il BarcodeDetector nativo
-      // quando WebKit lo rende disponibile.
-      const config={
-        fps:12,
-        qrbox:(viewfinderWidth,viewfinderHeight)=>({
-          width:Math.floor(viewfinderWidth*0.92),
-          height:Math.min(Math.floor(viewfinderHeight*0.60),260)
-        }),
-        aspectRatio:1.333,
-        disableFlip:true,
-        experimentalFeatures:{useBarCodeDetectorIfSupported:true}
-      };
+        ]
+      },false);
 
       await scanner.start(
-        {facingMode:{exact:"environment"}},
-        config,
-        decodedText=>lookupBarcode(decodedText),
+        {facingMode:"environment"},
+        {
+          fps:10,
+          // Nessun ritaglio della videocamera: analizziamo l'intera immagine.
+          // Questo aiuta soprattutto i codici a barre 1D su iPhone.
+          disableFlip:false
+        },
+        (decodedText)=>lookupBarcode(decodedText),
         ()=>{}
       );
 
       scannerRunning=true;
-      $("scannerStatus").textContent="Scanner pronto. Inquadra il codice a barre e tieni fermo l'iPhone.";
+      $("scannerStatus").textContent="Scanner pronto. Metti il codice al centro, riempi bene l'inquadratura e tieni fermo l'iPhone.";
     }catch(e){
-      // Alcuni iPhone non accettano il vincolo exact:environment.
-      try{
-        if(scanner)await scanner.start(
-          {facingMode:"environment"},
-          {fps:10,qrbox:{width:360,height:220},disableFlip:true,experimentalFeatures:{useBarCodeDetectorIfSupported:true}},
-          decodedText=>lookupBarcode(decodedText),
-          ()=>{}
-        );
-        scannerRunning=true;
-        $("scannerStatus").textContent="Scanner pronto. Inquadra il codice a barre e tieni fermo l'iPhone.";
-        return;
-      }catch(e2){}
+      console.error("Errore scanner",e);
       try{if(scanner)await scanner.clear();}catch(x){}
       scanner=null;
       close("scannerPanel");
