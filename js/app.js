@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=25", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=26", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const migrateProductFields=items=>items.forEach(p=>{
     if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
     if(p.pieces===undefined||p.pieces===null) p.pieces=1;
+    if(p.store===undefined||p.store===null) p.store="";
   });
   migrateProductFields(state.products);
   migrateProductFields(state.currentShopping);
@@ -57,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const shoppingItem=(p,acquired)=>'<div class="shopping-item'+(acquired?' is-acquired':'')+'" data-shopping-id="'+p._shoppingId+'" data-acquired="'+(acquired?'1':'0')+'">'+
       productImage(p)+
       '<div class="shopping-item-name">'+p.name+
-        '<small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+'</small>'+
+        '<small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+'</small>'+
         '<span class="shopping-item-hint">'+(acquired?'Swipe per rimetterlo da acquistare':'Swipe per segnare come acquistato · Tieni premuto per rimuovere')+'</span>'+
       '</div>'+
       '<div class="shopping-item-price">'+(p.price!==""?euro(p.price):"—")+'</div>'+
@@ -173,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("libraryList").innerHTML=products.length
       ?products.map(p=>'<div class="library-item">'+
           productImage(p)+
-          '<div class="library-item-info"><strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
+          '<div class="library-item-info"><strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
           '<div class="library-actions"><button class="library-add-btn" data-id="'+p.id+'">Aggiungi</button><button class="library-edit-btn" data-edit-id="'+p.id+'" aria-label="Modifica '+p.name+'">✎</button></div>'+
         '</div>').join("")
       :'<div class="empty-state"><span>📦</span><h2>Nessun prodotto</h2><p>Aggiungi il primo prodotto alla tua libreria.</p></div>';
@@ -193,6 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
       $("productPrice").value=p.price||"";
       $("productWeight").value=p.weight??p.quantity??"";
       $("productPieces").value=p.pieces||1;
+      const knownStores=["Conad","Triscount","Alimentarista","Todis"];
+      $("productStore").value=knownStores.includes(p.store) ? p.store : (p.store ? "Altro" : "");
+      $("productCustomStore").value=knownStores.includes(p.store)||!p.store ? "" : p.store;
+      $("customStoreWrap").hidden=$("productStore").value!=="Altro";
       pendingPhoto=p.photo||"";
       $("newProductForm").dataset.barcode=p.barcode||"";
       $("newProductForm").dataset.editing="1";
@@ -215,6 +220,9 @@ document.addEventListener("DOMContentLoaded", () => {
     delete form.dataset.editing;
     $("productWeight").value="";
     $("productPieces").value=1;
+    $("productStore").value="";
+    $("productCustomStore").value="";
+    $("customStoreWrap").hidden=true;
     $("photoPreview").hidden=true;
     $("newProductPanel").querySelector(".eyebrow").textContent="NUOVO PRODOTTO";
     const newProductTitle=$("newProductPanel").querySelector(".panel-header h1");
@@ -239,6 +247,11 @@ document.addEventListener("DOMContentLoaded", () => {
   $("newProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
   $("closeNewProduct").onclick=$("closeNewProductBtn").onclick=()=>{resetProductForm();close("newProductPanel");};
   $("productSearch").oninput=e=>renderLibrary(e.target.value);
+  $("productStore").onchange=e=>{
+    const isOther=e.target.value==="Altro";
+    $("customStoreWrap").hidden=!isOther;
+    if(!isOther)$("productCustomStore").value="";
+  };
   $("productPhoto").onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file){pendingPhoto="";$("photoPreview").hidden=true;return;}const reader=new FileReader();reader.onload=()=>{pendingPhoto=reader.result;$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;};reader.readAsDataURL(file);};
   const stopScanner=async()=>{
     try{ if(scanLoopId) cancelAnimationFrame(scanLoopId); }catch(e){}
@@ -305,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     video.srcObject=scannerStream;
     await video.play();
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.13 pronto. Puoi tenere il codice anche ruotato.";
+    $("scannerStatus").textContent="Scanner V1.4.14 pronto. Puoi tenere il codice anche ruotato.";
 
     let lastScan=0;
     const scanFrame=async now=>{
@@ -346,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.13 pronto. Inquadra il codice da qualsiasi orientamento.";
+    $("scannerStatus").textContent="Scanner V1.4.14 pronto. Inquadra il codice da qualsiasi orientamento.";
   };
 
   const startScanner=async()=>{
@@ -390,6 +403,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const price=$("productPrice").value.trim().replace(",",".");
     const weight=$("productWeight").value.trim().replace(",",".");
     const pieces=Math.max(1,parseInt($("productPieces").value,10)||1);
+    const selectedStore=$("productStore").value;
+    const store=selectedStore==="Altro" ? $("productCustomStore").value.trim() : selectedStore;
     if(!name)return;
 
     const product={
@@ -398,6 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
       price,
       weight,
       pieces,
+      store,
       photo:pendingPhoto,
       barcode:e.target.dataset.barcode||""
     };
