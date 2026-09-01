@@ -191,8 +191,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const pendingCount=state.currentShopping.length;
     const purchasedCount=state.purchasedShopping.length;
     const count=pendingCount+purchasedCount;
+    // Il totale in alto riguarda solo i prodotti ancora da acquistare.
+    const pendingTotal=state.currentShopping.reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
+    // Il totale del Carrello resta invece separato nella sezione in basso.
     const cartTotal=state.purchasedShopping.reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
-    $("shoppingTotal").textContent=euro(cartTotal);
+    $("shoppingTotal").textContent=euro(pendingTotal);
     $("cartTotal").textContent=euro(cartTotal);
     $("cartCount").textContent=purchasedCount;
     document.querySelector(".shopping-summary span").textContent=pendingCount+(pendingCount===1?" prodotto da acquistare":" prodotti da acquistare");
