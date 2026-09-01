@@ -19,4 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
   remindersBtn.addEventListener("click", openPanel);
   closeReminders.addEventListener("click", closePanel);
   closeRemindersBtn.addEventListener("click", closePanel);
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then(() => console.log("Modalità offline pronta"))
+        .catch((error) => console.error("Service Worker non registrato:", error));
+    });
+  }
 });
