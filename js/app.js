@@ -537,6 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let timer=null, longPressed=false;
     const clear=()=>{if(timer){clearTimeout(timer);timer=null;}};
     target.addEventListener("pointerdown",e=>{
+      if(reminderSelectionMode)return;
       if(e.pointerType==="mouse"&&e.button!==0)return;
       longPressed=false;
       timer=setTimeout(()=>{
@@ -549,12 +550,24 @@ document.addEventListener("DOMContentLoaded", () => {
     target.addEventListener("pointercancel",clear);
     target.addEventListener("pointerleave",clear);
     target.addEventListener("click",e=>{
+      if(reminderSelectionMode)return;
       if(longPressed){e.preventDefault();return;}
       openReminderEditor(id);
     });
   };
+  let reminderSelectionMode=false;
+  const selectedReminderIds=new Set();
+
+  const updateReminderSelectButton=()=>{
+    const btn=$("reminderSelectBtn");
+    if(!btn)return;
+    btn.textContent=reminderSelectionMode ? "Fine" : "✓ Seleziona";
+    btn.classList.toggle("is-active",reminderSelectionMode);
+  };
+
   const renderReminders=()=>{
     const list=$("remindersList"), empty=$("remindersEmpty");
+    list.classList.toggle("is-selecting",reminderSelectionMode);
     list.innerHTML="";
     if(!state.reminders.length){ empty.hidden=false; return; }
     empty.hidden=true;
@@ -562,8 +575,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if(!p.reminderQuantity)p.reminderQuantity=1;
       const item=document.createElement("div");
       item.className="library-item";
-      item.innerHTML=productImage(p)+'<div class="library-item-info reminder-item-info"><strong>'+p.name+'</strong><small>Da acquistare: '+p.reminderQuantity+(p.reminderQuantity===1?' pezzo':' pezzi')+(p.store?' · '+p.store:'')+'</small></div>';
-      bindReminderPress(item.querySelector(".reminder-item-info"),p.id);
+      item.innerHTML=productImage(p)+'<div class="library-item-info reminder-item-info"><strong>'+p.name+'</strong><small>Da acquistare: '+p.reminderQuantity+(p.reminderQuantity===1?' pezzo':' pezzi')+(p.store?' · '+p.store:'')+'</small></div><button class="reminder-select-control" type="button" aria-label="Seleziona '+p.name+'">✓</button>';
+      const info=item.querySelector(".reminder-item-info");
+      const selectControl=item.querySelector(".reminder-select-control");
+      selectControl.classList.toggle("is-selected",selectedReminderIds.has(p.id));
+      selectControl.onclick=(e)=>{
+        e.stopPropagation();
+        if(selectedReminderIds.has(p.id))selectedReminderIds.delete(p.id);
+        else selectedReminderIds.add(p.id);
+        selectControl.classList.toggle("is-selected",selectedReminderIds.has(p.id));
+      };
+      bindReminderPress(info,p.id);
+      info.addEventListener("click",e=>{
+        if(reminderSelectionMode)e.stopPropagation();
+      },true);
       list.appendChild(item);
     });
   };
@@ -605,7 +630,13 @@ document.addEventListener("DOMContentLoaded", () => {
   $("reminderIncreaseBtn").onclick=()=>{$("reminderQuantityInput").value=(parseInt($("reminderQuantityInput").value,10)||1)+1;};
   $("saveReminderEditBtn").onclick=saveReminderQuantity;
   $("closeReminderEdit").onclick=$("closeReminderEditBtn").onclick=closeReminderEditor;
-  $("remindersBtn").onclick=()=>{renderReminders();open("remindersPanel");};
+  $("reminderSelectBtn").onclick=()=>{
+    reminderSelectionMode=!reminderSelectionMode;
+    if(!reminderSelectionMode)selectedReminderIds.clear();
+    updateReminderSelectButton();
+    renderReminders();
+  };
+  $("remindersBtn").onclick=()=>{reminderSelectionMode=false;selectedReminderIds.clear();updateReminderSelectButton();renderReminders();open("remindersPanel");};
   $("closeReminders").onclick=$("closeRemindersBtn").onclick=()=>close("remindersPanel");
   $("addReminderBtn").onclick=()=>{renderReminderLibrary("");$("reminderProductSearch").value="";open("reminderProductPanel");};
   $("closeReminderProducts").onclick=$("closeReminderProductsBtn").onclick=()=>close("reminderProductPanel");
