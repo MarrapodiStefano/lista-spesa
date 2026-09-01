@@ -588,3 +588,97 @@ body{
 .product-sheet{
   touch-action:pan-y;
 }
+
+
+/* V1.4.13 — Modifica rapida dei prodotti da acquistare */
+.purchase-edit-panel{
+  position:fixed;
+  inset:0;
+  z-index:45;
+  display:flex;
+  align-items:flex-end;
+  visibility:hidden;
+  pointer-events:none;
+}
+.purchase-edit-panel.is-open{
+  visibility:visible;
+  pointer-events:auto;
+}
+.purchase-edit-panel.is-open .panel-backdrop{
+  background:rgba(0,0,0,.28);
+}
+.purchase-edit-panel.is-open .panel-sheet{
+  transform:translateY(0);
+}
+.purchase-edit-sheet{
+  min-height:0;
+  padding-bottom:max(34px,env(safe-area-inset-bottom));
+}
+.purchase-edit-card{
+  margin-top:30px;
+  padding:20px;
+  border:1px solid var(--border);
+  border-radius:24px;
+  background:#fff;
+}
+.purchase-edit-label{
+  margin-bottom:16px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.11em;
+}
+.piece-stepper{
+  display:grid;
+  grid-template-columns:58px 1fr 58px;
+  align-items:center;
+  gap:12px;
+}
+.piece-stepper button{
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:18px;
+  background:#ededf0;
+  color:var(--text);
+  font-size:30px;
+  font-weight:500;
+}
+.piece-stepper input,
+.purchase-price-label input{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  color:var(--text);
+  font:inherit;
+}
+.piece-stepper input{
+  height:58px;
+  padding:0 12px;
+  text-align:center;
+  font-size:24px;
+  font-weight:750;
+}
+.purchase-price-label{
+  display:grid;
+  gap:8px;
+  margin-top:22px;
+  font-weight:650;
+}
+.purchase-price-label input{
+  padding:16px;
+  font-size:18px;
+}
+.save-purchase-edit-btn{
+  width:100%;
+  min-height:58px;
+  margin-top:26px;
+  border:0;
+  border-radius:20px;
+  background:var(--dark);
+  color:#fff;
+  font-size:17px;
+  font-weight:700;
+}
+.shopping-item[data-acquired="0"]{cursor:pointer;}
