@@ -906,3 +906,51 @@ body{
   border-radius:18px;
   font-size:17px;
 }
+
+
+/* V1.6.8 — Sposta i prodotti selezionati dal Promemoria alla spesa */
+.reminder-move-btn{
+  grid-column:1 / -1;
+  width:100%;
+  min-height:54px;
+  border:0;
+  border-radius:18px;
+  background:var(--dark);
+  color:#fff;
+  font-size:16px;
+  font-weight:750;
+}
+.reminder-move-btn:disabled{opacity:.45}
+.reminder-transfer-panel{
+  position:fixed;
+  inset:0;
+  z-index:55;
+  display:flex;
+  align-items:flex-end;
+  visibility:hidden;
+  pointer-events:none;
+}
+.reminder-transfer-panel.is-open{visibility:visible;pointer-events:auto}
+.reminder-transfer-panel.is-open .panel-backdrop{background:rgba(0,0,0,.28)}
+.reminder-transfer-panel.is-open .panel-sheet{transform:translateY(0)}
+.reminder-transfer-sheet{min-height:0;padding-bottom:max(28px,env(safe-area-inset-bottom))}
+.transfer-note{
+  margin:20px 0 18px;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.4;
+}
+.transfer-choice{
+  width:100%;
+  display:grid;
+  gap:5px;
+  text-align:left;
+  margin-top:12px;
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  color:var(--text);
+}
+.transfer-choice strong{font-size:18px}
+.transfer-choice small{color:var(--muted);font-size:14px}
