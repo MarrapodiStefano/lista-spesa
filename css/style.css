@@ -773,3 +773,67 @@ body{
 /* V1.6.1 — Scanner rapido Promemoria */
 .reminder-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.reminder-actions .new-product-btn,.reminder-actions .scan-product-btn{margin:0;font-size:15px;min-height:54px}.reminder-scan-btn{padding:0 10px}
 .reminder-scanner-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px}.reminder-scanner-box{width:min(100%,420px);color:#fff;text-align:center}.reminder-scanner-box strong{display:block;margin-bottom:16px;font-size:18px}.reminder-scanner-video{width:100%;aspect-ratio:3/4;border-radius:22px;overflow:hidden;background:#000}.reminder-scanner-video video{width:100%;height:100%;object-fit:cover}.reminder-scanner-box button{margin-top:18px;border:0;border-radius:14px;padding:12px 22px;font:inherit}
+
+
+/* V1.6.4 — Promemoria a tutto schermo e modalità selezione */
+.reminders-panel{
+  align-items:stretch;
+}
+.reminders-sheet{
+  width:100%;
+  height:100dvh;
+  min-height:100dvh;
+  max-height:none;
+  border-radius:0;
+  padding-top:max(14px, env(safe-area-inset-top));
+  padding-bottom:max(20px, env(safe-area-inset-bottom));
+}
+.reminders-panel .panel-sheet{
+  margin:0;
+}
+.reminders-list{
+  width:100%;
+}
+.reminder-actions{
+  grid-template-columns:1fr 1fr;
+}
+.reminder-select-btn{
+  grid-column:1 / -1;
+  width:100%;
+  min-height:50px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  color:var(--text);
+  font-size:16px;
+  font-weight:750;
+}
+.reminder-select-btn.is-active{
+  background:var(--dark);
+  color:#fff;
+  border-color:var(--dark);
+}
+.reminder-select-control{
+  display:none;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border:2px solid #b9bcc3;
+  border-radius:50%;
+  background:#fff;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:18px;
+  font-weight:800;
+}
+.reminders-list.is-selecting .reminder-select-control{
+  display:flex;
+}
+.reminder-select-control.is-selected{
+  background:#4673b6;
+  border-color:#4673b6;
+}
+.reminders-list.is-selecting .library-item{
+  cursor:default;
+}
