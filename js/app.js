@@ -117,10 +117,13 @@
     }
 
     function parsePrice(value) {
-        const normalized = String(value)
-            .trim()
-            .replace(/\./g, "")
-            .replace(",", ".");
+        const raw = String(value).trim();
+
+        // In italiano la virgola è normalmente il separatore decimale.
+        // Accettiamo comunque anche il punto per chi preferisce digitarlo.
+        const normalized = raw.includes(",")
+            ? raw.replace(/\./g, "").replace(",", ".")
+            : raw;
 
         const price = Number(normalized);
         return Number.isFinite(price) && price >= 0 ? price : NaN;
