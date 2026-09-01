@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=16", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=17", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -32,7 +32,7 @@ if ("serviceWorker" in navigator) {
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
   let pendingPhoto="";
-  let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false;
+  let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   const $=id=>document.getElementById(id);
   const save=()=>localStorage.setItem(DB_KEY,JSON.stringify(state));
@@ -60,7 +60,19 @@ document.addEventListener("DOMContentLoaded", () => {
   $("closeNewProduct").onclick=$("closeNewProductBtn").onclick=()=>close("newProductPanel");
   $("productSearch").oninput=e=>renderLibrary(e.target.value);
   $("productPhoto").onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file){pendingPhoto="";$("photoPreview").hidden=true;return;}const reader=new FileReader();reader.onload=()=>{pendingPhoto=reader.result;$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;};reader.readAsDataURL(file);};
-  const stopScanner=async()=>{try{if(scannerControls&&scannerControls.stop)scannerControls.stop();}catch(e){}scannerControls=null;scannerRunning=false;try{const video=$("barcodeReader").querySelector("video");if(video&&video.srcObject)video.srcObject.getTracks().forEach(t=>t.stop());}catch(e){}};
+  const stopScanner=async()=>{
+    try{ if(scanLoopId) cancelAnimationFrame(scanLoopId); }catch(e){}
+    scanLoopId=null;
+    try{if(scannerControls&&scannerControls.stop)scannerControls.stop();}catch(e){}
+    scannerControls=null;
+    scannerRunning=false;
+    try{
+      const video=$("barcodeReader").querySelector("video");
+      const stream=scannerStream||(video&&video.srcObject);
+      if(stream&&stream.getTracks)stream.getTracks().forEach(t=>t.stop());
+    }catch(e){}
+    scannerStream=null;
+  };
 
   const lookupBarcode=async code=>{
     if(processingBarcode)return;
@@ -95,63 +107,97 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const cameraConstraints={
+    audio:false,
+    video:{
+      facingMode:{ideal:"environment"},
+      width:{ideal:1280,max:1920},
+      height:{ideal:720,max:1080}
+    }
+  };
+
+  const startNativeScanner=async video=>{
+    const formats=["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf","codabar"];
+    const detector=new BarcodeDetector({formats});
+    scannerStream=await navigator.mediaDevices.getUserMedia(cameraConstraints);
+    video.srcObject=scannerStream;
+    await video.play();
+    scannerRunning=true;
+    $("scannerStatus").textContent="Scanner V1.4.5 pronto. Puoi tenere il codice anche ruotato.";
+
+    let lastScan=0;
+    const scanFrame=async now=>{
+      if(!scannerRunning||processingBarcode)return;
+      if(now-lastScan>120){
+        lastScan=now;
+        try{
+          const codes=await detector.detect(video);
+          if(codes&&codes.length){
+            const value=codes[0].rawValue;
+            if(value){
+              $("scannerStatus").textContent="✅ Codice rilevato: "+value;
+              lookupBarcode(value);
+              return;
+            }
+          }
+        }catch(err){
+          // Alcuni fotogrammi possono fallire durante l'autofocus: continuiamo.
+        }
+      }
+      scanLoopId=requestAnimationFrame(scanFrame);
+    };
+    scanLoopId=requestAnimationFrame(scanFrame);
+  };
+
+  const startZXingScanner=async video=>{
+    if(!window.ZXingBrowser)throw Error("ZXing non disponibile");
+    scanner=new ZXingBrowser.BrowserMultiFormatReader();
+    scannerControls=await scanner.decodeFromConstraints(
+      cameraConstraints,
+      video,
+      (result,error)=>{
+        if(result&&!processingBarcode){
+          const code=result.getText();
+          $("scannerStatus").textContent="✅ Codice rilevato: "+code;
+          lookupBarcode(code);
+        }
+      }
+    );
+    scannerRunning=true;
+    $("scannerStatus").textContent="Scanner V1.4.5 pronto. Inquadra il codice da qualsiasi orientamento.";
+  };
+
   const startScanner=async()=>{
     processingBarcode=false;
+    await stopScanner();
     open("scannerPanel");
     $("scannerStatus").textContent="Richiedo l'accesso alla fotocamera…";
 
     try{
-      if(!window.ZXingBrowser)throw Error("ZXing non disponibile");
-
       $("barcodeReader").innerHTML='<video id="zxingVideo" autoplay muted playsinline></video>';
       const video=$("zxingVideo");
-      // Lettore multi-formato ZXing: usiamo la configurazione standard,
-      // evitando API opzionali che non sono presenti in tutte le build UMD.
-      scanner=new ZXingBrowser.BrowserMultiFormatReader();
 
-      // V1.4.4: evitiamo di forzare l'alta risoluzione, che su alcuni iPhone
-      // può far scegliere una lente/inquadratura troppo ravvicinata.
-      scannerControls=await scanner.decodeFromConstraints(
-        {
-          video:{
-            facingMode:{ideal:"environment"},
-            width:{ideal:1280,max:1920},
-            height:{ideal:720,max:1080},
-            aspectRatio:{ideal:1.777}
-          },
-          audio:false
-        },
-        video,
-        (result,error,controls)=>{
-          if(result&&!processingBarcode){
-            const code=result.getText();
-            $("scannerStatus").textContent="✅ Codice rilevato: "+code;
-            lookupBarcode(code);
-          }
-        }
-      );
-
-      // Se il browser espone il controllo zoom, riportiamolo esplicitamente
-      // al minimo disponibile: l'immagine deve restare più ampia possibile.
-      try{
-        const stream=video.srcObject;
-        const track=stream&&stream.getVideoTracks?stream.getVideoTracks()[0]:null;
-        const capabilities=track&&track.getCapabilities?track.getCapabilities():null;
-        if(track&&capabilities&&capabilities.zoom&&track.applyConstraints){
-          await track.applyConstraints({advanced:[{zoom:capabilities.zoom.min}]});
-        }
-      }catch(zoomError){
-        console.warn("Controllo zoom non disponibile",zoomError);
+      // V1.4.5: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
+      // EAN dei prodotti. Se non è disponibile, torniamo automaticamente a ZXing.
+      if("BarcodeDetector" in window){
+        await startNativeScanner(video);
+      }else{
+        await startZXingScanner(video);
       }
-
-      scannerRunning=true;
-      $("scannerStatus").textContent="Scanner ZXing V1.4.4 pronto. Inquadra il codice senza avvicinarti troppo.";
     }catch(e){
-      console.error("Errore scanner ZXing",e);
-      await stopScanner();
-      $("barcodeReader").innerHTML="";
-      close("scannerPanel");
-      alert("Impossibile avviare lo scanner. Dettaglio: "+(e&&e.message?e.message:"errore sconosciuto"));
+      console.warn("Scanner nativo non disponibile, provo ZXing",e);
+      try{
+        await stopScanner();
+        $("barcodeReader").innerHTML='<video id="zxingVideo" autoplay muted playsinline></video>';
+        const video=$("zxingVideo");
+        await startZXingScanner(video);
+      }catch(fallbackError){
+        console.error("Errore scanner",fallbackError);
+        await stopScanner();
+        $("barcodeReader").innerHTML="";
+        close("scannerPanel");
+        alert("Impossibile avviare lo scanner. Verifica il permesso della fotocamera e riprova.");
+      }
     }
   };
   $("scanProductBtn").onclick=startScanner;
