@@ -32,8 +32,106 @@ document.addEventListener("DOMContentLoaded", () => {
   $("productSearch").oninput=e=>renderLibrary(e.target.value);
   $("productPhoto").onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file){pendingPhoto="";$("photoPreview").hidden=true;return;}const reader=new FileReader();reader.onload=()=>{pendingPhoto=reader.result;$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;};reader.readAsDataURL(file);};
   const stopScanner=async()=>{if(scanner&&scannerRunning){try{await scanner.stop();}catch(e){}scannerRunning=false;}};
-  const lookupBarcode=async code=>{ if(processingBarcode)return; processingBarcode=true; $("scannerStatus").textContent="Codice trovato: "+code+". Cerco il prodotto…"; try{const local=state.products.find(p=>p.barcode===code);if(local){await stopScanner();close("scannerPanel");$("productName").value=local.name||"";$("productQuantity").value=local.quantity||1;$("productPrice").value=local.price||"";pendingPhoto=local.photo||"";if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}return;}const response=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=code,product_name,brands,quantity,image_front_url,image_url");const data=await response.json();await stopScanner();close("scannerPanel");$("newProductForm").dataset.barcode=code;if(data.status===1&&data.product){const p=data.product;$("productName").value=p.product_name||p.brands||"";const qty=(p.quantity||"").match(/\d+/);if(qty)$("productQuantity").value=qty[0];pendingPhoto=p.image_front_url||p.image_url||"";if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}}else alert("Prodotto non trovato online. Puoi completarlo manualmente.");}catch(e){await stopScanner();close("scannerPanel");alert("Non riesco a recuperare le informazioni online.");}};
-  const startScanner=async()=>{processingBarcode=false;open("scannerPanel");$("scannerStatus").textContent="Richiedo l'accesso alla fotocamera…";try{if(!window.Html5Qrcode)throw Error("Scanner non disponibile");scanner=new Html5Qrcode("barcodeReader",{formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.ITF]});const config={fps:15,qrbox:{width:320,height:220},disableFlip:false,experimentalFeatures:{useBarCodeDetectorIfSupported:true}};await scanner.start({facingMode:{exact:"environment"}},config,code=>lookupBarcode(code),()=>{});scannerRunning=true;$("scannerStatus").textContent="Inquadra bene il codice a barre e tieni fermo l'iPhone";}catch(e){try{if(scanner)await scanner.clear();}catch(x){}scanner=null;close("scannerPanel");alert("Impossibile avviare la scansione. Verifica i permessi della fotocamera e riprova.");}};
+
+  const lookupBarcode=async code=>{
+    if(processingBarcode)return;
+    processingBarcode=true;
+    $("scannerStatus").textContent="Codice trovato: "+code+". Cerco il prodotto…";
+    try{
+      const local=state.products.find(p=>p.barcode===code);
+      if(local){
+        await stopScanner(); close("scannerPanel");
+        $("productName").value=local.name||"";
+        $("productQuantity").value=local.quantity||1;
+        $("productPrice").value=local.price||"";
+        pendingPhoto=local.photo||"";
+        if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
+        return;
+      }
+      const response=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=code,product_name,brands,quantity,image_front_url,image_url");
+      const data=await response.json();
+      await stopScanner(); close("scannerPanel");
+      $("newProductForm").dataset.barcode=code;
+      if(data.status===1&&data.product){
+        const p=data.product;
+        $("productName").value=p.product_name||p.brands||"";
+        const qty=(p.quantity||"").match(/\d+/);
+        if(qty)$("productQuantity").value=qty[0];
+        pendingPhoto=p.image_front_url||p.image_url||"";
+        if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
+      }else alert("Codice letto correttamente, ma il prodotto non è presente nel database online. Puoi completarlo manualmente.");
+    }catch(e){
+      await stopScanner(); close("scannerPanel");
+      alert("Il codice è stato letto, ma non riesco a recuperare le informazioni online.");
+    }
+  };
+
+  const startScanner=async()=>{
+    processingBarcode=false;
+    open("scannerPanel");
+    $("scannerStatus").textContent="Richiedo l'accesso alla fotocamera…";
+    try{
+      if(!window.Html5Qrcode)throw Error("Scanner non disponibile");
+      scanner=new Html5Qrcode("barcodeReader",{
+        formatsToSupport:[
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.ITF
+        ],
+        verbose:false
+      });
+
+      const config={
+        fps:10,
+        qrbox:{width:360,height:180},
+        aspectRatio:1.777
+      };
+
+      await scanner.start(
+        {facingMode:"environment"},
+        config,
+        code=>lookupBarcode(code),
+        ()=>{}
+      );
+
+      scannerRunning=true;
+      $("scannerStatus").textContent="Inquadra bene il codice a barre e tieni fermo l'iPhone…";
+
+      // Su alcune versioni recenti di iOS/WebKit il decoder può bloccarsi
+      // dopo l'avvio della videocamera. Un piccolo reset dei vincoli video
+      // forza il flusso a ripartire correttamente.
+      setTimeout(async()=>{
+        if(!scannerRunning || processingBarcode)return;
+        try{
+          const caps=scanner.getRunningTrackCapabilities();
+          const advanced=[];
+          if(caps.zoom){
+            const zoom=Math.min(Math.max(2,Number(caps.zoom.min)||1),Number(caps.zoom.max)||2);
+            advanced.push({zoom});
+          }
+          const constraints={
+            width:{ideal:1280},
+            frameRate:{ideal:30},
+            ...(advanced.length?{advanced}: {})
+          };
+          await scanner.applyVideoConstraints(constraints);
+          if(!processingBarcode)$("scannerStatus").textContent="Scanner pronto. Inquadra il codice a barre.";
+        }catch(e){
+          // Se il dispositivo non supporta questi vincoli, lo scanner continua normalmente.
+        }
+      },700);
+    }catch(e){
+      try{if(scanner)await scanner.clear();}catch(x){}
+      scanner=null;
+      close("scannerPanel");
+      alert("Impossibile avviare la scansione. Verifica i permessi della fotocamera e riprova.");
+    }
+  };
+
   $("scanProductBtn").onclick=startScanner;
   $("closeScanner").onclick=$("closeScannerBtn").onclick=async()=>{await stopScanner();close("scannerPanel");};
   $("newProductForm").onsubmit=e=>{e.preventDefault();const name=$("productName").value.trim();const price=$("productPrice").value.trim().replace(",",".");const quantity=Math.max(1,parseInt($("productQuantity").value,10)||1);if(!name)return;state.products.push({id:Date.now().toString(),name,price,quantity,photo:pendingPhoto,barcode:e.target.dataset.barcode||""});save();pendingPhoto="";$("photoPreview").hidden=true;delete e.target.dataset.barcode;e.target.reset();$("productQuantity").value=1;close("newProductPanel");renderLibrary();};
