@@ -360,7 +360,7 @@ button {
 }
 
 
-/* V1.4.8 — Lista spesa: scorrimento, swipe e pressione prolungata */
+/* V1.4.9 — Lista spesa: scorrimento, swipe e pressione prolungata */
 .shopping-screen.app-screen{
   height:calc(100dvh - 56px);
   min-height:0;
@@ -409,7 +409,7 @@ button {
 }
 
 
-/* V1.4.8 — Carrello visibile e totale sempre disponibile */
+/* V1.4.9 — Carrello visibile e totale sempre disponibile */
 .shopping-screen.app-screen{
   height:100dvh;
   padding-bottom:0;
@@ -465,4 +465,59 @@ button {
   .cart-total{margin-bottom:7px}
   .cart-total strong{font-size:19px}
   .shopping-bottom-bar{padding-top:8px}
+}
+
+
+/* V1.4.9 — La libreria deve scorrere solo verticalmente */
+html,
+body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  overscroll-behavior-x:none;
+}
+
+.app-shell,
+.app-screen,
+.product-panel,
+.new-product-panel,
+.panel-sheet,
+.product-sheet,
+.library-list,
+.library-item{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+.product-panel,
+.new-product-panel{
+  touch-action:pan-y;
+}
+
+.library-list{
+  touch-action:pan-y;
+  overscroll-behavior-x:none;
+}
+
+.library-item{
+  width:100%;
+  min-width:0;
+}
+
+.library-item-info{
+  min-width:0;
+  overflow:hidden;
+}
+
+.library-item-info strong,
+.library-item-info small{
+  overflow-wrap:anywhere;
+}
+
+.library-actions{
+  flex-shrink:0;
+}
+
+.search-input{
+  max-width:100%;
 }
