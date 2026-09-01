@@ -13,8 +13,7 @@
     <section class="home-screen">
       <div class="hero">
         <p class="eyebrow">LA MIA SPESA</p>
-        <h1>Organizza la tua spesa.<br>Con semplicità.</h1>
-        <p class="subtitle">Crea una nuova lista oppure consulta le spese precedenti.</p>
+        <p class="subtitle">Crea una nuova lista, consulta le spese precedenti o tieni d'occhio ciò che è finito.</p>
       </div>
 
       <div class="actions" aria-label="Azioni principali">
@@ -23,6 +22,15 @@
           <span class="action-text">
             <strong>Nuova spesa</strong>
             <small>Crea una nuova lista</small>
+          </span>
+          <span class="action-arrow" aria-hidden="true">›</span>
+        </button>
+
+        <button class="action-card action-secondary" id="remindersBtn" type="button">
+          <span class="action-icon" aria-hidden="true">🔔</span>
+          <span class="action-text">
+            <strong>Promemoria</strong>
+            <small>Prodotti finiti da riacquistare</small>
           </span>
           <span class="action-arrow" aria-hidden="true">›</span>
         </button>
@@ -39,6 +47,30 @@
 
       <p class="footer-note">Tutto semplice. Tutto sotto controllo.</p>
     </section>
+
+    <section class="reminders-panel" id="remindersPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeReminders"></div>
+
+      <div class="panel-sheet" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
+        <div class="panel-handle"></div>
+
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">PROMEMORIA</p>
+            <h1 id="remindersTitle">Da riacquistare</h1>
+          </div>
+          <button class="close-btn" id="closeRemindersBtn" type="button" aria-label="Chiudi">×</button>
+        </div>
+
+        <div class="reminders-empty">
+          <span class="empty-icon" aria-hidden="true">🔔</span>
+          <h2>Nessun prodotto da ricordare</h2>
+          <p>Quando un prodotto finirà, potremo aggiungerlo qui per ricordarti di riacquistarlo.</p>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <script src="js/app.js"></script>
 </body>
 </html>
