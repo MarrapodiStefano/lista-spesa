@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=29">
+  <link rel="manifest" href="manifest.json?v=30">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=29">
+  <link rel="stylesheet" href="css/style.css?v=30">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <section class="home-screen" id="homeScreen">
       <div class="hero">
-        <p class="eyebrow">LA MIA SPESA · V1.4.18</p>
+        <p class="eyebrow">LA MIA SPESA · V1.5.0</p>
       </div>
       <div class="actions">
         <button class="action-card action-primary" id="newShoppingBtn" type="button"><span class="action-icon">🛒</span><span class="action-text"><strong>Nuova spesa</strong><small>Crea una nuova lista</small></span><span class="action-arrow">›</span></button>
@@ -25,6 +25,25 @@
         <button class="action-card action-secondary" id="historyBtn" type="button"><span class="action-icon">🕘</span><span class="action-text"><strong>Storico</strong><small>Rivedi le spese passate</small></span><span class="action-arrow">›</span></button>
       </div>
       <p class="footer-note">Tutto semplice. Tutto sotto controllo.</p>
+    </section>
+
+    <section class="new-shopping-panel" id="newShoppingPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeNewShopping"></div>
+      <div class="panel-sheet form-sheet new-shopping-sheet"><div class="panel-handle"></div>
+        <div class="panel-header"><div><p class="eyebrow">NUOVA SPESA</p><h1>Dettagli della spesa</h1></div><button class="close-btn" id="closeNewShoppingBtn" type="button">×</button></div>
+        <form id="newShoppingForm">
+          <label>Nome della spesa<input id="newShoppingName" required autocomplete="off" placeholder="Es. Spesa settimanale"></label>
+          <label>Negozio
+            <select id="newShoppingStore" required>
+              <option value="">Seleziona un negozio</option>
+              <option value="Conad">Conad</option><option value="Triscount">Triscount</option><option value="Alimentarista">Alimentarista</option><option value="Todis">Todis</option><option value="Altro">Altro</option>
+            </select>
+          </label>
+          <label id="newShoppingCustomStoreWrap" hidden>Nome del negozio<input id="newShoppingCustomStore" autocomplete="off" placeholder="Inserisci il nome del negozio"></label>
+          <label>Data<input id="newShoppingDate" type="date" required></label>
+          <button class="save-product-btn" type="submit">Crea nuova spesa</button>
+        </form>
+      </div>
     </section>
 
     <section class="shopping-screen app-screen" id="shoppingScreen" hidden>
@@ -115,5 +134,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=29"></script>
+  <script src="js/app.js?v=30"></script>
 </body></html>
