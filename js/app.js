@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
   closeRemindersBtn.addEventListener("click", closePanel);
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js")
-        .then(() => console.log("Modalità offline pronta"))
-        .catch((error) => console.error("Service Worker non registrato:", error));
-    });
+    navigator.serviceWorker
+      .register("/lista-spesa/sw.js", { scope: "/lista-spesa/" })
+      .then(() => navigator.serviceWorker.ready)
+      .then(() => console.log("Modalità offline pronta"))
+      .catch((error) => console.error("Service Worker non registrato:", error));
   }
 });
