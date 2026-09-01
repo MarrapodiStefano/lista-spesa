@@ -837,3 +837,72 @@ body{
 .reminders-list.is-selecting .library-item{
   cursor:default;
 }
+
+
+/* V1.6.7 — Modifica Promemoria: interfaccia più pulita */
+.purchase-edit-sheet{
+  padding:22px 24px max(24px,env(safe-area-inset-bottom));
+}
+.purchase-edit-sheet .panel-header{
+  margin-bottom:26px;
+}
+.purchase-edit-sheet .eyebrow{
+  margin-bottom:6px;
+  font-size:13px;
+  letter-spacing:.14em;
+}
+.purchase-edit-sheet .panel-header h1{
+  font-size:clamp(34px,9vw,44px);
+  line-height:1.05;
+  letter-spacing:-.035em;
+  overflow-wrap:anywhere;
+}
+.purchase-edit-card{
+  margin-top:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.purchase-edit-label{
+  margin-bottom:10px;
+  color:var(--text);
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:0;
+}
+.piece-stepper{
+  grid-template-columns:52px 1fr 52px;
+  gap:10px;
+}
+.piece-stepper button{
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  background:#ececf0;
+  font-size:27px;
+}
+.piece-stepper input{
+  height:52px;
+  border-radius:16px;
+  font-size:21px;
+  font-weight:700;
+}
+.purchase-price-label{
+  margin-top:20px;
+  gap:8px;
+  font-size:17px;
+  font-weight:700;
+}
+.purchase-price-label input{
+  min-height:54px;
+  padding:14px 16px;
+  border-radius:16px;
+  font-size:18px;
+}
+.save-purchase-edit-btn{
+  min-height:56px;
+  margin-top:22px;
+  border-radius:18px;
+  font-size:17px;
+}
