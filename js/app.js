@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=53", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=54", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -425,10 +425,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderShopping();
   };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
-  $("tabHomeBtn").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
-  $("tabLibraryBtn").onclick=()=>{renderLibrary("");$("productSearch").value="";open("productPanel");};
-  $("tabRemindersBtn").onclick=()=>{reminderSelectionMode=false;selectedReminderIds.clear();updateReminderSelectButton();renderReminders();open("remindersPanel");};
-  $("tabHistoryBtn").onclick=()=>{renderHistory();open("historyPanel");};
   $("backHomeBtn").onclick=()=>{renderHomeCurrentShopping();$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("finishShoppingBtn").onclick=finishShopping;
   $("historyBtn").onclick=()=>{renderHistory();open("historyPanel");};
