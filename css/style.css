@@ -696,3 +696,13 @@ body{
   color:var(--text);
   background:#fff;
 }
+
+
+/* V1.4.17 — Modifica prodotto: campi più compatti su iPhone */
+.form-sheet form{gap:12px;margin-top:18px}
+.form-sheet label{gap:5px;font-size:15px}
+.form-sheet input,.form-sheet select{border-radius:14px;padding:12px 16px;font-size:16px;min-height:50px}
+.form-sheet input[type="file"]{padding:8px 12px;min-height:46px}
+.scan-product-btn{min-height:56px;margin-top:16px}
+.scan-note{margin:8px 4px 0;font-size:13px}
+.save-product-btn{margin-top:4px}
