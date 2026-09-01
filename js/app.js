@@ -256,21 +256,67 @@ document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML=html;
     bindShoppingGestures();
   };
+  let expandedHistoryId=null;
+  let historySortMode="date-desc";
+
+  const historyDateValue=h=>{
+    const value=h.date||h.completedAt||"";
+    const time=new Date(value).getTime();
+    return Number.isNaN(time)?0:time;
+  };
+
+  const sortedHistory=()=>{
+    const items=[...(state.history||[])];
+    return items.sort((a,b)=>{
+      if(historySortMode==="store-asc")return String(a.store||"").localeCompare(String(b.store||""),"it");
+      if(historySortMode==="store-desc")return String(b.store||"").localeCompare(String(a.store||""),"it");
+      const diff=historyDateValue(a)-historyDateValue(b);
+      return historySortMode==="date-asc"?diff:-diff;
+    });
+  };
+
   const renderHistory=()=>{
     const list=$("historyList");
     if(!list)return;
     if(!Array.isArray(state.history)||!state.history.length){
-      list.innerHTML='<div class="empty-state"><span>🕘</span><h2>Nessuna spesa salvata</h2><p>Quando concluderai una spesa, la troverai qui.</p></div>';
+      list.innerHTML='<div class="empty-state history-empty"><span>🕘</span><h2>Nessuna spesa salvata</h2><p>Quando concluderai una spesa, la troverai qui.</p></div>';
       return;
     }
-    list.innerHTML=state.history.map(h=>{
+
+    list.innerHTML=sortedHistory().map(h=>{
       const date=h.date?h.date.split("-").reverse().join("/"):"";
       const total=(h.products||[]).reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
-      return '<article class="history-card">'+
-        '<div class="history-card-head"><div><strong>'+((h.name&&h.name!=="La mia spesa")?h.name:(h.store||"Spesa"))+'</strong><small>'+[h.store,date].filter(Boolean).join(" · ")+'</small></div><b>'+euro(total)+'</b></div>'+
-        '<div class="history-products">'+(h.products||[]).map(p=>'<div><span>'+p.name+' · '+(p.pieces||1)+'</span><b>'+euro((Number(p.price)||0)*(Number(p.pieces)||1))+'</b></div>').join("")+'</div>'+
+      const isOpen=expandedHistoryId===h.id;
+      const products=(h.products||[]).map(p=>{
+        const pieces=Math.max(1,Number(p.pieces)||1);
+        const unit=Number(p.price)||0;
+        return '<div class="history-product-row">'+
+          '<div><strong>'+p.name+'</strong><small>'+pieces+(pieces===1?' pezzo':' pezzi')+' · '+euro(unit)+' cad.</small></div>'+
+          '<b>'+euro(unit*pieces)+'</b>'+
+        '</div>';
+      }).join("");
+
+      return '<article class="history-card '+(isOpen?'is-expanded':'')+'" data-history-id="'+h.id+'">'+
+        '<button class="history-card-summary" type="button" aria-expanded="'+isOpen+'">'+
+          '<span class="history-store-icon">🛒</span>'+
+          '<span class="history-card-copy"><strong>'+((h.store)||"Spesa")+'</strong><small>'+date+'</small></span>'+
+          '<b class="history-card-total">'+euro(total)+'</b>'+
+          '<span class="history-chevron">'+(isOpen?'⌃':'⌄')+'</span>'+
+        '</button>'+
+        (isOpen?'<div class="history-products">'+products+
+          '<div class="history-grand-total"><strong>Totale spesa</strong><b>'+euro(total)+'</b></div>'+
+        '</div>':'')+
       '</article>';
     }).join("");
+
+    list.querySelectorAll(".history-card-summary").forEach(btn=>{
+      btn.onclick=()=>{
+        const card=btn.closest(".history-card");
+        const id=card.dataset.historyId;
+        expandedHistoryId=expandedHistoryId===id?null:id;
+        renderHistory();
+      };
+    });
   };
 
   const finishShopping=()=>{
@@ -466,7 +512,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("backHomeBtn").onclick=()=>{renderHomeCurrentShopping();$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("finishShoppingBtn").onclick=finishShopping;
-  $("historyBtn").onclick=()=>{renderHistory();open("historyPanel");};
+  $("historyBtn").onclick=()=>{
+    expandedHistoryId=null;
+    historySortMode=$("historySort").value||"date-desc";
+    renderHistory();
+    open("historyPanel");
+  };
+  $("historySort").onchange=e=>{
+    historySortMode=e.target.value;
+    expandedHistoryId=null;
+    renderHistory();
+  };
   $("closeHistory").onclick=$("closeHistoryBtn").onclick=()=>close("historyPanel");
   $("addProductBtn").onclick=()=>{
     const panel=$("productPanel");
