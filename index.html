@@ -11,70 +11,55 @@
   <title>La mia spesa</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
   <main class="app-shell">
-    <section class="home-screen">
+    <section class="home-screen" id="homeScreen">
       <div class="hero">
         <p class="eyebrow">LA MIA SPESA</p>
         <p class="subtitle">Crea una nuova lista, consulta le spese precedenti o tieni d'occhio ciò che è finito.</p>
       </div>
-
-      <div class="actions" aria-label="Azioni principali">
-        <button class="action-card action-primary" id="newShoppingBtn" type="button">
-          <span class="action-icon" aria-hidden="true">🛒</span>
-          <span class="action-text">
-            <strong>Nuova spesa</strong>
-            <small>Crea una nuova lista</small>
-          </span>
-          <span class="action-arrow" aria-hidden="true">›</span>
-        </button>
-
-        <button class="action-card action-secondary" id="remindersBtn" type="button">
-          <span class="action-icon" aria-hidden="true">🔔</span>
-          <span class="action-text">
-            <strong>Promemoria</strong>
-            <small>Prodotti finiti da riacquistare</small>
-          </span>
-          <span class="action-arrow" aria-hidden="true">›</span>
-        </button>
-
-        <button class="action-card action-secondary" id="historyBtn" type="button">
-          <span class="action-icon" aria-hidden="true">🕘</span>
-          <span class="action-text">
-            <strong>Storico</strong>
-            <small>Rivedi le spese passate</small>
-          </span>
-          <span class="action-arrow" aria-hidden="true">›</span>
-        </button>
+      <div class="actions">
+        <button class="action-card action-primary" id="newShoppingBtn" type="button"><span class="action-icon">🛒</span><span class="action-text"><strong>Nuova spesa</strong><small>Crea una nuova lista</small></span><span class="action-arrow">›</span></button>
+        <button class="action-card action-secondary" id="remindersBtn" type="button"><span class="action-icon">🔔</span><span class="action-text"><strong>Promemoria</strong><small>Prodotti finiti da riacquistare</small></span><span class="action-arrow">›</span></button>
+        <button class="action-card action-secondary" id="historyBtn" type="button"><span class="action-icon">🕘</span><span class="action-text"><strong>Storico</strong><small>Rivedi le spese passate</small></span><span class="action-arrow">›</span></button>
       </div>
-
       <p class="footer-note">Tutto semplice. Tutto sotto controllo.</p>
+    </section>
+
+    <section class="shopping-screen app-screen" id="shoppingScreen" hidden>
+      <header class="screen-header">
+        <button class="back-btn" id="backHomeBtn" type="button">‹</button>
+        <div><p class="eyebrow">NUOVA SPESA</p><h1 id="shoppingTitle">La mia spesa</h1></div>
+      </header>
+      <div class="shopping-summary"><span>0 prodotti</span><strong id="shoppingTotal">€ 0,00</strong></div>
+      <div class="product-list" id="shoppingList">
+        <div class="empty-state"><span>🛒</span><h2>La lista è vuota</h2><p>Aggiungi il primo prodotto dalla tua libreria.</p></div>
+      </div>
+      <button class="add-product-btn" id="addProductBtn" type="button">＋ Aggiungi prodotto</button>
     </section>
 
     <section class="reminders-panel" id="remindersPanel" aria-hidden="true">
       <div class="panel-backdrop" id="closeReminders"></div>
+      <div class="panel-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">PROMEMORIA</p><h1>Da riacquistare</h1></div><button class="close-btn" id="closeRemindersBtn" type="button">×</button></div>
+      <div class="reminders-empty"><span class="empty-icon">🔔</span><h2>Nessun prodotto da ricordare</h2><p>Quando un prodotto finirà, potremo aggiungerlo qui per ricordarti di riacquistarlo.</p></div></div>
+    </section>
 
-      <div class="panel-sheet" role="dialog" aria-modal="true" aria-labelledby="remindersTitle">
-        <div class="panel-handle"></div>
+    <section class="product-panel" id="productPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeProducts"></div>
+      <div class="panel-sheet product-sheet"><div class="panel-handle"></div>
+        <div class="panel-header"><div><p class="eyebrow">LIBRERIA PRODOTTI</p><h1>Aggiungi prodotti</h1></div><button class="close-btn" id="closeProductsBtn" type="button">×</button></div>
+        <input class="search-input" id="productSearch" type="search" placeholder="Cerca un prodotto">
+        <div class="library-list" id="libraryList"></div>
+        <button class="new-product-btn" id="newProductBtn" type="button">＋ Nuovo prodotto</button>
+      </div>
+    </section>
 
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">PROMEMORIA</p>
-            <h1 id="remindersTitle">Da riacquistare</h1>
-          </div>
-          <button class="close-btn" id="closeRemindersBtn" type="button" aria-label="Chiudi">×</button>
-        </div>
-
-        <div class="reminders-empty">
-          <span class="empty-icon" aria-hidden="true">🔔</span>
-          <h2>Nessun prodotto da ricordare</h2>
-          <p>Quando un prodotto finirà, potremo aggiungerlo qui per ricordarti di riacquistarlo.</p>
-        </div>
+    <section class="new-product-panel" id="newProductPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeNewProduct"></div>
+      <div class="panel-sheet form-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">NUOVO PRODOTTO</p><h1>Aggiungi alla libreria</h1></div><button class="close-btn" id="closeNewProductBtn" type="button">×</button></div>
+        <form id="newProductForm"><label>Nome prodotto<input id="productName" required autocomplete="off" placeholder="Es. Latte"></label><label>Prezzo abituale <span class="optional">(facoltativo)</span><input id="productPrice" inputmode="decimal" placeholder="Es. 1,50"></label><button class="save-product-btn" type="submit">Salva prodotto</button></form>
       </div>
     </section>
   </main>
-
   <script src="js/app.js"></script>
-</body>
-</html>
+</body></html>
