@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=38", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=40", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -510,6 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editingReminderId=id;
     $("reminderEditName").textContent=item.name;
     $("reminderQuantityInput").value=Math.max(1,parseInt(item.reminderQuantity,10)||1);
+    $("reminderPriceInput").value=item.price??"";
     open("reminderEditPanel");
   };
   const closeReminderEditor=()=>{
@@ -520,6 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const item=state.reminders.find(p=>p.id===editingReminderId);
     if(!item)return closeReminderEditor();
     item.reminderQuantity=Math.max(1,parseInt($("reminderQuantityInput").value,10)||1);
+    item.price=$("reminderPriceInput").value.trim().replace(",",".");
     save();
     renderReminders();
     closeReminderEditor();
@@ -575,7 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(!p.reminderQuantity)p.reminderQuantity=1;
       const item=document.createElement("div");
       item.className="library-item";
-      item.innerHTML=productImage(p)+'<div class="library-item-info reminder-item-info"><strong>'+p.name+'</strong><small>Da acquistare: '+p.reminderQuantity+(p.reminderQuantity===1?' pezzo':' pezzi')+(p.store?' · '+p.store:'')+'</small></div><button class="reminder-select-control" type="button" aria-label="Seleziona '+p.name+'">✓</button>';
+      item.innerHTML=productImage(p)+'<div class="library-item-info reminder-item-info"><strong>'+p.name+'</strong><small>Da acquistare: '+p.reminderQuantity+(p.reminderQuantity===1?' pezzo':' pezzi')+(p.price!==""&&p.price!==undefined?' · '+euro(p.price):"")+(p.store?' · '+p.store:'')+'</small></div><button class="reminder-select-control" type="button" aria-label="Seleziona '+p.name+'">✓</button>';
       const info=item.querySelector(".reminder-item-info");
       const selectControl=item.querySelector(".reminder-select-control");
       selectControl.classList.toggle("is-selected",selectedReminderIds.has(p.id));
