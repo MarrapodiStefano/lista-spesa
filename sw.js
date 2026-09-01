@@ -1,4 +1,4 @@
-const CACHE_NAME = "lista-spesa-offline-v14";
+const CACHE_NAME = "lista-spesa-offline-v15";
 
 const APP_SHELL = [
   "./",
