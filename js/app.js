@@ -1,4 +1,33 @@
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(console.error);
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register("./sw.js?v=10", { updateViaCache: "none" });
+      await registration.update();
+
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const worker = registration.installing;
+        if (!worker) return;
+        worker.addEventListener("statechange", () => {
+          if (worker.state === "installed" && navigator.serviceWorker.controller) {
+            worker.postMessage({ type: "SKIP_WAITING" });
+          }
+        });
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (sessionStorage.getItem("listaSpesaReloaded") === "1") return;
+        sessionStorage.setItem("listaSpesaReloaded", "1");
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("Service Worker:", error);
+    }
+  });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
