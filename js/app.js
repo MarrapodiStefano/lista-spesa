@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=22", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=25", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
   let pendingPhoto="";
   let editingProductId=null;
+  let editingShoppingId=null;
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
@@ -84,6 +85,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const openPurchaseEditor=id=>{
+    const item=state.currentShopping.find(p=>p._shoppingId===id);
+    if(!item)return;
+    editingShoppingId=id;
+    $("purchaseEditName").textContent=item.name;
+    $("purchasePiecesInput").value=Math.max(1,parseInt(item.pieces,10)||1);
+    $("purchasePriceInput").value=item.price??"";
+    open("purchaseEditPanel");
+  };
+
+  const closePurchaseEditor=()=>{
+    editingShoppingId=null;
+    close("purchaseEditPanel");
+  };
+
+  const savePurchaseEditor=()=>{
+    const item=state.currentShopping.find(p=>p._shoppingId===editingShoppingId);
+    if(!item)return closePurchaseEditor();
+    item.pieces=Math.max(1,parseInt($("purchasePiecesInput").value,10)||1);
+    item.price=$("purchasePriceInput").value.trim().replace(",",".");
+    save();
+    closePurchaseEditor();
+    renderShopping();
+  };
+
   const bindShoppingGestures=()=>{
     [...$("shoppingList").querySelectorAll(".shopping-item")].forEach(item=>{
       let startX=0,startY=0,startTime=0,longPress=null,moved=false;
@@ -106,9 +132,12 @@ document.addEventListener("DOMContentLoaded", () => {
         clearLong();
         const t=e.changedTouches[0];
         const dx=t.clientX-startX, dy=t.clientY-startY;
-        if(Date.now()-startTime<900 && Math.abs(dx)>65 && Math.abs(dx)>Math.abs(dy)*1.25){
+        const elapsed=Date.now()-startTime;
+        if(elapsed<900 && Math.abs(dx)>65 && Math.abs(dx)>Math.abs(dy)*1.25){
           item.classList.add("is-swiping");
           moveShoppingItem(item.dataset.shoppingId,item.dataset.acquired==="1");
+        }else if(!moved && elapsed<500 && item.dataset.acquired!=="1"){
+          openPurchaseEditor(item.dataset.shoppingId);
         }
       },{passive:true});
       item.addEventListener("touchcancel",clearLong,{passive:true});
@@ -187,9 +216,21 @@ document.addEventListener("DOMContentLoaded", () => {
     $("productPieces").value=1;
     $("photoPreview").hidden=true;
     $("newProductPanel").querySelector(".eyebrow").textContent="NUOVO PRODOTTO";
-    $("newProductPanel").querySelector(".panel-header h1").textContent="Aggiungi alla libreria";
+    const newProductTitle=$("newProductPanel").querySelector(".panel-header h1");
+    if(newProductTitle)newProductTitle.textContent="";
     form.querySelector(".save-product-btn").textContent="Salva prodotto";
   };
+  $("decreasePiecesBtn").onclick=()=>{
+    const input=$("purchasePiecesInput");
+    input.value=Math.max(1,(parseInt(input.value,10)||1)-1);
+  };
+  $("increasePiecesBtn").onclick=()=>{
+    const input=$("purchasePiecesInput");
+    input.value=Math.max(1,(parseInt(input.value,10)||1)+1);
+  };
+  $("closePurchaseEdit").onclick=$("closePurchaseEditBtn").onclick=closePurchaseEditor;
+  $("savePurchaseEditBtn").onclick=savePurchaseEditor;
+
   $("newShoppingBtn").onclick=()=>{$("homeScreen").hidden=true;$("shoppingScreen").hidden=false;renderShopping();};
   $("backHomeBtn").onclick=()=>{$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("addProductBtn").onclick=()=>{renderLibrary();open("productPanel");};
@@ -263,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     video.srcObject=scannerStream;
     await video.play();
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.11 pronto. Puoi tenere il codice anche ruotato.";
+    $("scannerStatus").textContent="Scanner V1.4.13 pronto. Puoi tenere il codice anche ruotato.";
 
     let lastScan=0;
     const scanFrame=async now=>{
@@ -304,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.11 pronto. Inquadra il codice da qualsiasi orientamento.";
+    $("scannerStatus").textContent="Scanner V1.4.13 pronto. Inquadra il codice da qualsiasi orientamento.";
   };
 
   const startScanner=async()=>{
