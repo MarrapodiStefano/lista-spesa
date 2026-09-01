@@ -61,7 +61,17 @@
           <span>CARRELLO · <b id="cartCount">0</b> prodotti</span>
           <strong id="cartTotal">0,00 €</strong>
         </div>
+        <button class="finish-shopping-btn" id="finishShoppingBtn" type="button">✓ Concludi e salva nello Storico</button>
         <button class="add-product-btn" id="addProductBtn" type="button">＋ Aggiungi prodotto</button>
+      </div>
+    </section>
+
+    <section class="history-panel" id="historyPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeHistory"></div>
+      <div class="panel-sheet history-sheet">
+        <div class="panel-handle"></div>
+        <div class="panel-header"><div><p class="eyebrow">STORICO</p><h1>Le tue spese</h1></div><button class="close-btn" id="closeHistoryBtn" type="button">×</button></div>
+        <div class="history-list" id="historyList"></div>
       </div>
     </section>
 
