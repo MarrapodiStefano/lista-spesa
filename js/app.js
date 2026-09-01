@@ -175,9 +175,7 @@
 
         item.append(button);
 
-        if (location === "todo") {
-            attachSwipe(item, product.id);
-        }
+        attachSwipe(item, product.id, location);
 
         return item;
     }
@@ -478,7 +476,20 @@
         renderAll();
     }
 
-    function attachSwipe(element, id) {
+    function moveBackToTodo(id) {
+        const index = state.currentShopping.bought.findIndex((p) => p.id === id);
+        if (index === -1) return;
+
+        const [product] = state.currentShopping.bought.splice(index, 1);
+        delete product.boughtAt;
+
+        state.currentShopping.todo.unshift(product);
+
+        saveState();
+        renderAll();
+    }
+
+    function attachSwipe(element, id, location) {
         let startX = 0;
         let currentX = 0;
         let dragging = false;
@@ -509,7 +520,13 @@
 
             if (delta < -75) {
                 element.style.transform = "translateX(-110%)";
-                setTimeout(() => moveToBought(id), 140);
+                setTimeout(() => {
+                    if (location === "todo") {
+                        moveToBought(id);
+                    } else {
+                        moveBackToTodo(id);
+                    }
+                }, 140);
             } else {
                 element.style.transform = "";
             }
