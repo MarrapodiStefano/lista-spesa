@@ -1,4 +1,4 @@
-const CACHE_NAME = "la-mia-spesa-v5";
+const CACHE_NAME = "la-mia-spesa-v6";
 
 const APP_SHELL = [
   "./",
@@ -34,34 +34,27 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) {
-        event.waitUntil(
-          fetch(request)
-            .then((response) => {
-              if (response && response.ok && response.type === "basic") {
-                return caches.open(CACHE_NAME).then((cache) =>
-                  cache.put(request, response.clone())
-                );
-              }
-            })
-            .catch(() => undefined)
+    caches.match(request).then(async (cached) => {
+      if (cached) return cached;
+
+      if (request.mode === "navigate") {
+        return (
+          (await caches.match("./")) ||
+          (await caches.match("./index.html"))
         );
-        return cached;
       }
 
-      return fetch(request).then((response) => {
+      try {
+        const response = await fetch(request);
         if (response && response.ok && response.type === "basic") {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, copy);
         }
         return response;
-      });
-    }).catch(async () => {
-      if (request.mode === "navigate") {
-        return (await caches.match("./")) || (await caches.match("./index.html"));
+      } catch {
+        return Response.error();
       }
-      return Response.error();
     })
   );
 });
