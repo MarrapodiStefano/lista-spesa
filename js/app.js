@@ -258,6 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   let expandedHistoryId=null;
   let historySortMode="date-desc";
+  let historySearchQuery="";
 
   const historyDateValue=h=>{
     const value=h.date||h.completedAt||"";
@@ -278,16 +279,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderHistory=()=>{
     const list=$("historyList");
     if(!list)return;
+
+    const query=historySearchQuery.trim().toLocaleLowerCase("it");
+    const history=sortedHistory();
+    const filtered=query
+      ?history.filter(h=>(h.products||[]).some(p=>String(p.name||"").toLocaleLowerCase("it").includes(query)))
+      :history;
+
     if(!Array.isArray(state.history)||!state.history.length){
       list.innerHTML='<div class="empty-state history-empty"><span>🕘</span><h2>Nessuna spesa salvata</h2><p>Quando concluderai una spesa, la troverai qui.</p></div>';
       return;
     }
 
-    list.innerHTML=sortedHistory().map(h=>{
+    if(!filtered.length){
+      list.innerHTML='<div class="empty-state history-empty history-search-empty"><span>🔎</span><h2>Nessun prodotto trovato</h2><p>Non abbiamo trovato acquisti che corrispondono a "<strong>'+historySearchQuery.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</strong>".</p></div>';
+      return;
+    }
+
+    list.innerHTML=filtered.map(h=>{
       const date=h.date?h.date.split("-").reverse().join("/"):"";
       const total=(h.products||[]).reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
-      const isOpen=expandedHistoryId===h.id;
-      const products=(h.products||[]).map(p=>{
+      const matchingProducts=query
+        ?(h.products||[]).filter(p=>String(p.name||"").toLocaleLowerCase("it").includes(query))
+        :(h.products||[]);
+      const isOpen=query||expandedHistoryId===h.id;
+      const products=matchingProducts.map(p=>{
         const pieces=Math.max(1,Number(p.pieces)||1);
         const unit=Number(p.price)||0;
         return '<div class="history-product-row">'+
@@ -296,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '</div>';
       }).join("");
 
-      return '<article class="history-card '+(isOpen?'is-expanded':'')+'" data-history-id="'+h.id+'">'+
+      return '<article class="history-card '+(isOpen?'is-expanded':'')+' '+(query?'history-search-result':'')+'" data-history-id="'+h.id+'">'+
         '<button class="history-card-summary" type="button" aria-expanded="'+isOpen+'">'+
           '<span class="history-store-icon">🛒</span>'+
           '<span class="history-card-copy"><strong>'+((h.store)||"Spesa")+'</strong><small>'+date+'</small></span>'+
@@ -304,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
           '<span class="history-chevron">'+(isOpen?'⌃':'⌄')+'</span>'+
         '</button>'+
         (isOpen?'<div class="history-products">'+products+
+          (query?'<div class="history-search-date"><span>✓ Acquistato il</span><strong>'+date+'</strong></div>':'')+
           '<div class="history-grand-total"><strong>Totale spesa</strong><b>'+euro(total)+'</b></div>'+
         '</div>':'')+
       '</article>';
@@ -311,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     list.querySelectorAll(".history-card-summary").forEach(btn=>{
       btn.onclick=()=>{
+        if(historySearchQuery.trim())return;
         const card=btn.closest(".history-card");
         const id=card.dataset.historyId;
         expandedHistoryId=expandedHistoryId===id?null:id;
@@ -514,6 +532,9 @@ document.addEventListener("DOMContentLoaded", () => {
   $("finishShoppingBtn").onclick=finishShopping;
   $("historyBtn").onclick=()=>{
     expandedHistoryId=null;
+    historySearchQuery="";
+    $("historySearch").value="";
+    $("clearHistorySearch").hidden=true;
     historySortMode=$("historySort").value||"date-desc";
     renderHistory();
     open("historyPanel");
@@ -522,6 +543,20 @@ document.addEventListener("DOMContentLoaded", () => {
     historySortMode=e.target.value;
     expandedHistoryId=null;
     renderHistory();
+  };
+  $("historySearch").oninput=e=>{
+    historySearchQuery=e.target.value;
+    $("clearHistorySearch").hidden=!historySearchQuery;
+    expandedHistoryId=null;
+    renderHistory();
+  };
+  $("clearHistorySearch").onclick=()=>{
+    historySearchQuery="";
+    $("historySearch").value="";
+    $("clearHistorySearch").hidden=true;
+    expandedHistoryId=null;
+    renderHistory();
+    $("historySearch").focus();
   };
   $("closeHistory").onclick=$("closeHistoryBtn").onclick=()=>close("historyPanel");
   $("addProductBtn").onclick=()=>{
