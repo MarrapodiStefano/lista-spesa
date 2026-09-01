@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=29", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=30", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -37,6 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
+  if(!state.currentShoppingName) state.currentShoppingName="La mia spesa";
+  if(state.currentShoppingStore===undefined) state.currentShoppingStore="";
+  if(state.currentShoppingDate===undefined) state.currentShoppingDate="";
   if(!Array.isArray(state.purchasedShopping)) state.purchasedShopping=[];
   const migrateProductFields=items=>items.forEach(p=>{
     if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
@@ -150,6 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderShopping=()=>{
     $("shoppingTitle").textContent=state.currentShoppingName;
+    const shoppingEyebrow=$("shoppingScreen").querySelector(".screen-header .eyebrow");
+    if(shoppingEyebrow) shoppingEyebrow.textContent=(state.currentShoppingStore||"NUOVA SPESA")+(state.currentShoppingDate?" · "+state.currentShoppingDate.split("-").reverse().join("/"):"");
     const list=$("shoppingList");
     const pendingCount=state.currentShopping.length;
     const purchasedCount=state.purchasedShopping.length;
@@ -240,7 +245,37 @@ document.addEventListener("DOMContentLoaded", () => {
   $("closePurchaseEdit").onclick=$("closePurchaseEditBtn").onclick=closePurchaseEditor;
   $("savePurchaseEditBtn").onclick=savePurchaseEditor;
 
-  $("newShoppingBtn").onclick=()=>{$("homeScreen").hidden=true;$("shoppingScreen").hidden=false;renderShopping();};
+  const todayISO=()=>new Date().toISOString().slice(0,10);
+  const openNewShopping=()=>{
+    $("newShoppingForm").reset();
+    $("newShoppingDate").value=todayISO();
+    $("newShoppingCustomStoreWrap").hidden=true;
+    open("newShoppingPanel");
+  };
+  $("newShoppingBtn").onclick=openNewShopping;
+  $("newShoppingStore").onchange=e=>{
+    const other=e.target.value==="Altro";
+    $("newShoppingCustomStoreWrap").hidden=!other;
+    if(!other)$("newShoppingCustomStore").value="";
+  };
+  $("closeNewShopping").onclick=$("closeNewShoppingBtn").onclick=()=>close("newShoppingPanel");
+  $("newShoppingForm").onsubmit=e=>{
+    e.preventDefault();
+    const name=$("newShoppingName").value.trim();
+    const selected=$("newShoppingStore").value;
+    const store=selected==="Altro"?$("newShoppingCustomStore").value.trim():selected;
+    const date=$("newShoppingDate").value;
+    if(!name||!store||!date)return;
+    state.currentShoppingName=name;
+    state.currentShoppingStore=store;
+    state.currentShoppingDate=date;
+    state.currentShopping=[];
+    state.purchasedShopping=[];
+    save();
+    close("newShoppingPanel");
+    $("homeScreen").hidden=true;$("shoppingScreen").hidden=false;
+    renderShopping();
+  };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
   $("backHomeBtn").onclick=()=>{$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("addProductBtn").onclick=()=>{renderLibrary();open("productPanel");};
