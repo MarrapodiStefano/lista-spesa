@@ -121,8 +121,13 @@ document.addEventListener("DOMContentLoaded", () => {
         {facingMode:"environment"},
         {
           fps:10,
-          // Nessun ritaglio della videocamera: analizziamo l'intera immagine.
-          // Questo aiuta soprattutto i codici a barre 1D su iPhone.
+          aspectRatio:1.777,
+          // Il riquadro centrale rende evidente dove posizionare il codice
+          // e concentra l'analisi sulla zona di scansione.
+          qrbox:(viewfinderWidth)=>{
+            const width=Math.min(340,Math.floor(viewfinderWidth*0.88));
+            return {width:width,height:Math.max(120,Math.floor(width*0.42))};
+          },
           disableFlip:false
         },
         (decodedText)=>lookupBarcode(decodedText),
@@ -130,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       scannerRunning=true;
-      $("scannerStatus").textContent="Scanner pronto. Metti il codice al centro, riempi bene l'inquadratura e tieni fermo l'iPhone.";
+      $("scannerStatus").textContent="Scanner pronto. Metti il codice dentro il riquadro bianco e tieni fermo l'iPhone.";
     }catch(e){
       console.error("Errore scanner",e);
       try{if(scanner)await scanner.clear();}catch(x){}
