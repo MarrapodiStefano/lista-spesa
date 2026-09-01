@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=59", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=60", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -446,6 +446,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
   $("productsLibraryBtn").onclick=()=>{
+    const panel=$("productPanel");
+    panel.classList.add("library-mode");
+    $("productPanelEyebrow").hidden=true;
+    $("productPanelTitle").textContent="I miei prodotti";
     $("productSearch").value="";
     renderLibrary("");
     open("productPanel");
@@ -454,8 +458,22 @@ document.addEventListener("DOMContentLoaded", () => {
   $("finishShoppingBtn").onclick=finishShopping;
   $("historyBtn").onclick=()=>{renderHistory();open("historyPanel");};
   $("closeHistory").onclick=$("closeHistoryBtn").onclick=()=>close("historyPanel");
-  $("addProductBtn").onclick=()=>{renderLibrary();open("productPanel");};
-  $("closeProducts").onclick=$("closeProductsBtn").onclick=()=>close("productPanel");
+  $("addProductBtn").onclick=()=>{
+    const panel=$("productPanel");
+    panel.classList.remove("library-mode");
+    $("productPanelEyebrow").hidden=false;
+    $("productPanelTitle").textContent="Aggiungi prodotti";
+    $("productSearch").value="";
+    renderLibrary();
+    open("productPanel");
+  };
+  $("closeProducts").onclick=$("closeProductsBtn").onclick=()=>{
+    const panel=$("productPanel");
+    panel.classList.remove("library-mode");
+    $("productPanelEyebrow").hidden=false;
+    $("productPanelTitle").textContent="Aggiungi prodotti";
+    close("productPanel");
+  };
   $("newProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
   $("closeNewProduct").onclick=$("closeNewProductBtn").onclick=()=>{resetProductForm();close("newProductPanel");};
   $("productSearch").oninput=e=>renderLibrary(e.target.value);
