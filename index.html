@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=23">
+  <link rel="manifest" href="manifest.json?v=24">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=23">
+  <link rel="stylesheet" href="css/style.css?v=24">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <section class="home-screen" id="homeScreen">
       <div class="hero">
-        <p class="eyebrow">LA MIA SPESA · V1.4.11</p>
+        <p class="eyebrow">LA MIA SPESA · V1.4.12</p>
         <p class="subtitle">Crea una nuova lista, consulta le spese precedenti o tieni d'occhio ciò che è finito.</p>
       </div>
       <div class="actions">
@@ -63,7 +63,7 @@
 
     <section class="new-product-panel" id="newProductPanel" aria-hidden="true">
       <div class="panel-backdrop" id="closeNewProduct"></div>
-      <div class="panel-sheet form-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">NUOVO PRODOTTO</p><h1>Aggiungi alla libreria</h1></div><button class="close-btn" id="closeNewProductBtn" type="button">×</button></div>
+      <div class="panel-sheet form-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">NUOVO PRODOTTO</p></div><button class="close-btn" id="closeNewProductBtn" type="button">×</button></div>
         <button class="scan-product-btn" id="scanProductBtn" type="button">📷 Scansiona codice a barre</button>
         <p class="scan-note">Inquadra il codice: nome, foto e peso verranno cercati automaticamente.</p>
         <form id="newProductForm">
@@ -80,5 +80,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=23"></script>
+  <script src="js/app.js?v=24"></script>
 </body></html>
