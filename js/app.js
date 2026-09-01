@@ -1,3 +1,12 @@
+// Registra subito il Service Worker: la web app deve poter partire anche senza rete.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("./sw.js")
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => console.log("Modalità offline pronta"))
+    .catch((error) => console.error("Service Worker non registrato:", error));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const remindersBtn = document.getElementById("remindersBtn");
   const remindersPanel = document.getElementById("remindersPanel");
@@ -16,15 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.overflow = "";
   };
 
-  remindersBtn.addEventListener("click", openPanel);
-  closeReminders.addEventListener("click", closePanel);
-  closeRemindersBtn.addEventListener("click", closePanel);
-
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("/lista-spesa/sw.js", { scope: "/lista-spesa/" })
-      .then(() => navigator.serviceWorker.ready)
-      .then(() => console.log("Modalità offline pronta"))
-      .catch((error) => console.error("Service Worker non registrato:", error));
-  }
+  if (remindersBtn) remindersBtn.addEventListener("click", openPanel);
+  if (closeReminders) closeReminders.addEventListener("click", closePanel);
+  if (closeRemindersBtn) closeRemindersBtn.addEventListener("click", closePanel);
 });
