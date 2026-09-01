@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=33">
+  <link rel="manifest" href="manifest.json?v=34">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=33">
+  <link rel="stylesheet" href="css/style.css?v=34">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <section class="home-screen" id="homeScreen">
       <div class="hero">
-        <p class="eyebrow">LA MIA SPESA · V1.5.3</p>
+        <p class="eyebrow">LA MIA SPESA · V1.6.0</p>
       </div>
       <div class="actions">
         <button class="action-card action-primary" id="newShoppingBtn" type="button"><span class="action-icon">🛒</span><span class="action-text"><strong>Nuova spesa</strong><small>Crea una nuova lista</small></span><span class="action-arrow">›</span></button>
@@ -66,8 +66,20 @@
 
     <section class="reminders-panel" id="remindersPanel" aria-hidden="true">
       <div class="panel-backdrop" id="closeReminders"></div>
-      <div class="panel-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">PROMEMORIA</p><h1>Da riacquistare</h1></div><button class="close-btn" id="closeRemindersBtn" type="button">×</button></div>
-      <div class="reminders-empty"><span class="empty-icon">🔔</span><h2>Nessun prodotto da ricordare</h2><p>Quando un prodotto finirà, potremo aggiungerlo qui per ricordarti di riacquistarlo.</p></div></div>
+      <div class="panel-sheet reminders-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">PROMEMORIA</p><h1>Da riacquistare</h1></div><button class="close-btn" id="closeRemindersBtn" type="button">×</button></div>
+      <div class="reminders-list" id="remindersList"></div>
+      <div class="reminders-empty" id="remindersEmpty"><span class="empty-icon">🔔</span><h2>Nessun prodotto da ricordare</h2><p>Aggiungi un prodotto dalla libreria oppure creane uno nuovo.</p></div>
+      <button class="new-product-btn" id="addReminderBtn" type="button">＋ Aggiungi prodotto</button></div>
+    </section>
+
+    <section class="product-panel" id="reminderProductPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeReminderProducts"></div>
+      <div class="panel-sheet product-sheet"><div class="panel-handle"></div>
+        <div class="panel-header"><div><p class="eyebrow">PROMEMORIA</p><h1>Aggiungi prodotti</h1></div><button class="close-btn" id="closeReminderProductsBtn" type="button">×</button></div>
+        <input class="search-input" id="reminderProductSearch" type="search" placeholder="Cerca un prodotto">
+        <div class="library-list" id="reminderLibraryList"></div>
+        <button class="new-product-btn" id="newReminderProductBtn" type="button">＋ Nuovo prodotto</button>
+      </div>
     </section>
 
     <section class="product-panel" id="productPanel" aria-hidden="true">
@@ -134,5 +146,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=33"></script>
+  <script src="js/app.js?v=34"></script>
 </body></html>
