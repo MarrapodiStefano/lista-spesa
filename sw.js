@@ -1,11 +1,11 @@
-const CACHE_NAME = "lista-spesa-offline-v6";
+const CACHE_NAME = "lista-spesa-offline-v10";
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./css/style.css?v=6",
-  "./js/app.js?v=6",
-  "./manifest.json?v=6"
+  "./css/style.css?v=10",
+  "./js/app.js?v=10",
+  "./manifest.json?v=10"
 ];
 
 self.addEventListener("install", event => {
@@ -27,24 +27,34 @@ self.addEventListener("activate", event => {
   );
 });
 
+self.addEventListener("message", event => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === self.location.origin;
   const isAppAsset =
     event.request.mode === "navigate" ||
-    (url.origin === self.location.origin &&
-      (url.pathname.endsWith("/index.html") ||
-       url.pathname.endsWith("/css/style.css") ||
-       url.pathname.endsWith("/js/app.js") ||
-       url.pathname.endsWith("/manifest.json")));
+    (isSameOrigin && (
+      url.pathname.endsWith("/index.html") ||
+      url.pathname.endsWith("/css/style.css") ||
+      url.pathname.endsWith("/js/app.js") ||
+      url.pathname.endsWith("/manifest.json")
+    ));
 
+  // Online: usa sempre la versione più recente del server e aggiorna la cache.
+  // Offline: torna automaticamente all'ultima versione disponibile sul telefono.
   if (isAppAsset) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: "no-store" })
         .then(response => {
           if (response && response.ok) {
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, response.clone());
+            });
           }
           return response;
         })
@@ -60,11 +70,12 @@ self.addEventListener("fetch", event => {
     return;
   }
 
+  // Per le altre risorse manteniamo il comportamento offline-first.
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true })
       .then(cached => cached || fetch(event.request)
         .then(response => {
-          if (response && response.ok && url.origin === self.location.origin) {
+          if (response && response.ok && isSameOrigin) {
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
           }
           return response;
