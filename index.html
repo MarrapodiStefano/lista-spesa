@@ -7,9 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=62">
+  <link rel="manifest" href="manifest.json?v=64">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=63">
+  <link rel="stylesheet" href="css/style.css?v=64">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
@@ -18,7 +18,7 @@
       <header class="home-header">
         <div>
           <h1>La Mia Spesa</h1>
-          <p>V1.6.29</p>
+          <p>V1.6.30</p>
         </div>
         <div class="home-groceries" aria-hidden="true"><span>🥖</span><span>🥕</span><span>🍅</span><span>🥬</span></div>
       </header>
@@ -105,10 +105,21 @@
     </section>
 
     <section class="history-panel" id="historyPanel" aria-hidden="true">
-      <div class="panel-backdrop" id="closeHistory"></div>
       <div class="panel-sheet history-sheet">
-        <div class="panel-handle"></div>
-        <div class="panel-header"><div><p class="eyebrow">STORICO</p><h1>Le tue spese</h1></div><button class="close-btn" id="closeHistoryBtn" type="button">×</button></div>
+        <header class="history-full-header">
+          <button class="history-back-btn" id="closeHistoryBtn" type="button" aria-label="Indietro">‹</button>
+          <h1>Le tue spese</h1>
+          <button class="close-btn history-close-btn" id="closeHistory" type="button" aria-label="Chiudi">×</button>
+        </header>
+        <div class="history-sort-bar">
+          <span>Ordina per</span>
+          <select id="historySort" aria-label="Ordina lo storico">
+            <option value="date-desc">Data (più recenti)</option>
+            <option value="date-asc">Data (meno recenti)</option>
+            <option value="store-asc">Negozio (A-Z)</option>
+            <option value="store-desc">Negozio (Z-A)</option>
+          </select>
+        </div>
         <div class="history-list" id="historyList"></div>
       </div>
     </section>
@@ -245,5 +256,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=62"></script>
+  <script src="js/app.js?v=64"></script>
 </body></html>
