@@ -521,3 +521,70 @@ body{
 .search-input{
   max-width:100%;
 }
+
+
+/* V1.4.10 — Libreria: card in colonna, senza sovrapposizioni e senza scroll orizzontale */
+.product-panel,
+.product-panel .panel-sheet,
+.product-panel .product-sheet{
+  overflow:hidden;
+}
+
+.library-list{
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:flex-start;
+  align-content:flex-start;
+  gap:12px;
+  min-height:0;
+  width:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  overscroll-behavior-x:none;
+  touch-action:pan-y;
+}
+
+.library-item{
+  display:flex;
+  flex:0 0 auto;
+  width:100%;
+  min-height:92px;
+  height:auto;
+  margin:0;
+  padding:14px 16px;
+  align-items:center;
+  gap:14px;
+  overflow:hidden;
+}
+
+.library-item-info{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+}
+
+.library-item-info strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.library-item-info small{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.library-actions{
+  flex:0 0 auto;
+  flex-shrink:0;
+}
+
+.product-sheet{
+  touch-action:pan-y;
+}
