@@ -760,3 +760,11 @@ body{
   font-weight:650;
   letter-spacing:.06em;
 }
+
+
+/* V1.6.0 — Promemoria prodotti */
+.reminders-sheet{display:flex;flex-direction:column;max-height:88vh}
+.reminders-list{overflow-y:auto;min-height:0;flex:1;padding-bottom:12px}
+.reminders-empty[hidden]{display:none}
+.reminders-list .library-item{margin-bottom:10px}
+.reminders-list .add-to-list{font-size:24px;line-height:1}
