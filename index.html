@@ -68,7 +68,7 @@
         <p class="scan-note">Inquadra il codice: nome, foto e peso verranno cercati automaticamente.</p>
         <form id="newProductForm">
           <label>Nome prodotto<input id="productName" required autocomplete="off" placeholder="Es. Latte"></label>
-          <label>Prezzo abituale <span class="optional">(facoltativo)</span><input id="productPrice" inputmode="decimal" placeholder="Es. 1,50"></label>
+          <label>Prezzo abituale<input id="productPrice" inputmode="decimal" placeholder="Es. 1,50"></label>
           <label>Peso<input id="productWeight" type="number" min="0" step="any" value="" inputmode="decimal" placeholder="Es. 375"></label>
           <label>Pezzi<input id="productPieces" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
           <label>Negozio di riferimento
@@ -82,7 +82,7 @@
             </select>
           </label>
           <label id="customStoreWrap" hidden>Nome del negozio<input id="productCustomStore" autocomplete="off" placeholder="Inserisci il nome del negozio"></label>
-          <label>Foto prodotto <span class="optional">(facoltativa)</span><input id="productPhoto" type="file" accept="image/*"></label>
+          <label>Foto prodotto<input id="productPhoto" type="file" accept="image/*"></label>
           <div class="photo-preview" id="photoPreview" hidden><img id="photoPreviewImg" alt="Anteprima foto prodotto"></div>
           <button class="save-product-btn" type="submit">Salva prodotto</button>
         </form>
@@ -106,7 +106,7 @@
             <button id="increasePiecesBtn" type="button" aria-label="Aumenta pezzi">＋</button>
           </div>
         </div>
-        <label class="purchase-price-label">Prezzo del prodotto <span class="optional">(facoltativo)</span>
+        <label class="purchase-price-label">Prezzo del prodotto
           <input id="purchasePriceInput" type="text" inputmode="decimal" placeholder="Es. 1,50">
         </label>
         <button class="save-purchase-edit-btn" id="savePurchaseEditBtn" type="button">Salva modifiche</button>
