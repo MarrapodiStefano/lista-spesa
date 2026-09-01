@@ -1,11 +1,11 @@
-const CACHE_NAME = "lista-spesa-offline-v5";
+const CACHE_NAME = "lista-spesa-offline-v6";
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./css/style.css",
-  "./js/app.js",
-  "./manifest.json"
+  "./css/style.css?v=6",
+  "./js/app.js?v=6",
+  "./manifest.json?v=6"
 ];
 
 self.addEventListener("install", event => {
@@ -19,9 +19,9 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys
-        .filter(key => key.startsWith("lista-spesa-") && key !== CACHE_NAME)
-        .map(key => caches.delete(key))
+      .then(keys => Promise.all(
+        keys.filter(key => key.startsWith("lista-spesa-") && key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
@@ -44,8 +44,7 @@ self.addEventListener("fetch", event => {
       fetch(event.request)
         .then(response => {
           if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
           }
           return response;
         })
@@ -54,7 +53,7 @@ self.addEventListener("fetch", event => {
             .then(cached => cached || (
               event.request.mode === "navigate"
                 ? caches.match("./index.html").then(page => page || caches.match("./"))
-                : cached
+                : undefined
             ))
         )
     );
@@ -66,8 +65,7 @@ self.addEventListener("fetch", event => {
       .then(cached => cached || fetch(event.request)
         .then(response => {
           if (response && response.ok && url.origin === self.location.origin) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
           }
           return response;
         })
