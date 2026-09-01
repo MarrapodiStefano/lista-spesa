@@ -706,3 +706,8 @@ body{
 .scan-product-btn{min-height:56px;margin-top:16px}
 .scan-note{margin:8px 4px 0;font-size:13px}
 .save-product-btn{margin-top:4px}
+
+
+/* V1.5.0 — Dettagli nuova spesa */
+.new-shopping-panel{position:fixed;inset:0;z-index:32;display:flex;align-items:flex-end;visibility:hidden;pointer-events:none}.new-shopping-panel.is-open{visibility:visible;pointer-events:auto}.new-shopping-panel.is-open .panel-sheet{transform:translateY(0)}.new-shopping-panel.is-open .panel-backdrop{background:rgba(0,0,0,.28)}
+.new-shopping-sheet{min-height:0}.new-shopping-sheet form{margin-top:20px}
