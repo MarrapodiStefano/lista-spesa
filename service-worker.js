@@ -1,7 +1,8 @@
-/* La mia spesa - modalità offline affidabile */
-const CACHE_NAME = "la-mia-spesa-v3";
+/* La mia spesa - PWA offline con aggiornamenti affidabili */
+const CACHE_NAME = "la-mia-spesa-v4";
 
 const APP_SHELL = [
+  "./",
   "./index.html",
   "./css/style.css",
   "./js/app.js",
@@ -10,9 +11,7 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      await Promise.all(APP_SHELL.map((url) => cache.add(url)));
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
   self.skipWaiting();
 });
@@ -33,32 +32,37 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  // Quando c'è Internet, aggiorna sempre la pagina.
-  // Quando non c'è, usa la copia salvata sul dispositivo.
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
-    );
-    return;
-  }
+  const request = event.request;
 
-  // Per le risorse dell'app: cache prima, rete come recupero.
+  // Strategia principale: rete prima.
+  // Così, quando Internet è disponibile, l'app riceve sempre
+  // la versione più recente pubblicata su GitHub Pages.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (response && response.ok && response.type === "basic") {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, copy);
+          });
         }
+
         return response;
-      });
-    })
+      })
+      .catch(async () => {
+        // Senza Internet usiamo la copia locale.
+        const cached = await caches.match(request);
+        if (cached) return cached;
+
+        // Per l'apertura dell'app offline, ripieghiamo sulla home.
+        if (request.mode === "navigate") {
+          return (
+            (await caches.match("./")) ||
+            (await caches.match("./index.html"))
+          );
+        }
+
+        return Response.error();
+      })
   );
 });
