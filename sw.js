@@ -1,9 +1,9 @@
-const CACHE_NAME = "lista-spesa-offline-v62";
+const CACHE_NAME = "lista-spesa-offline-v63";
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./css/style.css?v=62",
+  "./css/style.css?v=63",
   "./js/app.js?v=62",
   "./manifest.json?v=62"
 ];
