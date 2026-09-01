@@ -954,3 +954,14 @@ body{
 }
 .transfer-choice strong{font-size:18px}
 .transfer-choice small{color:var(--muted);font-size:14px}
+
+
+/* V1.6.9 — Accesso chiaro alla spesa in corso */
+.active-shopping-card{
+  margin-bottom:2px;
+}
+.active-shopping-card small{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
