@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       productImage(p)+
       '<div class="shopping-item-name">'+p.name+
         '<small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+'</small>'+
-        '<span class="shopping-item-hint">'+(acquired?'Swipe per rimetterlo da acquistare':'Swipe per segnare come acquistato · Tieni premuto per rimuovere')+'</span>'+
+        '<span class="shopping-item-hint">'+(acquired?'Swipe per rimetterlo da acquistare':'Swipe per segnare come acquistato · Tieni premuto per altre azioni')+'</span>'+
       '</div>'+
       '<div class="shopping-item-price">'+(p.price!==""?euro(p.price):"—")+'</div>'+
     '</div>';
@@ -112,6 +112,40 @@ document.addEventListener("DOMContentLoaded", () => {
       save();
       renderShopping();
     }
+  };
+
+  let shoppingActionId=null;
+  const closeShoppingActions=()=>{
+    shoppingActionId=null;
+    close("shoppingActionPanel");
+  };
+  const openShoppingActions=id=>{
+    const item=state.currentShopping.find(p=>p._shoppingId===id);
+    if(!item)return;
+    shoppingActionId=id;
+    $("shoppingActionName").textContent=item.name;
+    open("shoppingActionPanel");
+  };
+  const moveShoppingItemToReminder=id=>{
+    const index=state.currentShopping.findIndex(p=>p._shoppingId===id);
+    if(index===-1)return closeShoppingActions();
+    const item=state.currentShopping[index];
+    const qty=Math.max(1,parseInt(item.pieces,10)||1);
+    const existing=state.reminders.find(p=>p.id===item.id);
+    if(existing){
+      existing.reminderQuantity=Math.max(1,parseInt(existing.reminderQuantity,10)||0)+qty;
+      if(item.price!==""&&item.price!==undefined)existing.price=item.price;
+    }else{
+      const reminder={...item};
+      delete reminder._shoppingId;
+      reminder.reminderQuantity=qty;
+      state.reminders.push(reminder);
+    }
+    state.currentShopping.splice(index,1);
+    save();
+    closeShoppingActions();
+    renderShopping();
+    alert('✓ "'+item.name+'" è stato spostato nei Promemoria.');
   };
 
   const openPurchaseEditor=id=>{
@@ -149,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const acquired=item.dataset.acquired==="1";
         if(!acquired){
           longPress=setTimeout(()=>{
-            if(!moved){navigator.vibrate&&navigator.vibrate(20);removeShoppingItem(item.dataset.shoppingId);}
+            if(!moved){navigator.vibrate&&navigator.vibrate(20);openShoppingActions(item.dataset.shoppingId);}
           },650);
         }
       },{passive:true});
@@ -171,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },{passive:true});
       item.addEventListener("touchcancel",clearLong,{passive:true});
       item.addEventListener("contextmenu",e=>{
-        if(item.dataset.acquired!=="1"){e.preventDefault();removeShoppingItem(item.dataset.shoppingId);}
+        if(item.dataset.acquired!=="1"){e.preventDefault();openShoppingActions(item.dataset.shoppingId);}
       });
     });
   };
@@ -279,6 +313,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("closePurchaseEdit").onclick=$("closePurchaseEditBtn").onclick=closePurchaseEditor;
   $("savePurchaseEditBtn").onclick=savePurchaseEditor;
+  $("closeShoppingAction").onclick=$("closeShoppingActionBtn").onclick=closeShoppingActions;
+  $("moveShoppingToReminderBtn").onclick=()=>{if(shoppingActionId)moveShoppingItemToReminder(shoppingActionId);};
+  $("deleteShoppingItemBtn").onclick=()=>{const id=shoppingActionId;closeShoppingActions();if(id)removeShoppingItem(id);};
 
   const todayISO=()=>new Date().toISOString().slice(0,10);
   const openNewShopping=()=>{
