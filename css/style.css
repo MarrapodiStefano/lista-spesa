@@ -682,3 +682,17 @@ body{
   font-weight:700;
 }
 .shopping-item[data-acquired="0"]{cursor:pointer;}
+
+
+/* V1.4.14 — Negozio di riferimento */
+.form-sheet select{
+  width:100%;
+  min-height:54px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:0 16px;
+  font:inherit;
+  font-size:17px;
+  color:var(--text);
+  background:#fff;
+}
