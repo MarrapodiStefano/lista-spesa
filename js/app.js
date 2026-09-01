@@ -245,6 +245,52 @@ document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML=html;
     bindShoppingGestures();
   };
+  const renderHistory=()=>{
+    const list=$("historyList");
+    if(!list)return;
+    if(!Array.isArray(state.history)||!state.history.length){
+      list.innerHTML='<div class="empty-state"><span>🕘</span><h2>Nessuna spesa salvata</h2><p>Quando concluderai una spesa, la troverai qui.</p></div>';
+      return;
+    }
+    list.innerHTML=state.history.map(h=>{
+      const date=h.date?h.date.split("-").reverse().join("/"):"";
+      const total=(h.products||[]).reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
+      return '<article class="history-card">'+
+        '<div class="history-card-head"><div><strong>'+((h.name&&h.name!=="La mia spesa")?h.name:(h.store||"Spesa"))+'</strong><small>'+[h.store,date].filter(Boolean).join(" · ")+'</small></div><b>'+euro(total)+'</b></div>'+
+        '<div class="history-products">'+(h.products||[]).map(p=>'<div><span>'+p.name+' · '+(p.pieces||1)+'</span><b>'+euro((Number(p.price)||0)*(Number(p.pieces)||1))+'</b></div>').join("")+'</div>'+
+      '</article>';
+    }).join("");
+  };
+
+  const finishShopping=()=>{
+    const products=[...state.purchasedShopping];
+    if(!products.length){
+      alert("Il Carrello è vuoto. Sposta nel Carrello i prodotti acquistati prima di concludere la spesa.");
+      return;
+    }
+    if(state.currentShopping.length){
+      if(!confirm("Ci sono ancora "+state.currentShopping.length+" prodotti da acquistare. Vuoi comunque concludere e salvare nello Storico solo i prodotti nel Carrello?"))return;
+    }else if(!confirm("Concludere questa spesa e salvarla nello Storico?"))return;
+    state.history.unshift({
+      id:"history-"+Date.now(),
+      name:state.currentShoppingName||"La mia spesa",
+      store:state.currentShoppingStore||"",
+      date:state.currentShoppingDate||new Date().toISOString().slice(0,10),
+      products:products.map(p=>({...p})),
+      completedAt:new Date().toISOString()
+    });
+    state.currentShopping=[];
+    state.purchasedShopping=[];
+    state.currentShoppingName="La mia spesa";
+    state.currentShoppingStore="";
+    state.currentShoppingDate="";
+    save();
+    renderHomeCurrentShopping();
+    $("shoppingScreen").hidden=true;
+    $("homeScreen").hidden=false;
+    alert("✓ Spesa salvata nello Storico.");
+  };
+
   const renderLibrary=(q="")=>{
     const products=state.products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
     $("libraryList").innerHTML=products.length
@@ -375,6 +421,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
   $("backHomeBtn").onclick=()=>{renderHomeCurrentShopping();$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
+  $("finishShoppingBtn").onclick=finishShopping;
+  $("historyBtn").onclick=()=>{renderHistory();open("historyPanel");};
+  $("closeHistory").onclick=$("closeHistoryBtn").onclick=()=>close("historyPanel");
   $("addProductBtn").onclick=()=>{renderLibrary();open("productPanel");};
   $("closeProducts").onclick=$("closeProductsBtn").onclick=()=>close("productPanel");
   $("newProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
