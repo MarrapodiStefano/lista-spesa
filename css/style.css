@@ -711,3 +711,25 @@ body{
 /* V1.5.0 — Dettagli nuova spesa */
 .new-shopping-panel{position:fixed;inset:0;z-index:32;display:flex;align-items:flex-end;visibility:hidden;pointer-events:none}.new-shopping-panel.is-open{visibility:visible;pointer-events:auto}.new-shopping-panel.is-open .panel-sheet{transform:translateY(0)}.new-shopping-panel.is-open .panel-backdrop{background:rgba(0,0,0,.28)}
 .new-shopping-sheet{min-height:0}.new-shopping-sheet form{margin-top:20px}
+
+
+/* V1.5.2 — Intestazione della spesa: solo negozio, data e nome personalizzato */
+.shopping-screen .screen-header{
+  margin-bottom:26px;
+}
+.shopping-screen .screen-header > div{
+  min-width:0;
+  flex:1;
+}
+.shopping-screen .shopping-meta{
+  margin:0;
+  color:var(--muted);
+  font-size:clamp(20px,5.8vw,28px);
+  line-height:1.2;
+  font-weight:750;
+  letter-spacing:.10em;
+  text-transform:none;
+}
+.shopping-screen .shopping-meta:empty{
+  display:none;
+}
