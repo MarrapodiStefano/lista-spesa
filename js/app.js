@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=10", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=11", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("scannerStatus").textContent="Richiedo l'accesso alla fotocamera…";
     try{
       if(!window.Html5Qrcode)throw Error("Scanner non disponibile");
+
       scanner=new Html5Qrcode("barcodeReader",{
         formatsToSupport:[
           Html5QrcodeSupportedFormats.EAN_13,
@@ -114,53 +115,48 @@ document.addEventListener("DOMContentLoaded", () => {
         verbose:false
       });
 
+      // Configurazione pensata per iPhone/Safari: niente zoom forzato.
+      // Il decoder analizza una zona ampia e usa il BarcodeDetector nativo
+      // quando WebKit lo rende disponibile.
       const config={
-        fps:10,
-        qrbox:{width:360,height:180},
-        aspectRatio:1.777
+        fps:12,
+        qrbox:(viewfinderWidth,viewfinderHeight)=>({
+          width:Math.floor(viewfinderWidth*0.92),
+          height:Math.min(Math.floor(viewfinderHeight*0.60),260)
+        }),
+        aspectRatio:1.333,
+        disableFlip:true,
+        experimentalFeatures:{useBarCodeDetectorIfSupported:true}
       };
 
       await scanner.start(
-        {facingMode:"environment"},
+        {facingMode:{exact:"environment"}},
         config,
-        code=>lookupBarcode(code),
+        decodedText=>lookupBarcode(decodedText),
         ()=>{}
       );
 
       scannerRunning=true;
-      $("scannerStatus").textContent="Inquadra bene il codice a barre e tieni fermo l'iPhone…";
-
-      // Su alcune versioni recenti di iOS/WebKit il decoder può bloccarsi
-      // dopo l'avvio della videocamera. Un piccolo reset dei vincoli video
-      // forza il flusso a ripartire correttamente.
-      setTimeout(async()=>{
-        if(!scannerRunning || processingBarcode)return;
-        try{
-          const caps=scanner.getRunningTrackCapabilities();
-          const advanced=[];
-          if(caps.zoom){
-            const zoom=Math.min(Math.max(2,Number(caps.zoom.min)||1),Number(caps.zoom.max)||2);
-            advanced.push({zoom});
-          }
-          const constraints={
-            width:{ideal:1280},
-            frameRate:{ideal:30},
-            ...(advanced.length?{advanced}: {})
-          };
-          await scanner.applyVideoConstraints(constraints);
-          if(!processingBarcode)$("scannerStatus").textContent="Scanner pronto. Inquadra il codice a barre.";
-        }catch(e){
-          // Se il dispositivo non supporta questi vincoli, lo scanner continua normalmente.
-        }
-      },700);
+      $("scannerStatus").textContent="Scanner pronto. Inquadra il codice a barre e tieni fermo l'iPhone.";
     }catch(e){
+      // Alcuni iPhone non accettano il vincolo exact:environment.
+      try{
+        if(scanner)await scanner.start(
+          {facingMode:"environment"},
+          {fps:10,qrbox:{width:360,height:220},disableFlip:true,experimentalFeatures:{useBarCodeDetectorIfSupported:true}},
+          decodedText=>lookupBarcode(decodedText),
+          ()=>{}
+        );
+        scannerRunning=true;
+        $("scannerStatus").textContent="Scanner pronto. Inquadra il codice a barre e tieni fermo l'iPhone.";
+        return;
+      }catch(e2){}
       try{if(scanner)await scanner.clear();}catch(x){}
       scanner=null;
       close("scannerPanel");
       alert("Impossibile avviare la scansione. Verifica i permessi della fotocamera e riprova.");
     }
   };
-
   $("scanProductBtn").onclick=startScanner;
   $("closeScanner").onclick=$("closeScannerBtn").onclick=async()=>{await stopScanner();close("scannerPanel");};
   $("newProductForm").onsubmit=e=>{e.preventDefault();const name=$("productName").value.trim();const price=$("productPrice").value.trim().replace(",",".");const quantity=Math.max(1,parseInt($("productQuantity").value,10)||1);if(!name)return;state.products.push({id:Date.now().toString(),name,price,quantity,photo:pendingPhoto,barcode:e.target.dataset.barcode||""});save();pendingPhoto="";$("photoPreview").hidden=true;delete e.target.dataset.barcode;e.target.reset();$("productQuantity").value=1;close("newProductPanel");renderLibrary();};
