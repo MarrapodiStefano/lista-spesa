@@ -1553,3 +1553,77 @@ body{
   .history-sort-bar>span{padding:0 11px;font-size:16px}
   .history-sort-bar select{padding-left:13px;font-size:16px}
 }
+
+
+/* V1.6.31 — Ricerca prodotti nello Storico */
+.history-search-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:58px;
+  margin:0 0 10px;
+  border:1px solid var(--border);
+  border-radius:17px;
+  background:#fff;
+  overflow:hidden;
+}
+.history-search-icon{
+  width:52px;
+  flex:0 0 52px;
+  display:grid;
+  place-items:center;
+  color:#69717d;
+  font-size:30px;
+  line-height:1;
+  transform:rotate(-20deg);
+}
+.history-search-wrap input{
+  min-width:0;
+  flex:1;
+  height:56px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  font:inherit;
+  font-size:17px;
+  padding:0 10px 0 0;
+}
+.history-search-wrap input::placeholder{color:#979da6}
+.history-search-clear{
+  width:42px;
+  height:42px;
+  margin-right:7px;
+  border:0;
+  border-radius:50%;
+  background:#f0f1f4;
+  color:#4d535d;
+  font-size:26px;
+  line-height:1;
+  cursor:pointer;
+}
+.history-search-result .history-products{border-top:1px solid var(--border)}
+.history-search-date{
+  min-height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:12px 4px;
+  color:#397c4d;
+  border-bottom:1px solid var(--border);
+  font-size:15px;
+}
+.history-search-date strong{
+  color:#236b3b;
+  font-size:17px;
+}
+.history-search-empty{
+  margin:12px 0 0;
+}
+.history-search-empty p strong{color:var(--text)}
+
+@media (max-width:390px){
+  .history-search-icon{width:46px;flex-basis:46px;font-size:27px}
+  .history-search-wrap input{font-size:16px}
+}
