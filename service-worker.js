@@ -1,8 +1,7 @@
-/* La mia spesa - modalità offline */
-const CACHE_NAME = "la-mia-spesa-v2";
+/* La mia spesa - modalità offline affidabile */
+const CACHE_NAME = "la-mia-spesa-v3";
 
 const APP_SHELL = [
-  "./",
   "./index.html",
   "./css/style.css",
   "./js/app.js",
@@ -12,13 +11,7 @@ const APP_SHELL = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // Cache ogni risorsa separatamente: un singolo errore non blocca
-      // l'installazione completa del Service Worker.
-      await Promise.all(
-        APP_SHELL.map((url) =>
-          cache.add(url).catch(() => console.warn("Non memorizzato:", url))
-        )
-      );
+      await Promise.all(APP_SHELL.map((url) => cache.add(url)));
     })
   );
   self.skipWaiting();
@@ -40,30 +33,32 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  // Per la navigazione dell'app: prima la copia salvata.
+  // Quando c'è Internet, aggiorna sempre la pagina.
+  // Quando non c'è, usa la copia salvata sul dispositivo.
   if (event.request.mode === "navigate") {
     event.respondWith(
-      caches.match("./index.html").then(
-        (cached) => cached || fetch(event.request)
-      )
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          return response;
+        })
+        .catch(() => caches.match("./index.html"))
     );
     return;
   }
 
-  // Per CSS e JavaScript: usa la cache, altrimenti scarica e conserva.
+  // Per le risorse dell'app: cache prima, rete come recupero.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
-
-      return fetch(event.request)
-        .then((response) => {
-          if (response && response.ok && response.type === "basic") {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => caches.match("./index.html"));
+      return fetch(event.request).then((response) => {
+        if (response && response.ok && response.type === "basic") {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      });
     })
   );
 });
