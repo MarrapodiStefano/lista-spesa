@@ -987,3 +987,12 @@ body{
 }
 .shopping-action-reminder{border:0;background:var(--dark);color:#fff;margin-bottom:12px;}
 .shopping-action-delete{border:1px solid #e7c9c9;background:#fff;color:#b33;}
+
+
+/* V1.6.15 — Compatta la lista quando vengono rimossi prodotti */
+.shopping-screen .product-list{
+  align-content:start;
+}
+.shopping-section{
+  align-content:start;
+}
