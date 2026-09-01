@@ -197,7 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
       $("newProductForm").dataset.barcode=p.barcode||"";
       $("newProductForm").dataset.editing="1";
       $("newProductPanel").querySelector(".eyebrow").textContent="MODIFICA PRODOTTO";
-      $("newProductPanel").querySelector(".panel-header h1").textContent="Modifica prodotto";
+      const editProductTitle=$("newProductPanel").querySelector(".panel-header h1");
+      if(editProductTitle)editProductTitle.textContent="";
       $("newProductForm").querySelector(".save-product-btn").textContent="Salva modifiche";
       if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
       else $("photoPreview").hidden=true;
