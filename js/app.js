@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=56", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=57", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -321,6 +321,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if(alreadyToBuy||alreadyInCart){
         const where=alreadyToBuy?"nella lista da acquistare":"nel Carrello";
         alert('⚠️ "'+p.name+'" è già presente '+where+'.');
+        // Dopo l'avviso azzeriamo la ricerca, così non resta il testo precedente.
+        $("productSearch").value="";
+        renderLibrary("");
         return;
       }
 
@@ -806,8 +809,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const exists=state.reminders.some(x=>x.id===p.id);
       const item=document.createElement("div"); item.className="library-item";
       item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'')+'</small></div><button class="add-to-list" type="button">'+(exists?"✓":"＋")+'</button>';
-      const btn=item.querySelector("button"); btn.disabled=exists;
-      btn.onclick=()=>{if(!state.reminders.some(x=>x.id===p.id)){state.reminders.push({...p,reminderQuantity:1});save();renderReminders();renderReminderLibrary($("reminderProductSearch").value);}};
+      const btn=item.querySelector("button");
+      btn.onclick=()=>{
+        if(state.reminders.some(x=>x.id===p.id)){
+          alert('⚠️ "'+p.name+'" è già presente nei Promemoria.');
+          // Anche qui puliamo la ricerca dopo l'avviso.
+          $("reminderProductSearch").value="";
+          renderReminderLibrary("");
+          return;
+        }
+        state.reminders.push({...p,reminderQuantity:1});
+        save();
+        renderReminders();
+        renderReminderLibrary($("reminderProductSearch").value);
+      };
       list.appendChild(item);
     });
   };
