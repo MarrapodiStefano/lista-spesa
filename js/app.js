@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=58", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=59", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -62,24 +62,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalEl=$("currentShoppingHomeTotal");
     if(!btn||!meta)return;
     const count=state.currentShopping.length+state.purchasedShopping.length;
-    // Una spesa è considerata attiva anche quando esistono i suoi dettagli,
-    // così la Home non perde il collegamento per riaprirla.
+    // La card verde compare solo quando esiste davvero una spesa attiva.
     const hasDetails=!!(state.currentShoppingStore||state.currentShoppingDate||(state.currentShoppingName&&state.currentShoppingName!=="La mia spesa"));
     const hasActive=count>0||hasDetails;
-    // Il collegamento alla spesa resta sempre visibile nella Home.
-    btn.hidden=false;
+    btn.hidden=!hasActive;
+    if(!hasActive)return;
+
     const bits=[];
-    if(hasActive){
-      if(state.currentShoppingStore)bits.push(state.currentShoppingStore);
-      if(state.currentShoppingDate)bits.push(state.currentShoppingDate.split("-").reverse().join("/"));
-      bits.push(count+(count===1?" prodotto":" prodotti"));
-      if(!count)bits.push("spesa in corso");
-    }else{
-      bits.push("Apri o crea la tua lista");
-    }
+    if(state.currentShoppingStore)bits.push(state.currentShoppingStore);
+    if(state.currentShoppingDate)bits.push(state.currentShoppingDate.split("-").reverse().join("/"));
+    bits.push(count+(count===1?" prodotto":" prodotti"));
+    if(!count)bits.push("spesa in corso");
     meta.textContent=bits.join(" · ");
+
     if(totalEl){
-      const total=state.purchasedShopping.reduce((sum,p)=>sum+(Number(p.price)||0)*(Number(p.pieces)||1),0);
+      // Il totale della Home rappresenta ciò che resta da acquistare,
+      // non ciò che è già stato spostato nel Carrello.
+      const total=state.currentShopping.reduce(
+        (sum,p)=>sum+(Number(p.price)||0)*(Number(p.pieces)||1),
+        0
+      );
       totalEl.textContent=euro(total)||"0,00 €";
     }
   };
