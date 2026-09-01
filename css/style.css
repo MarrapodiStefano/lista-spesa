@@ -977,3 +977,13 @@ body{
 .action-text{flex:1;overflow:hidden;}
 .action-arrow{flex:0 0 auto;}
 .active-shopping-card small{display:block;max-width:100%;}
+
+
+/* V1.6.14 — Azioni prodotto non disponibile */
+.shopping-action-sheet{min-height:0;padding-bottom:max(34px,env(safe-area-inset-bottom));}
+.shopping-action-help{margin:18px 0 22px;color:var(--muted);font-size:16px;line-height:1.45;}
+.shopping-action-reminder,.shopping-action-delete{
+  width:100%;min-height:58px;border-radius:20px;font-size:17px;font-weight:750;
+}
+.shopping-action-reminder{border:0;background:var(--dark);color:#fff;margin-bottom:12px;}
+.shopping-action-delete{border:1px solid #e7c9c9;background:#fff;color:#b33;}
