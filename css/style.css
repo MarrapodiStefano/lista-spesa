@@ -1050,3 +1050,90 @@ body{
 .history-products{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 .history-products>div{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:14px}
 .history-products b{color:var(--text);white-space:nowrap}
+
+
+/* V1.6.19 — Home proposta 2 */
+.app-shell{padding:0;max-width:none}
+.home-screen{
+  width:100%;max-width:560px;min-height:100dvh;margin:0 auto;
+  padding:max(28px,env(safe-area-inset-top)) 18px calc(104px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;justify-content:flex-start;
+}
+.home-header{
+  position:relative;display:flex;align-items:flex-start;justify-content:space-between;
+  min-height:108px;padding:2px 8px 0;margin-bottom:14px;overflow:visible;
+}
+.home-header h1{
+  margin:0;color:#1d2430;font-size:34px;line-height:1.05;letter-spacing:-.04em;font-weight:800;
+}
+.home-header p{margin:7px 0 0;color:#6d7480;font-size:14px;font-weight:650}
+.home-groceries{
+  position:absolute;right:-2px;bottom:-8px;height:90px;width:145px;display:flex;align-items:flex-end;
+  justify-content:center;gap:-8px;font-size:45px;filter:drop-shadow(0 10px 12px rgba(30,80,45,.14));
+}
+.home-groceries span{display:block;margin-left:-13px;transform-origin:bottom center}
+.home-groceries span:nth-child(1){font-size:51px;transform:rotate(-12deg)}
+.home-groceries span:nth-child(2){font-size:45px;transform:rotate(9deg)}
+.home-groceries span:nth-child(3){font-size:43px;transform:translateY(-3px)}
+.home-groceries span:nth-child(4){font-size:48px;transform:rotate(8deg)}
+.home-content{display:grid;gap:16px}
+.current-shopping-hero{
+  width:100%;min-height:122px;border:0;border-radius:25px;padding:18px 18px;
+  display:grid;grid-template-columns:58px 1fr auto 18px;align-items:center;column-gap:13px;
+  text-align:left;color:#fff;cursor:pointer;overflow:hidden;
+  background:linear-gradient(135deg,#2f8b4c,#166b37);
+  box-shadow:0 14px 28px rgba(25,112,58,.24);
+}
+.current-shopping-icon{
+  width:58px;height:58px;border-radius:17px;display:grid;place-items:center;font-size:28px;
+  background:rgba(255,255,255,.92);color:#248143;
+}
+.current-shopping-copy{min-width:0;display:flex;flex-direction:column;gap:6px}
+.current-shopping-copy strong{font-size:20px;line-height:1.1;letter-spacing:-.02em}
+.current-shopping-copy small{font-size:14px;line-height:1.25;opacity:.84;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.current-shopping-total{font-size:23px;white-space:nowrap;letter-spacing:-.03em}
+.current-shopping-arrow{font-size:32px;line-height:1;font-weight:300;opacity:.9}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.home-tile{
+  min-height:194px;border:1px solid rgba(25,35,45,.05);border-radius:25px;padding:24px 15px 18px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  box-shadow:0 10px 24px rgba(25,30,45,.06);cursor:pointer;color:#1d2430;
+}
+.home-tile:active{transform:scale(.98)}
+.tile-new-shopping{background:linear-gradient(145deg,#eef5ff,#dfeaf7)}
+.tile-product{background:linear-gradient(145deg,#fffdf2,#fff6d8)}
+.tile-reminders{background:linear-gradient(145deg,#fffaf0,#fff0cf)}
+.tile-history{background:linear-gradient(145deg,#f2f2ff,#e8e8f8)}
+.tile-icon,.tile-emoji{
+  width:54px;height:54px;border-radius:50%;display:grid;place-items:center;margin-bottom:18px;
+  font-size:31px;font-weight:400;line-height:1;
+}
+.tile-icon{background:linear-gradient(145deg,#3c70b6,#194c91);color:#fff;box-shadow:0 8px 15px rgba(40,87,155,.22)}
+.tile-emoji{font-size:37px}
+.home-tile strong{font-size:17px;line-height:1.12;letter-spacing:-.02em}
+.home-tile small{margin-top:10px;max-width:145px;color:#505865;font-size:13px;line-height:1.35}
+.home-message{
+  min-height:80px;padding:15px 20px;border-radius:22px;display:flex;align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(135deg,#f2f8f3,#edf1ee);border:1px solid rgba(28,80,48,.06);text-align:center;
+}
+.home-message span{font-size:28px}
+.home-message p{margin:0;color:#28312c;font-size:14px;line-height:1.5}
+.home-message strong{font-weight:750}
+.home-tabbar{
+  position:fixed;z-index:15;left:50%;bottom:max(10px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);width:min(calc(100% - 24px),536px);height:78px;padding:8px 12px;
+  display:grid;grid-template-columns:repeat(4,1fr);align-items:center;
+  border:1px solid rgba(30,35,45,.08);border-radius:25px;background:rgba(255,255,255,.94);
+  box-shadow:0 10px 35px rgba(30,35,45,.12);backdrop-filter:blur(18px);
+}
+.home-tab{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#6c737d;cursor:pointer}
+.home-tab span{font-size:26px;line-height:1;font-weight:400}
+.home-tab small{font-size:11px;font-weight:650}
+.home-tab.active{color:#238148}
+.home-tab.active span{font-weight:700}
+@media(max-width:390px){
+  .home-screen{padding-left:14px;padding-right:14px}
+  .home-header h1{font-size:31px}
+  .home-tile{min-height:178px;padding-left:10px;padding-right:10px}
+  .current-shopping-total{font-size:20px}
+}
