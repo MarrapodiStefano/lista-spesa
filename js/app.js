@@ -196,7 +196,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const t=e.changedTouches[0];
         const dx=t.clientX-startX, dy=t.clientY-startY;
         const elapsed=Date.now()-startTime;
-        if(elapsed<900 && Math.abs(dx)>65 && Math.abs(dx)>Math.abs(dy)*1.25){
+        // Su Safari lo swipe può durare più di 900 ms: conta la distanza reale,
+        // non la velocità del gesto.
+        if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.15){
           item.classList.add("is-swiping");
           moveShoppingItem(item.dataset.shoppingId,item.dataset.acquired==="1");
         }else if(!moved && elapsed<500 && item.dataset.acquired!=="1"){
