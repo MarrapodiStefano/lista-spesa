@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderHomeCurrentShopping=()=>{
     const btn=$("openCurrentShoppingBtn");
     const meta=$("currentShoppingHomeMeta");
+    const totalEl=$("currentShoppingHomeTotal");
     if(!btn||!meta)return;
     const count=state.currentShopping.length+state.purchasedShopping.length;
     // Una spesa è considerata attiva anche quando esistono i suoi dettagli,
@@ -73,6 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
     bits.push(count+(count===1?" prodotto":" prodotti"));
     if(!count)bits.push("spesa in corso");
     meta.textContent=bits.join(" · ");
+    if(totalEl){
+      const total=state.purchasedShopping.reduce((sum,p)=>sum+(Number(p.price)||0)*(Number(p.pieces)||1),0);
+      totalEl.textContent=euro(total)||"0,00 €";
+    }
   };
   const openCurrentShopping=()=>{
     $("homeScreen").hidden=true;
@@ -420,6 +425,10 @@ document.addEventListener("DOMContentLoaded", () => {
     renderShopping();
   };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
+  $("tabHomeBtn").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+  $("tabLibraryBtn").onclick=()=>{renderLibrary("");$("productSearch").value="";open("productPanel");};
+  $("tabRemindersBtn").onclick=()=>{reminderSelectionMode=false;selectedReminderIds.clear();updateReminderSelectButton();renderReminders();open("remindersPanel");};
+  $("tabHistoryBtn").onclick=()=>{renderHistory();open("historyPanel");};
   $("backHomeBtn").onclick=()=>{renderHomeCurrentShopping();$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("finishShoppingBtn").onclick=finishShopping;
   $("historyBtn").onclick=()=>{renderHistory();open("historyPanel");};
