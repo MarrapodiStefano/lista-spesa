@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=20", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=21", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     video.srcObject=scannerStream;
     await video.play();
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.8 pronto. Puoi tenere il codice anche ruotato.";
+    $("scannerStatus").textContent="Scanner V1.4.9 pronto. Puoi tenere il codice anche ruotato.";
 
     let lastScan=0;
     const scanFrame=async now=>{
@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.8 pronto. Inquadra il codice da qualsiasi orientamento.";
+    $("scannerStatus").textContent="Scanner V1.4.9 pronto. Inquadra il codice da qualsiasi orientamento.";
   };
 
   const startScanner=async()=>{
@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("barcodeReader").innerHTML='<video id="zxingVideo" autoplay muted playsinline></video>';
       const video=$("zxingVideo");
 
-      // V1.4.8: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
+      // V1.4.9: prima usiamo il lettore nativo dell'iPhone, più adatto ai codici
       // EAN dei prodotti. Se non è disponibile, torniamo automaticamente a ZXing.
       if("BarcodeDetector" in window){
         await startNativeScanner(video);
