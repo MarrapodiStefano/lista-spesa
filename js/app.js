@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=55", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=56", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -313,6 +313,17 @@ document.addEventListener("DOMContentLoaded", () => {
     [...$("libraryList").querySelectorAll("button[data-id]")].forEach(b=>b.onclick=()=>{
       const p=state.products.find(x=>x.id===b.dataset.id);
       if(!p)return;
+
+      // Evita duplicati: lo stesso prodotto può stare una sola volta
+      // nella spesa, sia "Da acquistare" sia nel "Carrello".
+      const alreadyToBuy=state.currentShopping.some(x=>x.id===p.id);
+      const alreadyInCart=state.purchasedShopping.some(x=>x.id===p.id);
+      if(alreadyToBuy||alreadyInCart){
+        const where=alreadyToBuy?"nella lista da acquistare":"nel Carrello";
+        alert('⚠️ "'+p.name+'" è già presente '+where+'.');
+        return;
+      }
+
       state.currentShopping.push({...p,_shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)});
       save();renderShopping();close("productPanel");
     });
