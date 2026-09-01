@@ -51,7 +51,7 @@ button {
 }
 
 .hero {
-  margin-bottom: 44px;
+  margin-bottom: 42px;
 }
 
 .eyebrow {
@@ -62,21 +62,14 @@ button {
   letter-spacing: 0.12em;
 }
 
-h1 {
-  margin: 0;
-  max-width: 520px;
-  font-size: clamp(40px, 10vw, 58px);
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-  font-weight: 800;
-}
-
 .subtitle {
-  max-width: 430px;
-  margin: 20px 0 0;
-  color: var(--muted);
-  font-size: 18px;
-  line-height: 1.45;
+  max-width: 460px;
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(28px, 7vw, 38px);
+  line-height: 1.14;
+  letter-spacing: -0.035em;
+  font-weight: 700;
 }
 
 .actions {
@@ -86,7 +79,7 @@ h1 {
 
 .action-card {
   width: 100%;
-  min-height: 112px;
+  min-height: 106px;
   border: 1px solid var(--border);
   border-radius: 28px;
   padding: 20px;
@@ -122,7 +115,7 @@ h1 {
   border-radius: 20px;
   display: grid;
   place-items: center;
-  font-size: 28px;
+  font-size: 27px;
   background: rgba(255,255,255,0.12);
 }
 
@@ -164,9 +157,125 @@ h1 {
   font-size: 14px;
 }
 
+/* Promemoria */
+.reminders-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.reminders-panel.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.panel-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background 0.25s ease;
+}
+
+.reminders-panel.is-open .panel-backdrop {
+  background: rgba(0,0,0,0.28);
+}
+
+.panel-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  min-height: min(70dvh, 680px);
+  padding: 14px 24px max(34px, env(safe-area-inset-bottom));
+  border-radius: 32px 32px 0 0;
+  background: var(--bg);
+  box-shadow: 0 -18px 45px rgba(0,0,0,0.15);
+  transform: translateY(105%);
+  transition: transform 0.3s cubic-bezier(.22,.8,.25,1);
+}
+
+.reminders-panel.is-open .panel-sheet {
+  transform: translateY(0);
+}
+
+.panel-handle {
+  width: 42px;
+  height: 5px;
+  margin: 0 auto 24px;
+  border-radius: 999px;
+  background: #c7c7cc;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.panel-header h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.close-btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #e8e8ec;
+  color: var(--text);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.reminders-empty {
+  margin-top: 56px;
+  padding: 34px 24px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.empty-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background: #f0f0f2;
+  font-size: 32px;
+}
+
+.reminders-empty h2 {
+  margin: 0;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+}
+
+.reminders-empty p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
 @media (min-width: 700px) {
   .app-shell {
     padding-left: 32px;
     padding-right: 32px;
+  }
+
+  .panel-sheet {
+    border-radius: 32px 32px 0 0;
   }
 }
