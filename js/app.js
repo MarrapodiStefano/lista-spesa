@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=34", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=35", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if(state.currentShoppingStore===undefined) state.currentShoppingStore="";
   if(state.currentShoppingDate===undefined) state.currentShoppingDate="";
   if(!Array.isArray(state.purchasedShopping)) state.purchasedShopping=[];
+  if(!Array.isArray(state.reminders)) state.reminders=[];
   const migrateProductFields=items=>items.forEach(p=>{
     if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
     if(p.pieces===undefined||p.pieces===null) p.pieces=1;
@@ -477,6 +478,46 @@ document.addEventListener("DOMContentLoaded", () => {
     renderLibrary($("productSearch").value);
     renderShopping();
   };
-  $("remindersBtn").onclick=()=>open("remindersPanel");
+  const renderReminders=()=>{
+    const list=$("remindersList"), empty=$("remindersEmpty");
+    list.innerHTML="";
+    if(!state.reminders.length){ empty.hidden=false; return; }
+    empty.hidden=true;
+    state.reminders.forEach(p=>{
+      const item=document.createElement("div");
+      item.className="library-item";
+      item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'Prodotto in promemoria')+'</small></div><button class="add-to-list" type="button">×</button>';
+      item.querySelector("button").onclick=()=>{state.reminders=state.reminders.filter(x=>x.id!==p.id);save();renderReminders();};
+      list.appendChild(item);
+    });
+  };
+  const renderReminderLibrary=q=>{
+    const list=$("reminderLibraryList"); const term=(q||"").toLowerCase();
+    list.innerHTML="";
+    state.products.filter(p=>p.name.toLowerCase().includes(term)).forEach(p=>{
+      const exists=state.reminders.some(x=>x.id===p.id);
+      const item=document.createElement("div"); item.className="library-item";
+      item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'')+'</small></div><button class="add-to-list" type="button">'+(exists?"✓":"＋")+'</button>';
+      const btn=item.querySelector("button"); btn.disabled=exists;
+      btn.onclick=()=>{if(!state.reminders.some(x=>x.id===p.id)){state.reminders.push({...p});save();renderReminders();renderReminderLibrary($("reminderProductSearch").value);}};
+      list.appendChild(item);
+    });
+  };
+  $("remindersBtn").onclick=()=>{renderReminders();open("remindersPanel");};
   $("closeReminders").onclick=$("closeRemindersBtn").onclick=()=>close("remindersPanel");
+  $("addReminderBtn").onclick=()=>{renderReminderLibrary("");$("reminderProductSearch").value="";open("reminderProductPanel");};
+  $("closeReminderProducts").onclick=$("closeReminderProductsBtn").onclick=()=>close("reminderProductPanel");
+  $("reminderProductSearch").oninput=e=>renderReminderLibrary(e.target.value);
+  $("newReminderProductBtn").onclick=()=>{close("reminderProductPanel");resetProductForm();$("newProductPanel").dataset.reminderMode="1";open("newProductPanel");};
+  const originalProductSubmit=$("newProductForm").onsubmit;
+  $("newProductForm").addEventListener("submit",()=>{
+    if($("newProductPanel").dataset.reminderMode==="1"){
+      setTimeout(()=>{
+        const newest=state.products[state.products.length-1];
+        if(newest&&!state.reminders.some(x=>x.id===newest.id)){state.reminders.push({...newest});save();}
+        delete $("newProductPanel").dataset.reminderMode;
+        renderReminders();
+      },0);
+    }
+  });
 });
