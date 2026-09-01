@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=14", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=15", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -105,16 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       $("barcodeReader").innerHTML='<video id="zxingVideo" autoplay muted playsinline></video>';
       const video=$("zxingVideo");
+      // Lettore multi-formato ZXing: usiamo la configurazione standard,
+      // evitando API opzionali che non sono presenti in tutte le build UMD.
       scanner=new ZXingBrowser.BrowserMultiFormatReader();
-
-      const hints=new Map();
-      hints.set(ZXingBrowser.DecodeHintType.POSSIBLE_FORMATS,[
-        ZXingBrowser.BarcodeFormat.EAN_13,
-        ZXingBrowser.BarcodeFormat.EAN_8,
-        ZXingBrowser.BarcodeFormat.UPC_A,
-        ZXingBrowser.BarcodeFormat.UPC_E
-      ]);
-      scanner.setHints(hints);
 
       scannerControls=await scanner.decodeFromConstraints(
         {
@@ -142,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await stopScanner();
       $("barcodeReader").innerHTML="";
       close("scannerPanel");
-      alert("Impossibile avviare lo scanner. Verifica i permessi della fotocamera e riprova.");
+      alert("Impossibile avviare lo scanner. Dettaglio: "+(e&&e.message?e.message:"errore sconosciuto"));
     }
   };
   $("scanProductBtn").onclick=startScanner;
