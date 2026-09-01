@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=30", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=31", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -265,8 +265,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const selected=$("newShoppingStore").value;
     const store=selected==="Altro"?$("newShoppingCustomStore").value.trim():selected;
     const date=$("newShoppingDate").value;
-    if(!name||!store||!date)return;
-    state.currentShoppingName=name;
+    if(!store||!date)return;
+    const finalName=name||"La mia spesa";
+    state.currentShoppingName=finalName;
     state.currentShoppingStore=store;
     state.currentShoppingDate=date;
     state.currentShopping=[];
