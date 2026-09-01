@@ -351,6 +351,11 @@ document.addEventListener("DOMContentLoaded", () => {
       $("newProductPanel").querySelector(".eyebrow").textContent="MODIFICA PRODOTTO";
       const editProductTitle=$("newProductPanel").querySelector(".panel-header h1");
       if(editProductTitle)editProductTitle.textContent="";
+      // In modifica non serve la scansione: resta disponibile solo quando si crea un nuovo prodotto.
+      const scanBtn=$("scanProductBtn");
+      const scanNote=document.querySelector("#newProductPanel .scan-note");
+      if(scanBtn)scanBtn.hidden=true;
+      if(scanNote)scanNote.hidden=true;
       $("newProductForm").querySelector(".save-product-btn").textContent="Salva modifiche";
       if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
       else $("photoPreview").hidden=true;
@@ -374,6 +379,11 @@ document.addEventListener("DOMContentLoaded", () => {
     $("newProductPanel").querySelector(".eyebrow").textContent="NUOVO PRODOTTO";
     const newProductTitle=$("newProductPanel").querySelector(".panel-header h1");
     if(newProductTitle)newProductTitle.textContent="";
+    // Ripristina la scansione quando si torna alla creazione di un nuovo prodotto.
+    const scanBtn=$("scanProductBtn");
+    const scanNote=document.querySelector("#newProductPanel .scan-note");
+    if(scanBtn)scanBtn.hidden=false;
+    if(scanNote)scanNote.hidden=false;
     form.querySelector(".save-product-btn").textContent="Salva prodotto";
   };
   $("decreasePiecesBtn").onclick=()=>{
