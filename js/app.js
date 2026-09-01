@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=35", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=36", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -503,6 +503,66 @@ document.addEventListener("DOMContentLoaded", () => {
       list.appendChild(item);
     });
   };
+  const addReminderByBarcode=async code=>{
+    const normalized=String(code||"").replace(/[^0-9A-Za-z]/g,"");
+    if(!normalized)return;
+    const product=state.products.find(p=>String(p.barcode||"").replace(/[^0-9A-Za-z]/g,"")===normalized);
+    if(!product){
+      alert("⚠️ Questo prodotto non è ancora presente nella libreria.");
+      return;
+    }
+    if(state.reminders.some(p=>p.id===product.id)){
+      alert("✓ "+product.name+" è già presente nei Promemoria.");
+      return;
+    }
+    state.reminders.push({...product});
+    save();
+    renderReminders();
+    alert("✓ "+product.name+" aggiunto ai Promemoria.");
+  };
+  const scanReminderBarcode=async()=>{
+    if(!("BarcodeDetector" in window)){
+      alert("Il lettore rapido non è disponibile su questo dispositivo.");
+      return;
+    }
+    try{
+      const formats=["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf","codabar"];
+      const detector=new BarcodeDetector({formats});
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+      const video=document.createElement("video");
+      video.setAttribute("playsinline","");
+      video.autoplay=true;
+      video.muted=true;
+      video.srcObject=stream;
+      await video.play();
+      const panel=document.createElement("div");
+      panel.className="reminder-scanner-overlay";
+      panel.innerHTML='<div class="reminder-scanner-box"><strong>Inquadra il codice a barre</strong><div class="reminder-scanner-video"></div><button type="button">Annulla</button></div>';
+      panel.querySelector(".reminder-scanner-video").appendChild(video);
+      document.body.appendChild(panel);
+      const stop=()=>{stream.getTracks().forEach(t=>t.stop());panel.remove();};
+      panel.querySelector("button").onclick=stop;
+      let active=true;
+      const loop=async()=>{
+        if(!active||!document.body.contains(panel))return;
+        try{
+          const codes=await detector.detect(video);
+          if(codes&&codes.length){
+            active=false;
+            const code=codes[0].rawValue;
+            stop();
+            await addReminderByBarcode(code);
+            return;
+          }
+        }catch(e){}
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }catch(e){
+      alert("Impossibile usare la fotocamera. Verifica il permesso e riprova.");
+    }
+  };
+  $("scanReminderBtn").onclick=scanReminderBarcode;
   $("remindersBtn").onclick=()=>{renderReminders();open("remindersPanel");};
   $("closeReminders").onclick=$("closeRemindersBtn").onclick=()=>close("remindersPanel");
   $("addReminderBtn").onclick=()=>{renderReminderLibrary("");$("reminderProductSearch").value="";open("reminderProductPanel");};
