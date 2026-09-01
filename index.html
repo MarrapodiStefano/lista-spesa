@@ -181,6 +181,20 @@
       </div>
     </section>
 
+    <section class="purchase-edit-panel" id="shoppingActionPanel" aria-hidden="true">
+      <div class="panel-backdrop" id="closeShoppingAction"></div>
+      <div class="panel-sheet shopping-action-sheet">
+        <div class="panel-handle"></div>
+        <div class="panel-header">
+          <div><p class="eyebrow">PRODOTTO NON DISPONIBILE</p><h1 id="shoppingActionName">Prodotto</h1></div>
+          <button class="close-btn" id="closeShoppingActionBtn" type="button">×</button>
+        </div>
+        <p class="shopping-action-help">Cosa vuoi fare con questo prodotto?</p>
+        <button class="shopping-action-reminder" id="moveShoppingToReminderBtn" type="button">🔔 Sposta nel Promemoria</button>
+        <button class="shopping-action-delete" id="deleteShoppingItemBtn" type="button">🗑️ Elimina dalla spesa</button>
+      </div>
+    </section>
+
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
   <script src="js/app.js?v=47"></script>
