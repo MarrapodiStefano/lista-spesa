@@ -1,11 +1,11 @@
-const CACHE_NAME = "lista-spesa-offline-v55";
+const CACHE_NAME = "lista-spesa-offline-v56";
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./css/style.css?v=55",
-  "./js/app.js?v=55",
-  "./manifest.json?v=55"
+  "./css/style.css?v=56",
+  "./js/app.js?v=56",
+  "./manifest.json?v=56"
 ];
 
 self.addEventListener("install", event => {
