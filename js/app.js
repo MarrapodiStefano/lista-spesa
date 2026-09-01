@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=57", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=58", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -443,6 +443,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderShopping();
   };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
+  $("productsLibraryBtn").onclick=()=>{
+    $("productSearch").value="";
+    renderLibrary("");
+    open("productPanel");
+  };
   $("backHomeBtn").onclick=()=>{renderHomeCurrentShopping();$("shoppingScreen").hidden=true;$("homeScreen").hidden=false;};
   $("finishShoppingBtn").onclick=finishShopping;
   $("historyBtn").onclick=()=>{renderHistory();open("historyPanel");};
