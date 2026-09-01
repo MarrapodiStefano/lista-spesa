@@ -1000,3 +1000,33 @@ body{
 
 /* V1.6.16 — Mantiene lo swipe orizzontale affidabile su iPhone/Safari */
 .shopping-item{touch-action:pan-y;}
+
+
+/* V1.6.17 — Schermata spesa compatta: niente spazio vuoto artificiale */
+.shopping-screen.app-screen{
+  height:auto;
+  min-height:100dvh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  display:block;
+  padding-bottom:max(16px,env(safe-area-inset-bottom));
+}
+.shopping-screen .product-list{
+  display:block;
+  flex:none;
+  min-height:0;
+  overflow:visible;
+  padding:0 0 12px;
+}
+.shopping-screen .shopping-section{
+  display:grid;
+  align-content:start;
+  gap:10px;
+}
+.shopping-screen .shopping-section + .shopping-section{
+  margin-top:18px;
+}
+.shopping-screen .shopping-bottom-bar{
+  position:static;
+  margin-top:0;
+}
