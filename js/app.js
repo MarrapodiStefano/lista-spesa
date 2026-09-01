@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=40", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=42", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -276,11 +276,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const date=$("newShoppingDate").value;
     if(!store||!date)return;
     const finalName=name||"La mia spesa";
+    const fromReminders=$("newShoppingPanel").dataset.fromReminders==="1";
+    const selectedReminders=fromReminders?selectedReminderItems():[];
+    if(fromReminders && (state.currentShopping.length||state.purchasedShopping.length)){
+      if(!confirm("Creando una nuova spesa, la lista attuale verrà sostituita dalla nuova lista. Vuoi continuare?"))return;
+    }
     state.currentShoppingName=finalName;
     state.currentShoppingStore=store;
     state.currentShoppingDate=date;
     state.currentShopping=[];
     state.purchasedShopping=[];
+    if(fromReminders){
+      selectedReminders.forEach(p=>{
+        const qty=Math.max(1,parseInt(p.reminderQuantity,10)||1);
+        state.currentShopping.push({...p,pieces:qty,_shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)});
+      });
+      state.reminders=state.reminders.filter(p=>!selectedReminderIds.has(p.id));
+      delete $("newShoppingPanel").dataset.fromReminders;
+      finishReminderSelection();
+    }
     save();
     close("newShoppingPanel");
     $("homeScreen").hidden=true;$("shoppingScreen").hidden=false;
@@ -560,11 +574,59 @@ document.addEventListener("DOMContentLoaded", () => {
   let reminderSelectionMode=false;
   const selectedReminderIds=new Set();
 
+  const selectedReminderItems=()=>state.reminders.filter(p=>selectedReminderIds.has(p.id));
+  const refreshReminderMoveButton=()=>{
+    const btn=$("moveSelectedReminderBtn");
+    if(!btn)return;
+    const count=selectedReminderIds.size;
+    btn.hidden=!reminderSelectionMode;
+    btn.textContent=count ? "🛒 Sposta nella spesa ("+count+")" : "🛒 Sposta nella spesa";
+    btn.disabled=!count;
+  };
+  const finishReminderSelection=()=>{
+    reminderSelectionMode=false;
+    selectedReminderIds.clear();
+    updateReminderSelectButton();
+    refreshReminderMoveButton();
+    renderReminders();
+  };
+  const moveSelectedIntoCurrentShopping=()=>{
+    const selected=selectedReminderItems();
+    if(!selected.length)return;
+    selected.forEach(p=>{
+      const qty=Math.max(1,parseInt(p.reminderQuantity,10)||1);
+      const existing=state.currentShopping.find(x=>x.id===p.id);
+      if(existing){
+        existing.pieces=Math.max(1,parseInt(existing.pieces,10)||0)+qty;
+        if(p.price!==""&&p.price!==undefined)existing.price=p.price;
+      }else{
+        state.currentShopping.push({...p,pieces:qty,_shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)});
+      }
+    });
+    state.reminders=state.reminders.filter(p=>!selectedReminderIds.has(p.id));
+    save();
+    finishReminderSelection();
+    renderShopping();
+    close("reminderTransferPanel");
+    alert("✓ Prodotti spostati nella spesa.");
+  };
+  const moveSelectedIntoNewShopping=()=>{
+    const selected=selectedReminderItems();
+    if(!selected.length)return;
+    close("reminderTransferPanel");
+    $("newShoppingPanel").dataset.fromReminders="1";
+    $("newShoppingForm").reset();
+    $("newShoppingDate").value=todayISO();
+    $("newShoppingCustomStoreWrap").hidden=true;
+    open("newShoppingPanel");
+  };
+
   const updateReminderSelectButton=()=>{
     const btn=$("reminderSelectBtn");
     if(!btn)return;
     btn.textContent=reminderSelectionMode ? "Fine" : "✓ Seleziona";
     btn.classList.toggle("is-active",reminderSelectionMode);
+    refreshReminderMoveButton();
   };
 
   const renderReminders=()=>{
@@ -586,6 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(selectedReminderIds.has(p.id))selectedReminderIds.delete(p.id);
         else selectedReminderIds.add(p.id);
         selectControl.classList.toggle("is-selected",selectedReminderIds.has(p.id));
+        refreshReminderMoveButton();
       };
       bindReminderPress(info,p.id);
       info.addEventListener("click",e=>{
@@ -636,8 +699,23 @@ document.addEventListener("DOMContentLoaded", () => {
     reminderSelectionMode=!reminderSelectionMode;
     if(!reminderSelectionMode)selectedReminderIds.clear();
     updateReminderSelectButton();
+    refreshReminderMoveButton();
     renderReminders();
   };
+  $("moveSelectedReminderBtn").onclick=()=>{
+    if(!selectedReminderIds.size)return;
+    const count=selectedReminderIds.size;
+    $("reminderTransferCount").textContent=count+(count===1?" prodotto selezionato":" prodotti selezionati")+" verr"+(count===1?"à":"anno")+" spostati dal Promemoria.";
+    const meta=[];
+    if(state.currentShoppingStore)meta.push(state.currentShoppingStore);
+    if(state.currentShoppingDate)meta.push(state.currentShoppingDate.split("-").reverse().join("/"));
+    if(state.currentShoppingName&&state.currentShoppingName!=="La mia spesa")meta.push(state.currentShoppingName);
+    $("transferCurrentMeta").textContent=meta.length?meta.join(" · "):"Aggiungi alla lista già aperta";
+    open("reminderTransferPanel");
+  };
+  $("closeReminderTransfer").onclick=$("closeReminderTransferBtn").onclick=()=>close("reminderTransferPanel");
+  $("transferToCurrentBtn").onclick=moveSelectedIntoCurrentShopping;
+  $("transferToNewBtn").onclick=moveSelectedIntoNewShopping;
   $("remindersBtn").onclick=()=>{reminderSelectionMode=false;selectedReminderIds.clear();updateReminderSelectButton();renderReminders();open("remindersPanel");};
   $("closeReminders").onclick=$("closeRemindersBtn").onclick=()=>close("remindersPanel");
   $("addReminderBtn").onclick=()=>{renderReminderLibrary("");$("reminderProductSearch").value="";open("reminderProductPanel");};
