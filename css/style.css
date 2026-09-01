@@ -285,3 +285,76 @@ button {
 .scan-product-btn{width:100%;min-height:62px;border:0;border-radius:20px;background:#17181c;color:#fff;font-size:17px;font-weight:700;margin-top:24px}.scan-note{margin:10px 4px 4px;color:var(--muted);font-size:14px;line-height:1.35}.scanner-panel{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;visibility:hidden;pointer-events:none}.scanner-panel.is-open{visibility:visible;pointer-events:auto}.scanner-panel.is-open .panel-sheet{transform:translateY(0)}.scanner-sheet{min-height:min(72dvh,720px)}.scanner-help{color:var(--muted);line-height:1.4;margin:22px 0 16px}#barcodeReader{overflow:hidden;border-radius:22px;background:#111;min-height:260px}.scanner-status{text-align:center;margin-top:18px;font-weight:650}.scanner-panel.is-open .panel-backdrop{background:rgba(0,0,0,.28)}
 /* Scanner V1.4.4: mostra l'intero flusso della fotocamera senza ritagli/zoom visivi */
 #barcodeReader video{display:block;width:100%;height:360px;object-fit:contain;background:#111;transform:none}
+
+
+/* V1.4.6 — Libreria: elenco realmente scorrevole su iPhone */
+.product-sheet,
+.form-sheet{
+  max-height:calc(100dvh - max(8px, env(safe-area-inset-top)));
+  overflow:hidden;
+}
+
+.product-sheet{
+  height:min(78dvh,760px);
+  min-height:0;
+}
+
+.library-list{
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding-bottom:16px;
+}
+
+.library-item{
+  align-items:center;
+}
+
+.library-item-info{
+  min-width:0;
+  flex:1;
+}
+
+.library-item-info strong{
+  display:block;
+  line-height:1.15;
+}
+
+.library-actions{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+
+.library-item .library-add-btn{
+  margin-left:0;
+  border:0;
+  border-radius:12px;
+  padding:10px 13px;
+  background:#ededf0;
+  color:#4673b6;
+  font-weight:700;
+}
+
+.library-item .library-edit-btn{
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:12px;
+  background:#f3f3f5;
+  color:var(--text);
+  font-size:22px;
+  line-height:1;
+}
+
+.form-sheet{
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.form-sheet form{
+  padding-bottom:20px;
+}
