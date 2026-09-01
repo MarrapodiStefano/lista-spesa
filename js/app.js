@@ -37,6 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
   if(!Array.isArray(state.purchasedShopping)) state.purchasedShopping=[];
+  const migrateProductFields=items=>items.forEach(p=>{
+    if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
+    if(p.pieces===undefined||p.pieces===null) p.pieces=1;
+  });
+  migrateProductFields(state.products);
+  migrateProductFields(state.currentShopping);
+  migrateProductFields(state.purchasedShopping);
   const ensureShoppingIds=items=>items.forEach((p,i)=>{if(!p._shoppingId)p._shoppingId="shop-"+Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,8);});
   ensureShoppingIds(state.currentShopping);
   ensureShoppingIds(state.purchasedShopping);
@@ -49,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const shoppingItem=(p,acquired)=>'<div class="shopping-item'+(acquired?' is-acquired':'')+'" data-shopping-id="'+p._shoppingId+'" data-acquired="'+(acquired?'1':'0')+'">'+
       productImage(p)+
       '<div class="shopping-item-name">'+p.name+
-        '<small>Quantità: '+(p.quantity||1)+'</small>'+
+        '<small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+'</small>'+
         '<span class="shopping-item-hint">'+(acquired?'Swipe per rimetterlo da acquistare':'Swipe per segnare come acquistato · Tieni premuto per rimuovere')+'</span>'+
       '</div>'+
       '<div class="shopping-item-price">'+(p.price!==""?euro(p.price):"—")+'</div>'+
@@ -117,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const pendingCount=state.currentShopping.length;
     const purchasedCount=state.purchasedShopping.length;
     const count=pendingCount+purchasedCount;
-    const cartTotal=state.purchasedShopping.reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.quantity)||1)),0);
+    const cartTotal=state.purchasedShopping.reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
     $("shoppingTotal").textContent=euro(cartTotal);
     $("cartTotal").textContent=euro(cartTotal);
     $("cartCount").textContent=purchasedCount;
@@ -137,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("libraryList").innerHTML=products.length
       ?products.map(p=>'<div class="library-item">'+
           productImage(p)+
-          '<div class="library-item-info"><strong>'+p.name+'</strong><small>Quantità: '+(p.quantity||1)+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
+          '<div class="library-item-info"><strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
           '<div class="library-actions"><button class="library-add-btn" data-id="'+p.id+'">Aggiungi</button><button class="library-edit-btn" data-edit-id="'+p.id+'" aria-label="Modifica '+p.name+'">✎</button></div>'+
         '</div>').join("")
       :'<div class="empty-state"><span>📦</span><h2>Nessun prodotto</h2><p>Aggiungi il primo prodotto alla tua libreria.</p></div>';
@@ -155,7 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
       editingProductId=p.id;
       $("productName").value=p.name||"";
       $("productPrice").value=p.price||"";
-      $("productQuantity").value=p.quantity||1;
+      $("productWeight").value=p.weight??p.quantity??"";
+      $("productPieces").value=p.pieces||1;
       pendingPhoto=p.photo||"";
       $("newProductForm").dataset.barcode=p.barcode||"";
       $("newProductForm").dataset.editing="1";
@@ -175,7 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     delete form.dataset.barcode;
     delete form.dataset.editing;
-    $("productQuantity").value=1;
+    $("productWeight").value="";
+    $("productPieces").value=1;
     $("photoPreview").hidden=true;
     $("newProductPanel").querySelector(".eyebrow").textContent="NUOVO PRODOTTO";
     $("newProductPanel").querySelector(".panel-header h1").textContent="Aggiungi alla libreria";
@@ -212,7 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if(local){
         await stopScanner(); close("scannerPanel");
         $("productName").value=local.name||"";
-        $("productQuantity").value=local.quantity||1;
+        $("productWeight").value=local.weight??local.quantity??"";
+        $("productPieces").value=local.pieces||1;
         $("productPrice").value=local.price||"";
         pendingPhoto=local.photo||"";
         if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
@@ -226,7 +236,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const p=data.product;
         $("productName").value=p.product_name||p.brands||"";
         const qty=(p.quantity||"").match(/\d+/);
-        if(qty)$("productQuantity").value=qty[0];
+        if(qty)$("productWeight").value=qty[0];
+        $("productPieces").value=1;
         pendingPhoto=p.image_front_url||p.image_url||"";
         if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
       }else alert("Codice letto correttamente, ma il prodotto non è presente nel database online. Puoi completarlo manualmente.");
@@ -252,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
     video.srcObject=scannerStream;
     await video.play();
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.10 pronto. Puoi tenere il codice anche ruotato.";
+    $("scannerStatus").textContent="Scanner V1.4.11 pronto. Puoi tenere il codice anche ruotato.";
 
     let lastScan=0;
     const scanFrame=async now=>{
@@ -293,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     scannerRunning=true;
-    $("scannerStatus").textContent="Scanner V1.4.10 pronto. Inquadra il codice da qualsiasi orientamento.";
+    $("scannerStatus").textContent="Scanner V1.4.11 pronto. Inquadra il codice da qualsiasi orientamento.";
   };
 
   const startScanner=async()=>{
@@ -335,14 +346,16 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const name=$("productName").value.trim();
     const price=$("productPrice").value.trim().replace(",",".");
-    const quantity=Math.max(1,parseInt($("productQuantity").value,10)||1);
+    const weight=$("productWeight").value.trim().replace(",",".");
+    const pieces=Math.max(1,parseInt($("productPieces").value,10)||1);
     if(!name)return;
 
     const product={
       id:editingProductId||Date.now().toString(),
       name,
       price,
-      quantity,
+      weight,
+      pieces,
       photo:pendingPhoto,
       barcode:e.target.dataset.barcode||""
     };
