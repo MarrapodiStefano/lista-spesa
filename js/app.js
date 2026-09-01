@@ -490,52 +490,48 @@
     }
 
     function attachSwipe(element, id, location) {
+        // Su iPhone ascoltiamo il gesto direttamente sul pulsante interno,
+        // che è la parte effettivamente toccata dall'utente.
+        const target = element.querySelector(".product-content") || element;
+
         let startX = 0;
         let startY = 0;
         let currentX = 0;
-        let dragging = false;
-        let moved = false;
+        let swiping = false;
 
-        const begin = (x, y) => {
-            startX = x;
-            startY = y;
-            currentX = x;
-            dragging = true;
-            moved = false;
-        };
+        target.addEventListener("touchstart", (event) => {
+            const touch = event.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            currentX = startX;
+            swiping = true;
+        }, { passive: true });
 
-        const move = (x, y) => {
-            if (!dragging) return;
+        target.addEventListener("touchmove", (event) => {
+            if (!swiping) return;
 
-            const deltaX = x - startX;
-            const deltaY = y - startY;
+            const touch = event.touches[0];
+            const deltaX = touch.clientX - startX;
+            const deltaY = touch.clientY - startY;
 
-            // Se il gesto è principalmente verticale, lasciamo scorrere la pagina.
-            if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 10) {
-                return;
-            }
+            // Se il gesto è soprattutto verticale, l'utente sta scorrendo la pagina.
+            if (Math.abs(deltaY) > Math.abs(deltaX)) return;
 
-            currentX = x;
+            currentX = touch.clientX;
 
-            if (Math.abs(deltaX) > 10) {
-                moved = true;
-            }
-
-            // Lo swipe verso sinistra funziona in entrambe le sezioni.
             if (deltaX < 0) {
                 element.style.transform =
                     "translateX(" + Math.max(deltaX, -120) + "px)";
             }
-        };
+        }, { passive: true });
 
-        const finish = () => {
-            if (!dragging) return;
+        target.addEventListener("touchend", () => {
+            if (!swiping) return;
+            swiping = false;
 
-            dragging = false;
-            const delta = currentX - startX;
+            const deltaX = currentX - startX;
 
-            if (delta < -55) {
-                element.style.transition = "transform 0.15s ease";
+            if (deltaX < -40) {
                 element.style.transform = "translateX(-120%)";
 
                 setTimeout(() => {
@@ -546,53 +542,14 @@
                     }
                 }, 150);
             } else {
-                element.style.transition = "transform 0.15s ease";
                 element.style.transform = "";
-
-                setTimeout(() => {
-                    element.style.transition = "";
-                }, 160);
             }
-        };
-
-        // Safari/iPhone: usiamo esplicitamente gli eventi touch,
-        // più affidabili per questo tipo di gesto.
-        element.addEventListener("touchstart", (event) => {
-            const touch = event.touches[0];
-            begin(touch.clientX, touch.clientY);
         }, { passive: true });
 
-        element.addEventListener("touchmove", (event) => {
-            const touch = event.touches[0];
-            move(touch.clientX, touch.clientY);
+        target.addEventListener("touchcancel", () => {
+            swiping = false;
+            element.style.transform = "";
         }, { passive: true });
-
-        element.addEventListener("touchend", finish, { passive: true });
-        element.addEventListener("touchcancel", finish, { passive: true });
-
-        // Supporto anche per computer e altri dispositivi.
-        element.addEventListener("pointerdown", (event) => {
-            if (event.pointerType === "touch") return;
-            begin(event.clientX, event.clientY);
-        });
-
-        element.addEventListener("pointermove", (event) => {
-            if (event.pointerType === "touch") return;
-            move(event.clientX, event.clientY);
-        });
-
-        element.addEventListener("pointerup", (event) => {
-            if (event.pointerType === "touch") return;
-            finish();
-        });
-
-        // Evita che un tap dopo uno swipe apra il dettaglio del prodotto.
-        element.addEventListener("click", (event) => {
-            if (moved) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        }, true);
     }
 
     function renameShopping() {
