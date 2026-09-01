@@ -1627,3 +1627,147 @@ body{
   .history-search-icon{width:46px;flex-basis:46px;font-size:27px}
   .history-search-wrap input{font-size:16px}
 }
+
+
+/* V1.6.32 — Storico compatto e armonizzato */
+.history-panel .history-sheet{
+  padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
+}
+.history-full-header{
+  grid-template-columns:46px 1fr 46px;
+  min-height:58px;
+  gap:10px;
+  margin:0 0 12px;
+}
+.history-full-header h1{
+  font-size:25px;
+  letter-spacing:-.035em;
+}
+.history-back-btn,
+.history-close-btn{
+  width:46px;
+  height:46px;
+  border-radius:15px;
+}
+.history-back-btn{font-size:36px}
+.history-close-btn{font-size:28px}
+
+/* Ricerca: una barra pulita, larga e della stessa famiglia visiva dei controlli */
+.history-search-wrap{
+  width:100%;
+  min-height:48px;
+  height:48px;
+  margin:0 0 8px;
+  border-radius:15px;
+}
+.history-search-icon{
+  width:44px;
+  flex-basis:44px;
+  font-size:24px;
+  transform:none;
+}
+.history-search-wrap input{
+  height:46px;
+  font-size:16px;
+  padding:0 8px 0 0;
+}
+.history-search-clear{
+  width:34px;
+  height:34px;
+  margin-right:6px;
+  font-size:22px;
+}
+
+/* Ordinamento più discreto e allineato alla barra di ricerca */
+.history-sort-bar{
+  grid-template-columns:auto minmax(0,1fr);
+  gap:8px;
+  margin:0 0 12px;
+}
+.history-sort-bar>span,
+.history-sort-bar select{
+  min-height:46px;
+  height:46px;
+  border-radius:15px;
+  font-size:15px;
+}
+.history-sort-bar>span{
+  padding:0 13px;
+  background:#f5f6f7;
+  font-weight:600;
+}
+.history-sort-bar select{
+  padding:0 34px 0 14px;
+}
+
+/* Schede più compatte: negozio e data restano subito leggibili */
+.history-list{
+  gap:8px;
+  padding:0 1px 18px;
+}
+.history-card{
+  border-radius:19px;
+}
+.history-card-summary{
+  min-height:88px;
+  padding:13px 14px;
+  grid-template-columns:46px minmax(0,1fr) auto 18px;
+  gap:11px;
+}
+.history-store-icon{
+  width:46px;
+  height:46px;
+  font-size:22px;
+}
+.history-card-copy{
+  gap:3px;
+}
+.history-card-copy strong{
+  font-size:18px;
+  line-height:1.15;
+}
+.history-card-copy small{
+  font-size:14px;
+  line-height:1.2;
+}
+.history-card-total{
+  font-size:18px;
+}
+.history-chevron{
+  font-size:23px;
+}
+
+/* Dettagli coerenti con la nuova densità */
+.history-products{
+  margin:0 14px 14px;
+}
+.history-product-row{
+  min-height:60px;
+  padding:9px 2px;
+}
+.history-product-row strong{font-size:15px}
+.history-product-row small{font-size:12px}
+.history-product-row b{font-size:15px}
+.history-grand-total{
+  min-height:54px;
+  padding:10px 2px 0;
+  font-size:16px;
+}
+.history-grand-total b{font-size:19px}
+.history-search-date{
+  min-height:48px;
+  padding:9px 2px;
+  font-size:13px;
+}
+.history-search-date strong{font-size:15px}
+
+@media(max-width:390px){
+  .history-panel .history-sheet{padding-left:14px;padding-right:14px}
+  .history-full-header h1{font-size:23px}
+  .history-sort-bar>span{padding:0 10px;font-size:14px}
+  .history-sort-bar select{font-size:14px;padding-left:11px}
+  .history-card-summary{grid-template-columns:44px minmax(0,1fr) auto 17px;gap:9px}
+  .history-store-icon{width:44px;height:44px;font-size:21px}
+  .history-card-copy strong{font-size:17px}
+  .history-card-total{font-size:17px}
+}
