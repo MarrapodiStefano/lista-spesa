@@ -996,3 +996,7 @@ body{
 .shopping-section{
   align-content:start;
 }
+
+
+/* V1.6.16 — Mantiene lo swipe orizzontale affidabile su iPhone/Safari */
+.shopping-item{touch-action:pan-y;}
