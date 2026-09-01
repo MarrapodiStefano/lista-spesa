@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=33", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=34", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -153,11 +153,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderShopping=()=>{
     const shoppingMeta=$("shoppingMeta");
-    const shoppingInfo=[];
-    if(state.currentShoppingStore) shoppingInfo.push(state.currentShoppingStore);
-    if(state.currentShoppingDate) shoppingInfo.push(state.currentShoppingDate.split("-").reverse().join("/"));
-    if(state.currentShoppingName && state.currentShoppingName!=="La mia spesa") shoppingInfo.push(state.currentShoppingName);
-    if(shoppingMeta) shoppingMeta.textContent=shoppingInfo.join(" · ");
+    if(shoppingMeta){
+      const store=state.currentShoppingStore||"";
+      const date=state.currentShoppingDate?state.currentShoppingDate.split("-").reverse().join("/"):"";
+      const name=(state.currentShoppingName && state.currentShoppingName!=="La mia spesa")?state.currentShoppingName:"";
+      shoppingMeta.innerHTML=
+        (store?'<span class="shopping-meta-store">'+store+'</span>':"")+
+        (date?'<span class="shopping-meta-date">'+date+'</span>':"")+
+        (name?'<span class="shopping-meta-name">'+name+'</span>':"");
+    }
     const list=$("shoppingList");
     const pendingCount=state.currentShopping.length;
     const purchasedCount=state.purchasedShopping.length;
