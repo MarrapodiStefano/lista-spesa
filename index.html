@@ -57,7 +57,7 @@
     <section class="new-product-panel" id="newProductPanel" aria-hidden="true">
       <div class="panel-backdrop" id="closeNewProduct"></div>
       <div class="panel-sheet form-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">NUOVO PRODOTTO</p><h1>Aggiungi alla libreria</h1></div><button class="close-btn" id="closeNewProductBtn" type="button">×</button></div>
-        <form id="newProductForm"><label>Nome prodotto<input id="productName" required autocomplete="off" placeholder="Es. Latte"></label><label>Prezzo abituale <span class="optional">(facoltativo)</span><input id="productPrice" inputmode="decimal" placeholder="Es. 1,50"></label><button class="save-product-btn" type="submit">Salva prodotto</button></form>
+        <form id="newProductForm"><label>Nome prodotto<input id="productName" required autocomplete="off" placeholder="Es. Latte"></label><label>Prezzo abituale <span class="optional">(facoltativo)</span><input id="productPrice" inputmode="decimal" placeholder="Es. 1,50"></label><label>Quantità abituale<input id="productQuantity" type="number" min="1" step="1" value="1" inputmode="numeric"></label><label>Foto prodotto <span class="optional">(facoltativa)</span><input id="productPhoto" type="file" accept="image/*"></label><div class="photo-preview" id="photoPreview" hidden><img id="photoPreviewImg" alt="Anteprima foto prodotto"></div><button class="save-product-btn" type="submit">Salva prodotto</button></form>
       </div>
     </section>
   </main>
