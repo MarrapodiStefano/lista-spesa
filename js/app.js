@@ -419,32 +419,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderLibrary=(q="")=>{
     const products=state.products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
     $("libraryList").innerHTML=products.length
-      ?products.map(p=>'<div class="library-item">'+
-          productImage(p)+
-          '<div class="library-item-info"><strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
-          '<div class="library-actions"><button class="library-add-btn" data-id="'+p.id+'">Aggiungi</button><button class="library-edit-btn" data-edit-id="'+p.id+'" aria-label="Modifica '+p.name+'">✎</button></div>'+
-        '</div>').join("")
+      ?products.map(p=>{
+          const alreadyToBuy=state.currentShopping.some(x=>x.id===p.id);
+          const alreadyInCart=state.purchasedShopping.some(x=>x.id===p.id);
+          const exists=alreadyToBuy||alreadyInCart;
+          return '<div class="library-item">'+
+            productImage(p)+
+            '<div class="library-item-info"><strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
+            '<div class="library-actions"><button class="add-to-list shopping-add-control '+(exists?'is-added':'')+'" data-id="'+p.id+'" type="button" aria-label="'+(exists?'Già aggiunto':'Aggiungi '+p.name)+'">'+(exists?"✓":"＋")+'</button><button class="library-edit-btn" data-edit-id="'+p.id+'" aria-label="Modifica '+p.name+'">✎</button></div>'+
+          '</div>';
+        }).join("")
       :'<div class="empty-state"><span>📦</span><h2>Nessun prodotto</h2><p>Aggiungi il primo prodotto alla tua libreria.</p></div>';
 
     [...$("libraryList").querySelectorAll("button[data-id]")].forEach(b=>b.onclick=()=>{
       const p=state.products.find(x=>x.id===b.dataset.id);
       if(!p)return;
 
-      // Evita duplicati: lo stesso prodotto può stare una sola volta
-      // nella spesa, sia "Da acquistare" sia nel "Carrello".
       const alreadyToBuy=state.currentShopping.some(x=>x.id===p.id);
       const alreadyInCart=state.purchasedShopping.some(x=>x.id===p.id);
       if(alreadyToBuy||alreadyInCart){
         const where=alreadyToBuy?"nella lista da acquistare":"nel Carrello";
         alert('⚠️ "'+p.name+'" è già presente '+where+'.');
-        // Dopo l'avviso azzeriamo la ricerca, così non resta il testo precedente.
         $("productSearch").value="";
         renderLibrary("");
         return;
       }
 
       state.currentShopping.push({...p,_shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)});
-      save();renderShopping();close("productPanel");
+      save();
+      renderShopping();
+      // Restiamo nella libreria: il + diventa immediatamente una ✓, come nei Promemoria.
+      renderLibrary($("productSearch").value);
     });
 
     [...$("libraryList").querySelectorAll("button[data-edit-id]")].forEach(b=>b.onclick=()=>{
@@ -465,7 +470,6 @@ document.addEventListener("DOMContentLoaded", () => {
       $("newProductPanel").querySelector(".eyebrow").textContent="MODIFICA PRODOTTO";
       const editProductTitle=$("newProductPanel").querySelector(".panel-header h1");
       if(editProductTitle)editProductTitle.textContent="";
-      // In modifica non serve la scansione: resta disponibile solo quando si crea un nuovo prodotto.
       const scanBtn=$("scanProductBtn");
       const scanNote=document.querySelector("#newProductPanel .scan-note");
       if(scanBtn)scanBtn.hidden=true;
