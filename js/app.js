@@ -465,7 +465,7 @@ document.addEventListener("DOMContentLoaded", () => {
       $("productPrice").value=p.price||"";
       $("productWeight").value=p.weight??p.quantity??"";
       $("productPieces").value=p.pieces||1;
-      const knownStores=["Conad","Triscount","Alimentarista","Todis"];
+      const knownStores=["Conad","Triscount","Alimentarista","Todis","Garanzia"];
       $("productStore").value=knownStores.includes(p.store) ? p.store : (p.store ? "Altro" : "");
       $("productCustomStore").value=knownStores.includes(p.store)||!p.store ? "" : p.store;
       $("customStoreWrap").hidden=$("productStore").value!=="Altro";
