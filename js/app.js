@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=76", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=78", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -573,6 +573,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderShopping();
   };
   $("homeNewProductBtn").onclick=()=>{resetProductForm();open("newProductPanel");};
+  $("guideBtn").onclick=()=>open("guidePanel");
+  $("closeGuideBtn").onclick=()=>close("guidePanel");
   $("productsLibraryBtn").onclick=()=>{
     const panel=$("productPanel");
     panel.classList.add("library-mode");
