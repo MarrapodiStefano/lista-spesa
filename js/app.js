@@ -1030,8 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const payload=toBase64Url(buildSharedReminder());
     const url=new URL(window.location.href);
     url.search="";
-    url.hash="";
-    url.searchParams.set("promemoria",payload);
+    url.hash="promemoria="+payload;
     const message="Ti ho inviato un promemoria della spesa. Apri questo link con La Mia Spesa per importare i prodotti:\n\n"+url.toString();
     try{
       // WhatsApp apre la scelta di un contatto e prepara già il messaggio.
@@ -1045,8 +1044,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const cleanSharedReminderUrl=()=>{
     const url=new URL(window.location.href);
-    if(!url.searchParams.has("promemoria"))return;
     url.searchParams.delete("promemoria");
+    if(String(url.hash||"").replace(/^#/,"").startsWith("promemoria="))url.hash="";
     history.replaceState({},document.title,url.pathname+(url.search||"")+url.hash);
   };
 
@@ -1082,21 +1081,26 @@ document.addEventListener("DOMContentLoaded", () => {
     else alert("Tutti i prodotti ricevuti erano già presenti nel tuo Promemoria.");
   };
 
+  // Legge sia i vecchi link con ?promemoria= sia i nuovi link con #promemoria=.
+  const getSharedReminderPayload=()=>{
+    const queryValue=new URLSearchParams(window.location.search).get("promemoria");
+    if(queryValue)return queryValue;
+    const hash=String(window.location.hash||"").replace(/^#/,"");
+    return new URLSearchParams(hash).get("promemoria")||"";
+  };
+
   const showSharedReminderImport=()=>{
-    const params=new URLSearchParams(window.location.search);
-    const encoded=params.get("promemoria");
+    const encoded=getSharedReminderPayload();
     if(!encoded)return;
     try{
       const payload=fromBase64Url(encoded);
       if(!payload||payload.v!==1||!Array.isArray(payload.products)||!payload.products.length){
         throw new Error("Payload non valido");
       }
+
+      // Importazione automatica: il destinatario non deve premere alcun altro pulsante.
       pendingSharedReminder=payload;
-      $("reminderImportNote").textContent="Hai ricevuto "+payload.products.length+(payload.products.length===1?" prodotto":" prodotti")+" da aggiungere al tuo Promemoria.";
-      $("reminderImportList").innerHTML=payload.products.slice(0,8).map(p=>
-        '<div><strong>'+String(p.name||"").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</strong><small>'+Math.max(1,parseInt(p.reminderQuantity,10)||1)+(Math.max(1,parseInt(p.reminderQuantity,10)||1)===1?" pezzo":" pezzi")+(p.store?" · "+String(p.store).replace(/</g,"&lt;").replace(/>/g,"&gt;"):"")+'</small></div>'
-      ).join("")+(payload.products.length>8?'<p class="reminder-import-more">+ altri '+(payload.products.length-8)+' prodotti</p>':"");
-      open("reminderImportPanel");
+      importSharedReminder();
     }catch(error){
       console.error("Importazione Promemoria:",error);
       cleanSharedReminderUrl();
