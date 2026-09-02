@@ -7,9 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=70">
+  <link rel="manifest" href="manifest.json?v=71">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=70">
+  <link rel="stylesheet" href="css/style.css?v=71">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
@@ -18,7 +18,7 @@
       <header class="home-header">
         <div>
           <h1>La Mia Spesa</h1>
-          <p>V1.6.36</p>
+          <p>V1.6.37</p>
         </div>
         <div class="home-groceries" aria-hidden="true"><span>🥖</span><span>🥕</span><span>🍅</span><span>🥬</span></div>
       </header>
@@ -134,7 +134,19 @@
       <div class="panel-sheet reminders-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">PROMEMORIA</p></div><button class="close-btn" id="closeRemindersBtn" type="button">×</button></div>
       <div class="reminders-list" id="remindersList"></div>
       <div class="reminders-empty" id="remindersEmpty"><span class="empty-icon">🔔</span><h2>Nessun prodotto da ricordare</h2><p>Aggiungi un prodotto dalla libreria oppure creane uno nuovo.</p></div>
-      <div class="reminder-actions"><button class="scan-product-btn reminder-scan-btn" id="scanReminderBtn" type="button">📷 Scansiona codice</button><button class="new-product-btn" id="addReminderBtn" type="button">＋ Aggiungi prodotto</button><button class="reminder-select-btn" id="reminderSelectBtn" type="button">✓ Seleziona</button><button class="reminder-move-btn" id="moveSelectedReminderBtn" type="button" hidden>🛒 Sposta nella spesa</button></div></div>
+      <div class="reminder-actions"><button class="scan-product-btn reminder-scan-btn" id="scanReminderBtn" type="button">📷 Scansiona codice</button><button class="new-product-btn" id="addReminderBtn" type="button">＋ Aggiungi prodotto</button><button class="reminder-share-btn" id="shareReminderBtn" type="button">📤 Condividi promemoria</button><button class="reminder-select-btn" id="reminderSelectBtn" type="button">✓ Seleziona</button><button class="reminder-move-btn" id="moveSelectedReminderBtn" type="button" hidden>🛒 Sposta nella spesa</button></div></div>
+    </section>
+
+    <section class="reminder-import-panel" id="reminderImportPanel" aria-hidden="true">
+      <div class="panel-backdrop"></div>
+      <div class="panel-sheet reminder-import-sheet">
+        <div class="panel-header"><div><p class="eyebrow">PROMEMORIA RICEVUTO</p><h1>Vuoi importarlo?</h1></div><button class="close-btn" id="closeReminderImportBtn" type="button">×</button></div>
+        <div class="reminder-import-icon">📥</div>
+        <p class="reminder-import-note" id="reminderImportNote"></p>
+        <div class="reminder-import-list" id="reminderImportList"></div>
+        <button class="reminder-import-confirm" id="confirmReminderImportBtn" type="button">✓ Importa nel mio Promemoria</button>
+        <button class="reminder-import-cancel" id="cancelReminderImportBtn" type="button">Non importare</button>
+      </div>
     </section>
 
     <section class="reminder-transfer-panel" id="reminderTransferPanel" aria-hidden="true">
@@ -261,5 +273,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=70"></script>
+  <script src="js/app.js?v=71"></script>
 </body></html>
