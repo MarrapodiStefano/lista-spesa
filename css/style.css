@@ -2056,3 +2056,102 @@ body{
   #reminderProductPanel .product-thumb-placeholder{width:46px;height:46px;flex-basis:46px}
   .reminder-add-control{width:44px !important;height:44px !important;border-radius:14px !important}
 }
+
+
+/* V1.6.37 — Condivisione Promemoria */
+.reminder-share-btn{
+  min-height:50px;
+  border:0;
+  border-radius:17px;
+  padding:0 16px;
+  background:#eef0f2;
+  color:#47515d;
+  font-size:16px;
+  font-weight:750;
+  flex:1 1 100%;
+}
+.reminder-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.reminder-share-btn:active{transform:scale(.98)}
+
+.reminder-import-panel{
+  position:fixed;
+  inset:0;
+  z-index:90;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+}
+.reminder-import-panel[aria-hidden="false"]{display:flex}
+.reminder-import-panel .panel-backdrop{display:block !important}
+.reminder-import-sheet{
+  position:relative;
+  z-index:1;
+  width:min(100%,560px);
+  max-height:88dvh;
+  overflow:auto;
+  padding:24px 22px max(24px,env(safe-area-inset-bottom));
+  border-radius:28px 28px 0 0;
+  background:#fff;
+  box-shadow:0 -10px 40px rgba(0,0,0,.16);
+}
+.reminder-import-icon{
+  width:66px;height:66px;margin:4px auto 14px;
+  display:grid;place-items:center;border-radius:22px;
+  background:#e3f0e8;font-size:31px;
+}
+.reminder-import-note{
+  margin:0 0 14px;
+  text-align:center;
+  color:#66707c;
+  line-height:1.4;
+}
+.reminder-import-list{
+  display:grid;
+  gap:7px;
+  margin:0 0 14px;
+}
+.reminder-import-list div{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:#f5f6f7;
+}
+.reminder-import-list strong{font-size:15px}
+.reminder-import-list small{font-size:12px;color:#737b85;text-align:right}
+.reminder-import-more{
+  margin:0;
+  padding:8px;
+  text-align:center;
+  color:#737b85;
+  font-size:13px;
+}
+.reminder-import-confirm,
+.reminder-import-cancel{
+  width:100%;
+  min-height:52px;
+  border-radius:17px;
+  font-size:16px;
+  font-weight:750;
+}
+.reminder-import-confirm{
+  border:0;
+  background:#287a4a;
+  color:#fff;
+}
+.reminder-import-cancel{
+  margin-top:8px;
+  border:0;
+  background:transparent;
+  color:#737b85;
+}
+@media(max-width:390px){
+  .reminder-share-btn{min-height:46px;font-size:15px}
+  .reminder-import-sheet{padding-left:18px;padding-right:18px}
+}
