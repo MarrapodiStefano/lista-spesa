@@ -1003,7 +1003,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.products.filter(p=>p.name.toLowerCase().includes(term)).forEach(p=>{
       const exists=state.reminders.some(x=>x.id===p.id);
       const item=document.createElement("div"); item.className="library-item";
-      item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'')+'</small></div><button class="add-to-list" type="button">'+(exists?"✓":"＋")+'</button>';
+      item.innerHTML=productImage(p)+'<div class="library-item-info"><strong>'+p.name+'</strong><small>'+(p.store?'Negozio: '+p.store:'')+'</small></div><button class="add-to-list reminder-add-control '+(exists?'is-added':'')+'" type="button" aria-label="'+(exists?'Già aggiunto':'Aggiungi '+p.name)+'">'+(exists?"✓":"＋")+'</button>';
       const btn=item.querySelector("button");
       btn.onclick=()=>{
         if(state.reminders.some(x=>x.id===p.id)){
