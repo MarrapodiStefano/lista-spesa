@@ -1462,13 +1462,30 @@ body{
 .history-store-icon{
   width:58px;
   height:58px;
+  flex:0 0 58px;
   border-radius:50%;
   display:grid;
   place-items:center;
-  background:linear-gradient(145deg,#3c9b5c,#1e6d3a);
   color:#fff;
-  font-size:28px;
+  background:#3c9b5c;
+  box-shadow:0 5px 14px rgba(20,24,32,.14);
 }
+.history-store-icon svg{
+  width:28px;
+  height:28px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.15;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.history-store-icon.store-conad{background:#d83232;color:#fff;}
+.history-store-icon.store-altro{background:#73777d;color:#fff;}
+.history-store-icon.store-triscount{background:#218a50;color:#fff;}
+.history-store-icon.store-alimentarista{background:#fff;color:#242a31;border:2px solid #dfe2e5;box-shadow:0 4px 12px rgba(20,24,32,.12);}
+.history-store-icon.store-todis{background:#f28b22;color:#fff;}
+.history-store-icon.store-default{background:#3c9b5c;color:#fff;}
 .history-card-copy{
   min-width:0;
   display:flex;
@@ -1546,7 +1563,7 @@ body{
 @media (max-width:390px){
   .history-full-header h1{font-size:27px}
   .history-card-summary{grid-template-columns:52px minmax(0,1fr) auto 20px;gap:11px}
-  .history-store-icon{width:52px;height:52px;font-size:25px}
+  .history-store-icon{width:52px;height:52px;flex-basis:52px}.history-store-icon svg{width:25px;height:25px}
   .history-card-copy strong{font-size:19px}
   .history-card-total{font-size:18px}
   .history-sort-bar{gap:7px}
