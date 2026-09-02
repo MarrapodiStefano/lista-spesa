@@ -2741,3 +2741,25 @@ body{
   border-radius:13px;
   font-size:14px;
 }
+
+
+/* V2.4 — Centramento perfetto dei pulsanti + e ✓ */
+.reminder-add-control,
+.shopping-add-control,
+#productPanel:not(.library-mode) .shopping-add-control{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  line-height:0 !important;
+  text-align:center !important;
+  box-sizing:border-box !important;
+}
+.reminder-add-control,
+.shopping-add-control{
+  vertical-align:middle;
+}
+.reminder-add-control.is-added,
+.shopping-add-control.is-added{
+  line-height:0 !important;
+}
