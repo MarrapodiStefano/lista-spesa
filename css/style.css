@@ -2633,3 +2633,32 @@ body{
   .guide-section h2{font-size:17px}
   .guide-section p,.guide-section li{font-size:12px}
 }
+
+
+/* V2.1 — Libreria prodotti: tap sul nome per modificare o eliminare */
+.library-name-btn{
+  min-width:0;
+  flex:1;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.library-name-btn:active{opacity:.65}
+.library-name-btn strong{display:block}
+.delete-product-btn{
+  width:100%;
+  min-height:54px;
+  margin-top:8px;
+  border:1px solid #d9534f;
+  border-radius:18px;
+  background:#fff;
+  color:#c43d38;
+  font-size:16px;
+  font-weight:750;
+}
