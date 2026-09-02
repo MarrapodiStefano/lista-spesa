@@ -276,21 +276,65 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const deleteHistoryShopping=id=>{
+    const h=(state.history||[]).find(x=>x.id===id);
+    if(!h)return;
+    const label=h.store||"questa spesa";
+    if(!confirm('🗑️ Vuoi eliminare completamente la spesa "'+label+'" dallo Storico?\n\nQuesta operazione non può essere annullata.'))return;
+    state.history=state.history.filter(x=>x.id!==id);
+    if(expandedHistoryId===id)expandedHistoryId=null;
+    save(); renderHistory();
+  };
+
+  const deleteHistoryProduct=(historyId,productIndex)=>{
+    const h=(state.history||[]).find(x=>x.id===historyId);
+    if(!h||!Array.isArray(h.products))return;
+    const p=h.products[productIndex];
+    if(!p)return;
+    if(!confirm('🗑️ Vuoi eliminare "'+p.name+'" da questa spesa?\n\nVerrà rimosso solo questo prodotto dallo Storico.'))return;
+    h.products.splice(productIndex,1);
+    if(!h.products.length){
+      state.history=state.history.filter(x=>x.id!==historyId);
+      expandedHistoryId=null;
+      save(); renderHistory();
+      alert("La spesa non conteneva altri prodotti ed è stata rimossa dallo Storico.");
+      return;
+    }
+    save(); renderHistory();
+  };
+
+  const bindHistoryLongPress=(element,callback)=>{
+    if(!element)return;
+    let timer=null;
+    const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null;}};
+    const startPress=e=>{
+      if(e.pointerType==="mouse"&&e.button!==0)return;
+      clearTimer();
+      timer=setTimeout(()=>{
+        element.classList.add("history-long-pressing");
+        if(navigator.vibrate)navigator.vibrate(35);
+        callback();
+        setTimeout(()=>element.classList.remove("history-long-pressing"),220);
+      },650);
+    };
+    element.addEventListener("pointerdown",startPress);
+    element.addEventListener("pointerup",clearTimer);
+    element.addEventListener("pointerleave",clearTimer);
+    element.addEventListener("pointercancel",clearTimer);
+    element.addEventListener("contextmenu",e=>e.preventDefault());
+  };
+
   const renderHistory=()=>{
     const list=$("historyList");
     if(!list)return;
-
     const query=historySearchQuery.trim().toLocaleLowerCase("it");
     const history=sortedHistory();
-    const filtered=query
-      ?history.filter(h=>(h.products||[]).some(p=>String(p.name||"").toLocaleLowerCase("it").includes(query)))
-      :history;
+    const filtered=query ? history.filter(h=>(h.products||[]).some(p=>String(p.name||"").toLocaleLowerCase("it").includes(query))) : history;
 
     if(!Array.isArray(state.history)||!state.history.length){
       list.innerHTML='<div class="empty-state history-empty"><span>🕘</span><h2>Nessuna spesa salvata</h2><p>Quando concluderai una spesa, la troverai qui.</p></div>';
       return;
     }
-
     if(!filtered.length){
       list.innerHTML='<div class="empty-state history-empty history-search-empty"><span>🔎</span><h2>Nessun prodotto trovato</h2><p>Non abbiamo trovato acquisti che corrispondono a "<strong>'+historySearchQuery.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</strong>".</p></div>';
       return;
@@ -299,41 +343,38 @@ document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML=filtered.map(h=>{
       const date=h.date?h.date.split("-").reverse().join("/"):"";
       const total=(h.products||[]).reduce((s,p)=>s+((Number(p.price)||0)*(Number(p.pieces)||1)),0);
-      const matchingProducts=query
-        ?(h.products||[]).filter(p=>String(p.name||"").toLocaleLowerCase("it").includes(query))
-        :(h.products||[]);
+      const matchingProducts=(h.products||[]).map((p,index)=>({p,index})).filter(({p})=>!query||String(p.name||"").toLocaleLowerCase("it").includes(query));
       const isOpen=query||expandedHistoryId===h.id;
-      const products=matchingProducts.map(p=>{
+      const products=matchingProducts.map(({p,index})=>{
         const pieces=Math.max(1,Number(p.pieces)||1);
         const unit=Number(p.price)||0;
-        return '<div class="history-product-row">'+
+        return '<div class="history-product-row" data-history-product-index="'+index+'" title="Tieni premuto per eliminare">'+
           '<div><strong>'+p.name+'</strong><small>'+pieces+(pieces===1?' pezzo':' pezzi')+' · '+euro(unit)+' cad.</small></div>'+
-          '<b>'+euro(unit*pieces)+'</b>'+
-        '</div>';
+          '<b>'+euro(unit*pieces)+'</b></div>';
       }).join("");
 
       return '<article class="history-card '+(isOpen?'is-expanded':'')+' '+(query?'history-search-result':'')+'" data-history-id="'+h.id+'">'+
-        '<button class="history-card-summary" type="button" aria-expanded="'+isOpen+'">'+
-          '<span class="history-store-icon">🛒</span>'+
-          '<span class="history-card-copy"><strong>'+((h.store)||"Spesa")+'</strong><small>'+date+'</small></span>'+
-          '<b class="history-card-total">'+euro(total)+'</b>'+
-          '<span class="history-chevron">'+(isOpen?'⌃':'⌄')+'</span>'+
-        '</button>'+
-        (isOpen?'<div class="history-products">'+products+
-          (query?'<div class="history-search-date"><span>✓ Acquistato il</span><strong>'+date+'</strong></div>':'')+
-          '<div class="history-grand-total"><strong>Totale spesa</strong><b>'+euro(total)+'</b></div>'+
-        '</div>':'')+
+        '<button class="history-card-summary" type="button" aria-expanded="'+isOpen+'" title="Tieni premuto per eliminare la spesa">'+
+          '<span class="history-store-icon">🛒</span><span class="history-card-copy"><strong>'+((h.store)||"Spesa")+'</strong><small>'+date+'</small></span>'+
+          '<b class="history-card-total">'+euro(total)+'</b><span class="history-chevron">'+(isOpen?'⌃':'⌄')+'</span></button>'+
+        (isOpen?'<div class="history-products">'+products+(query?'<div class="history-search-date"><span>✓ Acquistato il</span><strong>'+date+'</strong></div>':'')+'<div class="history-grand-total"><strong>Totale spesa</strong><b>'+euro(total)+'</b></div></div>':'')+
       '</article>';
     }).join("");
 
-    list.querySelectorAll(".history-card-summary").forEach(btn=>{
-      btn.onclick=()=>{
+    list.querySelectorAll(".history-card").forEach(card=>{
+      const id=card.dataset.historyId;
+      const summary=card.querySelector(".history-card-summary");
+      let suppressClick=false;
+      bindHistoryLongPress(summary,()=>{suppressClick=true;deleteHistoryShopping(id);});
+      summary.onclick=()=>{
+        if(suppressClick){suppressClick=false;return;}
         if(historySearchQuery.trim())return;
-        const card=btn.closest(".history-card");
-        const id=card.dataset.historyId;
         expandedHistoryId=expandedHistoryId===id?null:id;
         renderHistory();
       };
+      card.querySelectorAll(".history-product-row").forEach(row=>{
+        bindHistoryLongPress(row,()=>deleteHistoryProduct(id,Number(row.dataset.historyProductIndex)));
+      });
     });
   };
 
