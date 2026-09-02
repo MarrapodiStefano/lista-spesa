@@ -2254,3 +2254,54 @@ body{
   #remindersPanel .reminder-select-btn,
   #remindersPanel .reminder-move-btn{font-size:13px;padding:0 9px}
 }
+
+
+/* V1.6.41 — Azioni Promemoria affiancate e ancorate più in basso */
+#remindersPanel .reminders-sheet{
+  min-height:100dvh;
+}
+
+#remindersPanel .reminders-list{
+  flex:1 1 auto;
+}
+
+#remindersPanel .reminder-actions{
+  margin-top:auto;
+  padding-top:12px;
+  padding-bottom:2px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+#remindersPanel .scan-product-btn,
+#remindersPanel .new-product-btn{
+  width:100%;
+  min-width:0;
+  min-height:48px;
+  padding:0 8px;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+#remindersPanel .reminder-share-btn,
+#remindersPanel .reminder-select-btn,
+#remindersPanel .reminder-move-btn{
+  grid-column:1 / -1;
+  width:100%;
+}
+
+#remindersPanel .reminder-share-btn{
+  min-height:44px;
+}
+
+#remindersPanel .reminder-select-btn,
+#remindersPanel .reminder-move-btn{
+  min-height:44px;
+}
+
+@media(max-width:390px){
+  #remindersPanel .reminder-actions{gap:7px}
+  #remindersPanel .scan-product-btn,
+  #remindersPanel .new-product-btn{font-size:13px}
+}
