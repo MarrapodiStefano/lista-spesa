@@ -1771,3 +1771,7 @@ body{
   .history-card-copy strong{font-size:17px}
   .history-card-total{font-size:17px}
 }
+
+
+/* V1.6.33 — Eliminazione dallo Storico con tap prolungato */
+.history-card-summary,.history-product-row{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}.history-product-row{cursor:default;transition:transform .16s ease,background .16s ease,opacity .16s ease}.history-card-summary.history-long-pressing,.history-product-row.history-long-pressing{transform:scale(.985);opacity:.72;background:rgba(0,0,0,.045)}
