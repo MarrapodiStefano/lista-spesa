@@ -969,6 +969,130 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshReminderMoveButton();
   };
 
+  // Condivisione del Promemoria: viene creato un link che l'altra persona
+  // può aprire direttamente nella propria installazione dell'app.
+  let pendingSharedReminder=null;
+
+  const toBase64Url=value=>{
+    const bytes=new TextEncoder().encode(JSON.stringify(value));
+    let binary="";
+    bytes.forEach(b=>binary+=String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  };
+
+  const fromBase64Url=value=>{
+    let base64=String(value||"").replace(/-/g,"+").replace(/_/g,"/");
+    while(base64.length%4)base64+="=";
+    const binary=atob(base64);
+    const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  };
+
+  const buildSharedReminder=()=>({
+    v:1,
+    products:state.reminders.map(p=>({
+      name:String(p.name||"").trim(),
+      price:p.price??"",
+      weight:p.weight??"",
+      pieces:p.pieces??1,
+      store:p.store??"",
+      reminderQuantity:Math.max(1,parseInt(p.reminderQuantity,10)||1),
+      barcode:p.barcode||""
+    })).filter(p=>p.name)
+  });
+
+  const shareReminder=async()=>{
+    if(!state.reminders.length){
+      alert("Il Promemoria è vuoto: aggiungi almeno un prodotto prima di condividerlo.");
+      return;
+    }
+    const payload=toBase64Url(buildSharedReminder());
+    const url=new URL(window.location.href);
+    url.search="";
+    url.hash="";
+    url.searchParams.set("promemoria",payload);
+    const shareData={
+      title:"Promemoria - La Mia Spesa",
+      text:"Ti ho inviato un promemoria della spesa. Aprilo con La Mia Spesa per importare i prodotti.",
+      url:url.toString()
+    };
+    try{
+      if(navigator.share){
+        await navigator.share(shareData);
+      }else if(navigator.clipboard&&window.isSecureContext){
+        await navigator.clipboard.writeText(url.toString());
+        alert("✓ Link del Promemoria copiato negli appunti.");
+      }else{
+        window.prompt("Copia questo link e invialo alla persona:",url.toString());
+      }
+    }catch(error){
+      if(error&&error.name==="AbortError")return;
+      console.error("Condivisione Promemoria:",error);
+      alert("Non è stato possibile aprire la condivisione.");
+    }
+  };
+
+  const cleanSharedReminderUrl=()=>{
+    const url=new URL(window.location.href);
+    if(!url.searchParams.has("promemoria"))return;
+    url.searchParams.delete("promemoria");
+    history.replaceState({},document.title,url.pathname+(url.search||"")+url.hash);
+  };
+
+  const importSharedReminder=()=>{
+    if(!pendingSharedReminder||!Array.isArray(pendingSharedReminder.products))return;
+    let added=0, skipped=0;
+    pendingSharedReminder.products.forEach(raw=>{
+      const name=String(raw.name||"").trim();
+      if(!name)return;
+      const duplicate=state.reminders.some(existing=>
+        String(existing.name||"").trim().toLocaleLowerCase("it")===name.toLocaleLowerCase("it")
+      );
+      if(duplicate){skipped++;return;}
+      state.reminders.push({
+        id:"shared-"+Date.now()+"-"+Math.random().toString(36).slice(2,9),
+        name,
+        price:raw.price??"",
+        weight:raw.weight??"",
+        pieces:Math.max(1,parseInt(raw.pieces,10)||1),
+        store:raw.store??"",
+        barcode:raw.barcode||"",
+        reminderQuantity:Math.max(1,parseInt(raw.reminderQuantity,10)||1)
+      });
+      added++;
+    });
+    save();
+    pendingSharedReminder=null;
+    close("reminderImportPanel");
+    cleanSharedReminderUrl();
+    renderReminders();
+    if(added&&skipped)alert("✓ Importati "+added+" prodotti. "+skipped+" erano già presenti nel tuo Promemoria.");
+    else if(added)alert("✓ Importati "+added+(added===1?" prodotto nel tuo Promemoria.":" prodotti nel tuo Promemoria."));
+    else alert("Tutti i prodotti ricevuti erano già presenti nel tuo Promemoria.");
+  };
+
+  const showSharedReminderImport=()=>{
+    const params=new URLSearchParams(window.location.search);
+    const encoded=params.get("promemoria");
+    if(!encoded)return;
+    try{
+      const payload=fromBase64Url(encoded);
+      if(!payload||payload.v!==1||!Array.isArray(payload.products)||!payload.products.length){
+        throw new Error("Payload non valido");
+      }
+      pendingSharedReminder=payload;
+      $("reminderImportNote").textContent="Hai ricevuto "+payload.products.length+(payload.products.length===1?" prodotto":" prodotti")+" da aggiungere al tuo Promemoria.";
+      $("reminderImportList").innerHTML=payload.products.slice(0,8).map(p=>
+        '<div><strong>'+String(p.name||"").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</strong><small>'+Math.max(1,parseInt(p.reminderQuantity,10)||1)+(Math.max(1,parseInt(p.reminderQuantity,10)||1)===1?" pezzo":" pezzi")+(p.store?" · "+String(p.store).replace(/</g,"&lt;").replace(/>/g,"&gt;"):"")+'</small></div>'
+      ).join("")+(payload.products.length>8?'<p class="reminder-import-more">+ altri '+(payload.products.length-8)+' prodotti</p>':"");
+      open("reminderImportPanel");
+    }catch(error){
+      console.error("Importazione Promemoria:",error);
+      cleanSharedReminderUrl();
+      alert("⚠️ Il Promemoria ricevuto non è valido o il link è incompleto.");
+    }
+  };
+
   const renderReminders=()=>{
     const list=$("remindersList"), empty=$("remindersEmpty");
     list.classList.toggle("is-selecting",reminderSelectionMode);
@@ -1042,6 +1166,13 @@ document.addEventListener("DOMContentLoaded", () => {
     scannerTarget="reminder";
     await startScanner();
   };
+  $("shareReminderBtn").onclick=shareReminder;
+  $("confirmReminderImportBtn").onclick=importSharedReminder;
+  $("closeReminderImportBtn").onclick=$("cancelReminderImportBtn").onclick=()=>{
+    pendingSharedReminder=null;
+    close("reminderImportPanel");
+    cleanSharedReminderUrl();
+  };
   $("scanReminderBtn").onclick=scanReminderBarcode;
   $("reminderDecreaseBtn").onclick=()=>{$("reminderQuantityInput").value=Math.max(1,(parseInt($("reminderQuantityInput").value,10)||1)-1);};
   $("reminderIncreaseBtn").onclick=()=>{$("reminderQuantityInput").value=(parseInt($("reminderQuantityInput").value,10)||1)+1;};
@@ -1085,6 +1216,9 @@ document.addEventListener("DOMContentLoaded", () => {
       },0);
     }
   });
+
+  // Se l'app è stata aperta da un link condiviso, proponiamo subito l'importazione.
+  showSharedReminderImport();
 
   // Mostra subito dalla Home l'accesso alla spesa già aperta.
   renderHomeCurrentShopping();
