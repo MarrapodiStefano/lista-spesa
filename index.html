@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="icon-192.png?v=79">
   <link rel="manifest" href="manifest.json?v=79">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=79">
+  <link rel="stylesheet" href="css/style.css?v=80">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
@@ -19,7 +19,7 @@
       <header class="home-header">
         <div>
           <h1>La Mia Spesa</h1>
-          <p>V2.0</p>
+          <p>V2.1</p>
         </div>
         <div class="home-groceries" aria-hidden="true"><span>🥖</span><span>🥕</span><span>🍅</span><span>🥬</span></div>
       </header>
@@ -368,6 +368,7 @@
           <label>Foto prodotto<input id="productPhoto" type="file" accept="image/*"></label>
           <div class="photo-preview" id="photoPreview" hidden><img id="photoPreviewImg" alt="Anteprima foto prodotto"></div>
           <button class="save-product-btn" type="submit">Salva prodotto</button>
+          <button class="delete-product-btn" id="deleteProductBtn" type="button" hidden>🗑 Elimina dalla libreria</button>
         </form>
       </div>
     </section>
@@ -412,5 +413,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=78"></script>
+  <script src="js/app.js?v=80"></script>
 </body></html>
