@@ -2662,3 +2662,7 @@ body{
   font-size:16px;
   font-weight:750;
 }
+
+
+/* V2.2 — Negozio Garanzia */
+.store-garanzia,.store-color-garanzia{background:#f7a8c4!important;color:#fff!important}
