@@ -2155,3 +2155,102 @@ body{
   .reminder-share-btn{min-height:46px;font-size:15px}
   .reminder-import-sheet{padding-left:18px;padding-right:18px}
 }
+
+
+/* V1.6.40 — Promemoria principale più compatto */
+#remindersPanel .reminders-sheet{
+  padding-top:calc(max(10px, env(safe-area-inset-top)) + 2px);
+  padding-bottom:max(12px, env(safe-area-inset-bottom));
+}
+
+#remindersPanel .panel-header{
+  min-height:42px;
+  margin-bottom:4px;
+}
+
+#remindersPanel .panel-header .eyebrow{
+  margin:0;
+  font-size:12px;
+  letter-spacing:.16em;
+}
+
+#remindersPanel .close-btn{
+  width:38px;
+  height:38px;
+  font-size:26px;
+}
+
+#remindersPanel .reminders-list{
+  gap:6px;
+  padding-bottom:8px;
+}
+
+#remindersPanel .library-item{
+  min-height:64px;
+  padding:7px 9px;
+  gap:10px;
+  border-radius:16px;
+}
+
+#remindersPanel .product-thumb,
+#remindersPanel .product-thumb-placeholder{
+  width:46px;
+  height:46px;
+  flex:0 0 46px;
+  border-radius:12px;
+}
+
+#remindersPanel .library-item-info strong{
+  font-size:15px;
+  line-height:1.12;
+}
+
+#remindersPanel .library-item-info small{
+  margin-top:2px;
+  font-size:11.5px;
+  line-height:1.2;
+}
+
+#remindersPanel .reminder-select-control{
+  width:40px;
+  height:40px;
+  flex:0 0 40px;
+  border-radius:13px;
+  font-size:20px;
+}
+
+#remindersPanel .reminder-actions{
+  gap:6px;
+  padding-top:4px;
+}
+
+#remindersPanel .scan-product-btn,
+#remindersPanel .new-product-btn,
+#remindersPanel .reminder-share-btn,
+#remindersPanel .reminder-select-btn,
+#remindersPanel .reminder-move-btn{
+  min-height:44px;
+  border-radius:14px;
+  padding:0 11px;
+  font-size:14px;
+}
+
+#remindersPanel .reminder-share-btn{
+  flex:1 1 100%;
+  min-height:42px;
+}
+
+#remindersPanel .reminders-empty{
+  padding:24px 12px;
+}
+
+@media(max-width:390px){
+  #remindersPanel .library-item{min-height:60px;padding:6px 8px}
+  #remindersPanel .product-thumb,
+  #remindersPanel .product-thumb-placeholder{width:42px;height:42px;flex-basis:42px}
+  #remindersPanel .scan-product-btn,
+  #remindersPanel .new-product-btn,
+  #remindersPanel .reminder-share-btn,
+  #remindersPanel .reminder-select-btn,
+  #remindersPanel .reminder-move-btn{font-size:13px;padding:0 9px}
+}
