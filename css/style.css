@@ -1792,3 +1792,144 @@ body{
 
 /* V1.6.33 — Eliminazione dallo Storico con tap prolungato */
 .history-card-summary,.history-product-row{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}.history-product-row{cursor:default;transition:transform .16s ease,background .16s ease,opacity .16s ease}.history-card-summary.history-long-pressing,.history-product-row.history-long-pressing{transform:scale(.985);opacity:.72;background:rgba(0,0,0,.045)}
+
+
+/* V1.6.35 — Promemoria e aggiunta prodotti a schermo intero */
+#remindersPanel,
+#productPanel,
+#reminderProductPanel{
+  align-items:stretch;
+}
+
+#remindersPanel .panel-sheet,
+#productPanel .panel-sheet,
+#reminderProductPanel .panel-sheet{
+  width:100%;
+  max-width:none;
+  height:100dvh;
+  min-height:100dvh;
+  margin:0;
+  padding:calc(max(16px, env(safe-area-inset-top)) + 8px) 24px max(24px, env(safe-area-inset-bottom));
+  border-radius:0;
+  box-shadow:none;
+  overflow:hidden;
+}
+
+#remindersPanel .panel-backdrop,
+#productPanel .panel-backdrop,
+#reminderProductPanel .panel-backdrop{
+  display:none;
+}
+
+#remindersPanel .panel-handle,
+#productPanel .panel-handle,
+#reminderProductPanel .panel-handle{
+  display:none;
+}
+
+#remindersPanel .panel-header,
+#productPanel .panel-header,
+#reminderProductPanel .panel-header{
+  flex:0 0 auto;
+  margin-bottom:12px;
+}
+
+#remindersPanel .reminders-list,
+#remindersPanel .reminders-empty,
+#productPanel .library-list,
+#reminderProductPanel .library-list{
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+#remindersPanel .reminder-actions,
+#productPanel .new-product-btn,
+#reminderProductPanel .new-product-btn{
+  flex:0 0 auto;
+}
+
+#remindersPanel .reminders-sheet,
+#productPanel .product-sheet,
+#reminderProductPanel .product-sheet{
+  display:flex;
+  flex-direction:column;
+}
+
+#remindersPanel .reminders-list{
+  flex:1;
+}
+
+#productPanel .library-list,
+#reminderProductPanel .library-list{
+  flex:1;
+}
+
+#productPanel .search-input,
+#reminderProductPanel .search-input{
+  flex:0 0 auto;
+  margin-top:8px;
+}
+
+/* Anche la spesa aperta usa realmente tutto lo schermo disponibile */
+.shopping-screen.app-screen{
+  width:100%;
+  max-width:none;
+  min-height:100dvh;
+  padding:calc(max(14px, env(safe-area-inset-top)) + 6px) 20px 120px;
+  margin:0;
+}
+
+/* Nella libreria della spesa: + prima dell'aggiunta, ✓ dopo */
+.shopping-add-control{
+  width:58px;
+  height:58px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:18px;
+  background:#eceef2;
+  color:#4f7fbe;
+  font-size:32px;
+  line-height:1;
+  font-weight:500;
+  cursor:pointer;
+}
+
+.shopping-add-control.is-added{
+  color:#4f7fbe;
+  background:#e8eaee;
+  font-size:30px;
+  font-weight:700;
+}
+
+.library-actions{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#productPanel .library-item{
+  min-height:84px;
+}
+
+@media (max-width:520px){
+  #remindersPanel .panel-sheet,
+  #productPanel .panel-sheet,
+  #reminderProductPanel .panel-sheet{
+    padding-left:18px;
+    padding-right:18px;
+  }
+
+  .shopping-screen.app-screen{
+    padding-left:16px;
+    padding-right:16px;
+  }
+
+  .shopping-add-control{
+    width:54px;
+    height:54px;
+    border-radius:17px;
+  }
+}
