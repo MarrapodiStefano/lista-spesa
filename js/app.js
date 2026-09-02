@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=73", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=76", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -1083,6 +1083,121 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Condivisione della Spesa in corso: condividiamo i prodotti ancora da acquistare.
+  // Il Carrello del mittente non viene inviato, perché contiene prodotti già acquistati.
+  let pendingSharedShopping=null;
+
+  const buildSharedShopping=()=>({
+    v:1,
+    store:state.currentShoppingStore||"",
+    date:state.currentShoppingDate||"",
+    name:state.currentShoppingName||"",
+    products:state.currentShopping.map(p=>({
+      name:String(p.name||"").trim(),
+      price:p.price??"",
+      weight:p.weight??"",
+      pieces:Math.max(1,parseInt(p.pieces,10)||1),
+      store:p.store??"",
+      barcode:p.barcode||""
+    })).filter(p=>p.name)
+  });
+
+  const shareShopping=()=>{
+    if(!state.currentShopping.length){
+      alert("La lista da acquistare è vuota: non ci sono prodotti da condividere.");
+      return;
+    }
+    const payload=toBase64Url(buildSharedShopping());
+    const url=new URL(window.location.href);
+    url.search="";
+    url.hash="";
+    url.searchParams.set("spesa",payload);
+    const label=state.currentShoppingStore||"la mia spesa";
+    const message="Ti ho inviato "+label+". Apri questo link con La Mia Spesa per importare i prodotti nella tua spesa:\n\n"+url.toString();
+    try{
+      window.location.href="https://wa.me/?text="+encodeURIComponent(message);
+    }catch(error){
+      console.error("Condivisione Spesa:",error);
+      alert("Non è stato possibile aprire WhatsApp.");
+    }
+  };
+
+  const cleanSharedShoppingUrl=()=>{
+    const url=new URL(window.location.href);
+    if(!url.searchParams.has("spesa"))return;
+    url.searchParams.delete("spesa");
+    history.replaceState({},document.title,url.pathname+(url.search||"")+url.hash);
+  };
+
+  const importSharedShopping=()=>{
+    if(!pendingSharedShopping||!Array.isArray(pendingSharedShopping.products))return;
+    let added=0, skipped=0;
+    pendingSharedShopping.products.forEach(raw=>{
+      const name=String(raw.name||"").trim();
+      if(!name)return;
+      const duplicate=[...state.currentShopping,...state.purchasedShopping].some(existing=>
+        String(existing.name||"").trim().toLocaleLowerCase("it")===name.toLocaleLowerCase("it")
+      );
+      if(duplicate){skipped++;return;}
+      state.currentShopping.push({
+        id:"shared-shopping-"+Date.now()+"-"+Math.random().toString(36).slice(2,9),
+        _shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,9),
+        name,
+        price:raw.price??"",
+        weight:raw.weight??"",
+        pieces:Math.max(1,parseInt(raw.pieces,10)||1),
+        store:raw.store??"",
+        barcode:raw.barcode||""
+      });
+      added++;
+    });
+
+    // Se il destinatario non ha ancora una spesa attiva, eredita i dettagli della spesa ricevuta.
+    const hasOwnDetails=!!(state.currentShoppingStore||state.currentShoppingDate||
+      (state.currentShoppingName&&state.currentShoppingName!=="La mia spesa"));
+    if(!hasOwnDetails){
+      state.currentShoppingStore=pendingSharedShopping.store||"";
+      state.currentShoppingDate=pendingSharedShopping.date||"";
+      state.currentShoppingName=pendingSharedShopping.name||"La mia spesa";
+    }
+
+    save();
+    pendingSharedShopping=null;
+    close("shoppingImportPanel");
+    cleanSharedShoppingUrl();
+    renderHomeCurrentShopping();
+    renderShopping();
+
+    if(added&&skipped)alert("✓ Importati "+added+" prodotti. "+skipped+" erano già presenti nella tua spesa.");
+    else if(added)alert("✓ Importati "+added+(added===1?" prodotto nella tua spesa.":" prodotti nella tua spesa."));
+    else alert("Tutti i prodotti ricevuti erano già presenti nella tua spesa.");
+  };
+
+  const showSharedShoppingImport=()=>{
+    const params=new URLSearchParams(window.location.search);
+    const encoded=params.get("spesa");
+    if(!encoded)return;
+    try{
+      const payload=fromBase64Url(encoded);
+      if(!payload||payload.v!==1||!Array.isArray(payload.products)||!payload.products.length){
+        throw new Error("Payload non valido");
+      }
+      pendingSharedShopping=payload;
+      const meta=[payload.store,payload.date?String(payload.date).split("-").reverse().join("/"):null].filter(Boolean).join(" · ");
+      $("shoppingImportNote").textContent="Hai ricevuto "+payload.products.length+(payload.products.length===1?" prodotto":" prodotti")+(meta?" per "+meta:"")+" da aggiungere alla tua spesa.";
+      $("shoppingImportList").innerHTML=payload.products.slice(0,8).map(p=>{
+        const pieces=Math.max(1,parseInt(p.pieces,10)||1);
+        const safeName=String(p.name||"").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        return '<div><strong>'+safeName+'</strong><small>'+pieces+(pieces===1?" pezzo":" pezzi")+(p.price!==""&&p.price!==undefined?" · "+euro(p.price):"")+'</small></div>';
+      }).join("")+(payload.products.length>8?'<p class="reminder-import-more">+ altri '+(payload.products.length-8)+' prodotti</p>':"");
+      open("shoppingImportPanel");
+    }catch(error){
+      console.error("Importazione Spesa:",error);
+      cleanSharedShoppingUrl();
+      alert("⚠️ La spesa ricevuta non è valida o il link è incompleto.");
+    }
+  };
+
   const renderReminders=()=>{
     const list=$("remindersList"), empty=$("remindersEmpty");
     list.classList.toggle("is-selecting",reminderSelectionMode);
@@ -1157,6 +1272,13 @@ document.addEventListener("DOMContentLoaded", () => {
     await startScanner();
   };
   $("shareReminderBtn").onclick=shareReminder;
+  $("shareShoppingBtn").onclick=shareShopping;
+  $("confirmShoppingImportBtn").onclick=importSharedShopping;
+  $("closeShoppingImportBtn").onclick=$("cancelShoppingImportBtn").onclick=()=>{
+    pendingSharedShopping=null;
+    close("shoppingImportPanel");
+    cleanSharedShoppingUrl();
+  };
   $("confirmReminderImportBtn").onclick=importSharedReminder;
   $("closeReminderImportBtn").onclick=$("cancelReminderImportBtn").onclick=()=>{
     pendingSharedReminder=null;
@@ -1209,6 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Se l'app è stata aperta da un link condiviso, proponiamo subito l'importazione.
   showSharedReminderImport();
+  showSharedShoppingImport();
 
   // Mostra subito dalla Home l'accesso alla spesa già aperta.
   renderHomeCurrentShopping();
