@@ -7,9 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="La mia spesa">
-  <link rel="manifest" href="manifest.json?v=77">
+  <link rel="manifest" href="manifest.json?v=78">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=77">
+  <link rel="stylesheet" href="css/style.css?v=78">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
@@ -18,7 +18,7 @@
       <header class="home-header">
         <div>
           <h1>La Mia Spesa</h1>
-          <p>V1.6.43</p>
+          <p>V1.6.44</p>
         </div>
         <div class="home-groceries" aria-hidden="true"><span>🥖</span><span>🥕</span><span>🍅</span><span>🥬</span></div>
       </header>
@@ -60,9 +60,133 @@
             <strong>I miei prodotti</strong>
             <small>Visualizza e modifica la libreria</small>
           </button>
+          <button class="home-tile tile-guide" id="guideBtn" type="button">
+            <span class="tile-emoji">❔</span>
+            <strong>Guida all'app</strong>
+            <small>Tutto quello che devi sapere</small>
+          </button>
         </div>
 
         <div class="home-message"><span>🌿</span><p><strong>Organizza, acquista, risparmia.</strong><br>Noi ti aiutiamo!</p></div>
+      </div>
+    </section>
+
+
+    <section class="guide-panel" id="guidePanel" aria-hidden="true">
+      <div class="guide-sheet">
+        <header class="guide-header">
+          <div>
+            <p class="eyebrow">GUIDA COMPLETA</p>
+            <h1>Come usare<br>La Mia Spesa</h1>
+          </div>
+          <button class="close-btn" id="closeGuideBtn" type="button" aria-label="Chiudi">×</button>
+        </header>
+
+        <div class="guide-intro">
+          <span>🛒</span>
+          <div><strong>Tutto sotto controllo.</strong><p>Dalla tua libreria dei prodotti alla spesa, fino allo storico degli acquisti.</p></div>
+        </div>
+
+        <nav class="guide-index" aria-label="Indice guida">
+          <a href="#guide-home">🏠 Home</a>
+          <a href="#guide-products">📚 Prodotti</a>
+          <a href="#guide-shopping">🛒 Spesa</a>
+          <a href="#guide-reminders">🔔 Promemoria</a>
+          <a href="#guide-history">🕘 Storico</a>
+          <a href="#guide-sharing">📤 Condivisione</a>
+        </nav>
+
+        <div class="guide-content">
+          <section class="guide-section" id="guide-home">
+            <div class="guide-number">1</div>
+            <div><h2>La schermata Home</h2>
+            <p>È il punto di partenza dell'app. Da qui puoi accedere rapidamente a tutte le funzioni principali.</p>
+            <ul>
+              <li><strong>Nuova spesa:</strong> crea una nuova lista scegliendo negozio, data e, se vuoi, un nome.</li>
+              <li><strong>Aggiungi prodotto:</strong> inserisce un nuovo prodotto nella tua libreria personale.</li>
+              <li><strong>Promemoria:</strong> raccoglie i prodotti terminati o da ricordare di acquistare.</li>
+              <li><strong>Storico:</strong> conserva tutte le spese concluse.</li>
+              <li><strong>I miei prodotti:</strong> apre la tua libreria completa.</li>
+              <li><strong>Spesa in corso:</strong> compare solo quando esiste una lista attiva e mostra il totale dei prodotti ancora da acquistare.</li>
+            </ul></div>
+          </section>
+
+          <section class="guide-section" id="guide-products">
+            <div class="guide-number">2</div>
+            <div><h2>I miei prodotti</h2>
+            <p>È la tua libreria personale: qui conservi i prodotti che utilizzi più spesso.</p>
+            <div class="guide-tip"><strong>✏️ Modificare un prodotto</strong><br>Usa la matita per cambiare nome, prezzo di riferimento, negozio, quantità, peso e altre informazioni disponibili.</div>
+            <p><strong>Il prezzo nella libreria è il prezzo di riferimento.</strong> Quando aggiungi il prodotto a una spesa o al Promemoria puoi modificarne il prezzo senza cambiare quello salvato nella libreria.</p>
+            <p>La libreria è pensata per essere compatta e permetterti di trovare rapidamente ciò che cerchi.</p></div>
+          </section>
+
+          <section class="guide-section" id="guide-shopping">
+            <div class="guide-number">3</div>
+            <div><h2>Creare e gestire una spesa</h2>
+            <p>Premi <strong>Nuova spesa</strong>, scegli il negozio e la data, quindi inizia ad aggiungere prodotti.</p>
+            <ol>
+              <li>Apri <strong>＋ Aggiungi prodotto</strong>.</li>
+              <li>Cerca il prodotto nella libreria.</li>
+              <li>Il simbolo <strong>＋ grigio</strong> indica che non è ancora nella lista.</li>
+              <li>La <strong>✓ verde</strong> indica che il prodotto è già stato aggiunto.</li>
+            </ol>
+            <p>L'app controlla i duplicati: se un prodotto è già nella lista da acquistare o nel Carrello, riceverai un avviso.</p>
+            <div class="guide-tip"><strong>💶 Prezzo e quantità</strong><br>Il totale superiore della spesa considera la somma di <strong>prezzo × quantità</strong> dei prodotti ancora da acquistare. Il Carrello ha invece il proprio totale separato.</div>
+            <p><strong>Swipe:</strong> fai scorrere un prodotto per segnarlo come acquistato e spostarlo nel Carrello. Puoi fare l'operazione inversa per riportarlo nella lista.</p>
+            <p><strong>Pressione prolungata:</strong> su un prodotto ancora da acquistare puoi aprire le azioni disponibili, ad esempio rimuoverlo o spostarlo nel Promemoria.</p></div>
+          </section>
+
+          <section class="guide-section" id="guide-reminders">
+            <div class="guide-number">4</div>
+            <div><h2>Il Promemoria</h2>
+            <p>Usalo per segnare i prodotti terminati o quelli che vuoi ricordarti di acquistare.</p>
+            <ul>
+              <li><strong>＋ Aggiungi prodotto:</strong> aggiunge un prodotto dalla tua libreria.</li>
+              <li><strong>📷 Scansiona codice:</strong> permette di usare il codice a barre quando la funzione è disponibile.</li>
+              <li><strong>✓ Seleziona:</strong> consente di scegliere più prodotti.</li>
+              <li><strong>🛒 Sposta nella spesa:</strong> trasferisce i prodotti selezionati nella spesa in corso.</li>
+            </ul>
+            <p>Anche qui puoi modificare il prezzo del prodotto <strong>solo per quel Promemoria</strong>, senza alterare il prezzo di riferimento in <em>I miei prodotti</em>.</p>
+            <p>Con la pressione prolungata su un prodotto puoi accedere alle azioni aggiuntive previste.</p></div>
+          </section>
+
+          <section class="guide-section" id="guide-history">
+            <div class="guide-number">5</div>
+            <div><h2>Lo Storico delle spese</h2>
+            <p>Quando hai terminato, premi <strong>✓ Concludi e salva nello Storico</strong>.</p>
+            <p>Nello Storico puoi:</p>
+            <ul>
+              <li>vedere rapidamente <strong>negozio e data</strong> di ogni spesa;</li>
+              <li>toccare una spesa per espanderla e visualizzare prodotti, quantità e prezzi;</li>
+              <li>vedere il <strong>totale finale</strong> dopo l'ultimo prodotto;</li>
+              <li>ordinare le spese per <strong>data</strong> o per <strong>negozio</strong>;</li>
+              <li>cercare un prodotto e scoprire <strong>quando è stato acquistato</strong>.</li>
+            </ul>
+            <div class="guide-tip"><strong>🗑️ Correzioni</strong><br>Con una pressione prolungata puoi eliminare un'intera spesa oppure, quando previsto, intervenire su un singolo prodotto. L'app chiede sempre conferma.</div></div>
+          </section>
+
+          <section class="guide-section" id="guide-sharing">
+            <div class="guide-number">6</div>
+            <div><h2>Condividere con WhatsApp</h2>
+            <p>Puoi condividere sia il <strong>Promemoria</strong> sia la <strong>Spesa in corso</strong>.</p>
+            <ol>
+              <li>Premi <strong>📤 Condividi</strong>.</li>
+              <li>Si apre WhatsApp con il messaggio già preparato.</li>
+              <li>Scegli un contatto.</li>
+              <li>Invia il link.</li>
+            </ol>
+            <p>Chi riceve il link può aprirlo nella propria copia dell'app e scegliere se importare i prodotti.</p>
+            <div class="guide-tip"><strong>🔒 Nessuna perdita di dati</strong><br>La condivisione crea una copia: i tuoi prodotti originali rimangono nel tuo Promemoria o nella tua Spesa.</div>
+            <p>Per evitare duplicati, durante l'importazione i prodotti già presenti vengono riconosciuti e non vengono aggiunti una seconda volta.</p></div>
+          </section>
+
+          <section class="guide-section guide-section-last">
+            <div class="guide-number">✓</div>
+            <div><h2>Un consiglio per usare al meglio l'app</h2>
+            <p>Prima costruisci bene la libreria in <strong>I miei prodotti</strong>. Poi creare una nuova spesa diventerà molto più veloce: cerchi, aggiungi e acquisti.</p>
+            <p>Se qualcosa finisce, spostalo nel <strong>Promemoria</strong>. Quando sarà il momento di fare la spesa, trasferiscilo direttamente nella lista.</p></div>
+          </section>
+        </div>
       </div>
     </section>
 
@@ -287,5 +411,5 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=76"></script>
+  <script src="js/app.js?v=78"></script>
 </body></html>
