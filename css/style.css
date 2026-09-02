@@ -2666,3 +2666,78 @@ body{
 
 /* V2.2 — Negozio Garanzia */
 .store-garanzia,.store-color-garanzia{background:#f7a8c4!important;color:#fff!important}
+
+
+/* V2.3 — Aggiungi prodotti nella spesa: layout ultra compatto */
+#productPanel:not(.library-mode) .product-sheet{
+  width:100%;
+  max-width:none;
+  height:100dvh;
+  min-height:100dvh;
+  max-height:100dvh;
+  margin:0;
+  padding:calc(max(8px, env(safe-area-inset-top))) 12px max(10px, env(safe-area-inset-bottom));
+  border-radius:0;
+  box-shadow:none;
+}
+#productPanel:not(.library-mode) .panel-header{
+  min-height:38px;
+  margin-bottom:6px;
+}
+#productPanel:not(.library-mode) .panel-header .eyebrow{
+  display:none;
+}
+#productPanel:not(.library-mode) .panel-header h1{
+  font-size:21px;
+  line-height:1.1;
+}
+#productPanel:not(.library-mode) .close-btn{
+  width:34px;
+  height:34px;
+  font-size:24px;
+}
+#productPanel:not(.library-mode) .search-input{
+  margin:4px 0 6px;
+  min-height:42px;
+  padding:9px 13px;
+  border-radius:13px;
+  font-size:15px;
+}
+#productPanel:not(.library-mode) .library-list{
+  gap:5px;
+  padding-bottom:6px;
+}
+#productPanel:not(.library-mode) .library-item{
+  min-height:54px;
+  padding:6px 8px;
+  gap:8px;
+  border-radius:13px;
+}
+#productPanel:not(.library-mode) .product-thumb{
+  width:40px;
+  height:40px;
+  flex-basis:40px;
+  border-radius:9px;
+}
+#productPanel:not(.library-mode) .library-item-info strong{
+  font-size:14px;
+  line-height:1.1;
+}
+#productPanel:not(.library-mode) .library-item small{
+  margin-top:2px;
+  font-size:11px;
+  line-height:1.15;
+}
+#productPanel:not(.library-mode) .shopping-add-control{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  border-radius:10px;
+  font-size:20px;
+}
+#productPanel:not(.library-mode) .new-product-btn{
+  min-height:40px;
+  margin-top:5px;
+  border-radius:13px;
+  font-size:14px;
+}
