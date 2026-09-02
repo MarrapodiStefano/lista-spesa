@@ -418,15 +418,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderLibrary=(q="")=>{
     const products=state.products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
+    const libraryMode=$("productPanel").classList.contains("library-mode");
     $("libraryList").innerHTML=products.length
       ?products.map(p=>{
           const alreadyToBuy=state.currentShopping.some(x=>x.id===p.id);
           const alreadyInCart=state.purchasedShopping.some(x=>x.id===p.id);
           const exists=alreadyToBuy||alreadyInCart;
+          const details='<strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small>';
+          const actions=libraryMode
+            ?''
+            :'<div class="library-actions"><button class="add-to-list shopping-add-control '+(exists?'is-added':'')+'" data-id="'+p.id+'" type="button" aria-label="'+(exists?'Già aggiunto':'Aggiungi '+p.name)+'">'+(exists?"✓":"＋")+'</button></div>';
           return '<div class="library-item">'+
             productImage(p)+
-            '<div class="library-item-info"><strong>'+p.name+'</strong><small>Peso: '+(p.weight||'—')+' · Pezzi: '+(p.pieces||1)+(p.store?' · Negozio: '+p.store:'')+(p.price!==""?" · Prezzo: "+euro(p.price):"")+'</small></div>'+
-            '<div class="library-actions"><button class="add-to-list shopping-add-control '+(exists?'is-added':'')+'" data-id="'+p.id+'" type="button" aria-label="'+(exists?'Già aggiunto':'Aggiungi '+p.name)+'">'+(exists?"✓":"＋")+'</button><button class="library-edit-btn" data-edit-id="'+p.id+'" aria-label="Modifica '+p.name+'">✎</button></div>'+
+            '<button class="library-item-info library-name-btn" data-edit-id="'+p.id+'" type="button" aria-label="Modifica o elimina '+p.name+'">'+details+'</button>'+
+            actions+
           '</div>';
         }).join("")
       :'<div class="empty-state"><span>📦</span><h2>Nessun prodotto</h2><p>Aggiungi il primo prodotto alla tua libreria.</p></div>';
@@ -475,6 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(scanBtn)scanBtn.hidden=true;
       if(scanNote)scanNote.hidden=true;
       $("newProductForm").querySelector(".save-product-btn").textContent="Salva modifiche";
+      $("deleteProductBtn").hidden=false;
       if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
       else $("photoPreview").hidden=true;
       open("newProductPanel");
@@ -503,6 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(scanBtn)scanBtn.hidden=false;
     if(scanNote)scanNote.hidden=false;
     form.querySelector(".save-product-btn").textContent="Salva prodotto";
+    $("deleteProductBtn").hidden=true;
   };
   $("decreasePiecesBtn").onclick=()=>{
     const input=$("purchasePiecesInput");
@@ -860,6 +867,18 @@ document.addEventListener("DOMContentLoaded", () => {
     renderLibrary($("productSearch").value);
     renderShopping();
   };
+  $("deleteProductBtn").onclick=()=>{
+    if(!editingProductId)return;
+    const product=state.products.find(p=>p.id===editingProductId);
+    if(!product)return;
+    if(!confirm('Vuoi eliminare definitivamente "'+product.name+'" dalla libreria?'))return;
+    state.products=state.products.filter(p=>p.id!==editingProductId);
+    save();
+    resetProductForm();
+    close("newProductPanel");
+    renderLibrary($("productSearch").value);
+  };
+
   const openReminderEditor=id=>{
     const item=state.reminders.find(p=>p.id===id);
     if(!item)return;
