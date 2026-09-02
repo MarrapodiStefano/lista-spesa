@@ -2324,3 +2324,171 @@ body{
 .shopping-import-panel .reminder-import-icon{
   background:#e7f0ea;
 }
+
+
+/* V1.6.43 — Spesa in corso: layout ultra compatto */
+.shopping-screen.app-screen{
+  padding-top:calc(max(8px, env(safe-area-inset-top)) + 2px);
+  padding-left:14px;
+  padding-right:14px;
+  gap:0;
+}
+
+/* Intestazione ridotta */
+.shopping-screen .screen-header{
+  min-height:42px;
+  gap:10px;
+  margin-bottom:8px;
+}
+.shopping-screen .back-btn{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  font-size:32px;
+}
+.shopping-screen .shopping-meta-store{
+  font-size:22px;
+  letter-spacing:.055em;
+}
+.shopping-screen .shopping-meta-date{
+  margin-left:7px;
+  font-size:14px;
+  letter-spacing:.035em;
+}
+.shopping-screen .shopping-meta-name{
+  margin-top:1px;
+  font-size:14px;
+  letter-spacing:.025em;
+}
+
+/* Riepilogo molto più compatto */
+.shopping-screen .shopping-summary{
+  min-height:48px;
+  margin-bottom:8px;
+  padding:9px 13px;
+  border-radius:16px;
+}
+.shopping-screen .shopping-summary span{
+  font-size:13px;
+}
+.shopping-screen .shopping-summary strong{
+  font-size:19px;
+}
+
+/* Lista e sezioni */
+.shopping-screen .product-list{
+  gap:6px;
+  padding-bottom:8px;
+}
+.shopping-screen .shopping-section{
+  gap:6px;
+}
+.shopping-screen .shopping-section + .shopping-section{
+  margin-top:10px;
+}
+.shopping-screen .shopping-section-title{
+  margin:1px 2px;
+  font-size:11px;
+  letter-spacing:.09em;
+}
+
+/* Ogni prodotto occupa meno spazio possibile */
+.shopping-screen .shopping-item{
+  min-height:66px;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:16px;
+}
+.shopping-screen .shopping-item .product-thumb,
+.shopping-screen .shopping-item .product-thumb-placeholder{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+  border-radius:12px;
+}
+.shopping-screen .shopping-item-name{
+  gap:1px;
+  min-width:0;
+  font-size:15px;
+  line-height:1.15;
+}
+.shopping-screen .shopping-item-name small{
+  font-size:11px;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.shopping-screen .shopping-item-hint{
+  margin-top:2px;
+  font-size:10px;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.shopping-screen .shopping-item-price{
+  margin-left:auto;
+  padding-left:4px;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+/* Carrello e azioni: meno altezza, più armonia */
+.shopping-screen .shopping-bottom-bar{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  padding:8px 14px max(10px, env(safe-area-inset-bottom));
+}
+.shopping-screen .cart-total,
+.shopping-screen .finish-shopping-btn{
+  grid-column:1 / -1;
+}
+.shopping-screen .cart-total{
+  margin-bottom:0;
+  padding:0 2px;
+  min-height:24px;
+}
+.shopping-screen .cart-total span{
+  font-size:10px;
+  letter-spacing:.06em;
+}
+.shopping-screen .cart-total strong{
+  font-size:18px;
+}
+.shopping-screen .finish-shopping-btn,
+.shopping-screen .shopping-share-btn,
+.shopping-screen .add-product-btn{
+  width:100%;
+  min-height:42px !important;
+  height:42px;
+  margin:0 !important;
+  padding:0 10px;
+  border-radius:14px;
+  font-size:13px;
+  line-height:1;
+}
+.shopping-screen .finish-shopping-btn{
+  margin:0 !important;
+  font-size:13px;
+}
+.shopping-screen .shopping-share-btn{
+  background:#eef0f2;
+}
+.shopping-screen .add-product-btn{
+  box-shadow:none;
+}
+
+/* Schermi piccoli: ancora più compatto */
+@media(max-width:390px){
+  .shopping-screen.app-screen{padding-left:12px;padding-right:12px}
+  .shopping-screen .shopping-item{min-height:62px;padding:7px 9px}
+  .shopping-screen .shopping-item .product-thumb,
+  .shopping-screen .shopping-item .product-thumb-placeholder{width:44px;height:44px;flex-basis:44px}
+  .shopping-screen .shopping-item-name{font-size:14px}
+  .shopping-screen .shopping-item-hint{display:none}
+  .shopping-screen .finish-shopping-btn,
+  .shopping-screen .shopping-share-btn,
+  .shopping-screen .add-product-btn{font-size:12px}
+}
