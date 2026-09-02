@@ -353,9 +353,18 @@ document.addEventListener("DOMContentLoaded", () => {
           '<b>'+euro(unit*pieces)+'</b></div>';
       }).join("");
 
+      const storeName=String(h.store||"Spesa").trim();
+      const normalizedStore=storeName.toLocaleLowerCase("it");
+      const storeClass=normalizedStore==="conad"?"store-conad":
+        normalizedStore==="altro"?"store-altro":
+        normalizedStore==="triscount"?"store-triscount":
+        normalizedStore==="alimentarista"?"store-alimentarista":
+        normalizedStore==="todis"?"store-todis":"store-default";
+      const cartIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.1 10.2a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 1.9-1.4L21 8H6.2"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>';
+
       return '<article class="history-card '+(isOpen?'is-expanded':'')+' '+(query?'history-search-result':'')+'" data-history-id="'+h.id+'">'+
         '<button class="history-card-summary" type="button" aria-expanded="'+isOpen+'" title="Tieni premuto per eliminare la spesa">'+
-          '<span class="history-store-icon">🛒</span><span class="history-card-copy"><strong>'+((h.store)||"Spesa")+'</strong><small>'+date+'</small></span>'+
+          '<span class="history-store-icon '+storeClass+'">'+cartIcon+'</span><span class="history-card-copy"><strong>'+storeName+'</strong><small>'+date+'</small></span>'+
           '<b class="history-card-total">'+euro(total)+'</b><span class="history-chevron">'+(isOpen?'⌃':'⌄')+'</span></button>'+
         (isOpen?'<div class="history-products">'+products+(query?'<div class="history-search-date"><span>✓ Acquistato il</span><strong>'+date+'</strong></div>':'')+'<div class="history-grand-total"><strong>Totale spesa</strong><b>'+euro(total)+'</b></div></div>':'')+
       '</article>';
