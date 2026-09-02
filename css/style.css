@@ -1933,3 +1933,126 @@ body{
     border-radius:17px;
   }
 }
+
+
+/* V1.6.36 — Aggiunta prodotti più compatta e stati cromatici coerenti */
+#reminderProductPanel .panel-sheet{
+  padding-top:calc(max(10px, env(safe-area-inset-top)) + 4px);
+  padding-bottom:max(14px, env(safe-area-inset-bottom));
+}
+
+#reminderProductPanel .panel-header{
+  min-height:52px;
+  margin-bottom:4px;
+}
+
+#reminderProductPanel .panel-header h1{
+  font-size:25px;
+  line-height:1.05;
+  letter-spacing:-.03em;
+}
+
+#reminderProductPanel .panel-header .eyebrow{
+  font-size:11px;
+  margin-bottom:3px;
+  letter-spacing:.18em;
+}
+
+#reminderProductPanel .search-input{
+  min-height:48px;
+  height:48px;
+  margin:4px 0 8px;
+  padding:12px 14px;
+  border-radius:15px;
+  font-size:16px;
+}
+
+#reminderProductPanel .library-list{
+  gap:7px;
+  padding-bottom:8px;
+}
+
+#reminderProductPanel .library-item{
+  min-height:70px;
+  gap:11px;
+  padding:9px 11px;
+  border-radius:17px;
+}
+
+#reminderProductPanel .product-thumb,
+#reminderProductPanel .product-thumb-placeholder{
+  width:50px;
+  height:50px;
+  flex-basis:50px;
+  border-radius:13px;
+}
+
+#reminderProductPanel .library-item-info{
+  min-width:0;
+}
+
+#reminderProductPanel .library-item-info strong{
+  font-size:16px;
+  line-height:1.15;
+}
+
+#reminderProductPanel .library-item-info small{
+  margin-top:2px;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#reminderProductPanel .new-product-btn{
+  min-height:50px;
+  margin-top:8px;
+  border-radius:17px;
+  font-size:16px;
+}
+
+/* + grigio: non ancora aggiunto */
+.reminder-add-control,
+.shopping-add-control{
+  color:#68707b !important;
+  background:#eef0f2 !important;
+}
+
+/* ✓ verde: prodotto già aggiunto */
+.reminder-add-control.is-added,
+.shopping-add-control.is-added{
+  color:#287a4a !important;
+  background:#e3f0e8 !important;
+  border:1px solid #c9e0d1 !important;
+}
+
+/* Controllo compatto anche nella libreria della spesa */
+.reminder-add-control{
+  width:48px !important;
+  height:48px !important;
+  margin-left:auto;
+  padding:0 !important;
+  display:grid !important;
+  place-items:center !important;
+  border-radius:15px !important;
+  font-size:27px !important;
+  line-height:1 !important;
+  font-weight:600 !important;
+}
+
+.reminder-add-control.is-added{
+  font-size:25px !important;
+  font-weight:800 !important;
+}
+
+.shopping-add-control{
+  border:1px solid transparent !important;
+}
+
+@media(max-width:390px){
+  #reminderProductPanel .panel-header h1{font-size:23px}
+  #reminderProductPanel .library-item{min-height:66px;padding:8px 10px}
+  #reminderProductPanel .product-thumb,
+  #reminderProductPanel .product-thumb-placeholder{width:46px;height:46px;flex-basis:46px}
+  .reminder-add-control{width:44px !important;height:44px !important;border-radius:14px !important}
+}
