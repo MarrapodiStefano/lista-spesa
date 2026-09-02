@@ -1011,24 +1011,14 @@ document.addEventListener("DOMContentLoaded", () => {
     url.search="";
     url.hash="";
     url.searchParams.set("promemoria",payload);
-    const shareData={
-      title:"Promemoria - La Mia Spesa",
-      text:"Ti ho inviato un promemoria della spesa. Aprilo con La Mia Spesa per importare i prodotti.",
-      url:url.toString()
-    };
+    const message="Ti ho inviato un promemoria della spesa. Apri questo link con La Mia Spesa per importare i prodotti:\n\n"+url.toString();
     try{
-      if(navigator.share){
-        await navigator.share(shareData);
-      }else if(navigator.clipboard&&window.isSecureContext){
-        await navigator.clipboard.writeText(url.toString());
-        alert("✓ Link del Promemoria copiato negli appunti.");
-      }else{
-        window.prompt("Copia questo link e invialo alla persona:",url.toString());
-      }
+      // WhatsApp apre la scelta di un contatto e prepara già il messaggio.
+      const whatsappUrl="https://wa.me/?text="+encodeURIComponent(message);
+      window.location.href=whatsappUrl;
     }catch(error){
-      if(error&&error.name==="AbortError")return;
       console.error("Condivisione Promemoria:",error);
-      alert("Non è stato possibile aprire la condivisione.");
+      alert("Non è stato possibile aprire WhatsApp.");
     }
   };
 
