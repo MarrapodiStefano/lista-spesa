@@ -31,7 +31,7 @@ if ("serviceWorker" in navigator) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
-  const MASTER_PRODUCTS_URL="https://raw.githubusercontent.com/MarrapodiStefano/lista-spesa/main/products-master.json";
+  const MASTER_API_URL="https://lista-spesa-master.stef976.workers.dev/master";
   const normalizeProductName=name=>String(name||"").trim().toLocaleLowerCase("it-IT").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
   // Un prodotto è duplicato solo se coincidono nome E formato.
   // Esempio: Nutella 200g e Nutella 300g sono due prodotti diversi.
@@ -45,10 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn=$("syncMasterLibraryBtn");
     if(btn){btn.disabled=true;btn.classList.add("is-syncing");btn.textContent="↻ Aggiornamento...";}
     try{
-      const response=await fetch(MASTER_PRODUCTS_URL+"?v="+Date.now(),{cache:"no-store"});
+      const response=await fetch(MASTER_API_URL+"?v="+Date.now(),{cache:"no-store"});
       if(!response.ok)throw new Error("HTTP "+response.status);
-      const master=await response.json();
-      if(!Array.isArray(master))throw new Error("Formato non valido");
+      const payload=await response.json();
+      if(!payload.success||!Array.isArray(payload.products))throw new Error(payload.error||"Formato non valido");
+      const master=payload.products;
       const existing=new Set(state.products.map(getProductDuplicateKey));
       let added=0,skipped=0;
       master.forEach((raw,index)=>{
@@ -71,12 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const MASTER_SIGNATURE_KEY="listaSpesaMasterSignature";
   const checkMasterUpdate=async()=>{
     try{
-      const response=await fetch(MASTER_PRODUCTS_URL+"?check="+Date.now(),{cache:"no-store"});
+      const response=await fetch(MASTER_API_URL+"?check="+Date.now(),{cache:"no-store"});
       if(!response.ok)throw new Error("HTTP "+response.status);
-      const master=await response.json();
-      if(!Array.isArray(master))return;
+      const payload=await response.json();
+      if(!payload.success||!Array.isArray(payload.products))return;
+      const master=payload.products;
 
-      const signature=JSON.stringify(master);
+      const signature=payload.updatedAt||JSON.stringify(master);
       const previous=localStorage.getItem(MASTER_SIGNATURE_KEY);
 
       // Prima apertura su questo dispositivo: memorizza la versione senza mostrare avvisi.
@@ -90,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
         if(!isAdminMode()){
           setTimeout(()=>{
-            alert('☁️ Nuovi prodotti disponibili!\n\nEntra nella sezione “I miei prodotti” e premi “Importa prodotti” per aggiornarla.');
+            alert('☁️ Nuovi prodotti disponibili!\n\nEntra nella sezione “I miei prodotti” e premi “Aggiorna libreria prodotti” per importarli.');
           },500);
         }
       }
@@ -179,20 +181,42 @@ document.addEventListener("DOMContentLoaded", () => {
   $("adminLoginModal").addEventListener("click",e=>{if(e.target===$("adminLoginModal"))closeAdminLogin();});
   updateAdminUI();
 
-  // Esporta la libreria locale nel formato della Libreria Master.
-  $("exportMasterLibraryBtn").onclick=()=>{
+  // Solo l'amministratore può pubblicare la libreria locale nella Libreria Master.
+  // La chiave del Worker non viene salvata sul telefono.
+  $("exportMasterLibraryBtn").onclick=async()=>{
+    if(!isAdminMode())return;
+    const adminKey=prompt("Chiave amministratore per pubblicare la Libreria Master:");
+    if(!adminKey)return;
+
     const master=state.products.map(({id,name,price,weight,pieces,store,photo,barcode})=>({
       id,name,price,weight,pieces,store,photo,barcode
     }));
-    const blob=new Blob([JSON.stringify(master,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download="products-master.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+
+    const btn=$("exportMasterLibraryBtn");
+    btn.disabled=true;
+    const originalText=btn.textContent;
+    btn.textContent="☁️ Pubblicazione...";
+    try{
+      const response=await fetch(MASTER_API_URL,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "X-Admin-Key":adminKey
+        },
+        body:JSON.stringify({products:master})
+      });
+      const result=await response.json().catch(()=>({success:false,error:"Risposta non valida"}));
+      if(!response.ok||!result.success)throw new Error(result.error||"Pubblicazione non riuscita");
+
+      localStorage.setItem(MASTER_SIGNATURE_KEY,result.updatedAt||JSON.stringify(master));
+      alert("☁️ Libreria Master pubblicata correttamente su GitHub.");
+    }catch(error){
+      console.error("Pubblicazione Libreria Master:",error);
+      alert("⚠️ Non riesco a pubblicare la Libreria Master. Controlla la chiave amministratore e riprova.");
+    }finally{
+      btn.disabled=false;
+      btn.textContent=originalText;
+    }
   };
   window.addEventListener("load",()=>{
     if(state.products.length===0)syncMasterLibrary({silent:true});
