@@ -66,6 +66,40 @@ document.addEventListener("DOMContentLoaded", () => {
     finally{if(btn){btn.disabled=false;btn.classList.remove("is-syncing");btn.textContent="☁️ Aggiorna libreria Master";}}
   };
 
+  // Controllo automatico degli aggiornamenti della Libreria Master.
+  // Il messaggio viene mostrato una sola volta per ogni nuova versione trovata su GitHub.
+  const MASTER_SIGNATURE_KEY="listaSpesaMasterSignature";
+  const checkMasterUpdate=async()=>{
+    try{
+      const response=await fetch(MASTER_PRODUCTS_URL+"?check="+Date.now(),{cache:"no-store"});
+      if(!response.ok)throw new Error("HTTP "+response.status);
+      const master=await response.json();
+      if(!Array.isArray(master))return;
+
+      const signature=JSON.stringify(master);
+      const previous=localStorage.getItem(MASTER_SIGNATURE_KEY);
+
+      // Prima apertura su questo dispositivo: memorizza la versione senza mostrare avvisi.
+      if(previous===null){
+        localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
+        return;
+      }
+
+      // Nuova versione trovata: avvisa gli utenti normali una sola volta.
+      if(previous!==signature){
+        localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
+        if(!isAdminMode()){
+          setTimeout(()=>{
+            alert('☁️ Nuovi prodotti disponibili!\n\nEntra nella sezione “I miei prodotti” e premi “Importa prodotti” per aggiornarla.');
+          },500);
+        }
+      }
+    }catch(error){
+      // Il controllo è informativo: se GitHub non è raggiungibile l'app continua normalmente.
+      console.warn("Controllo aggiornamenti Libreria Master:",error);
+    }
+  };
+
   let pendingPhoto="";
   let editingProductId=null;
   let editingShoppingId=null;
@@ -160,7 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
     a.remove();
     URL.revokeObjectURL(url);
   };
-  window.addEventListener("load",()=>{if(state.products.length===0)syncMasterLibrary({silent:true});},{once:true});
+  window.addEventListener("load",()=>{
+    if(state.products.length===0)syncMasterLibrary({silent:true});
+    checkMasterUpdate();
+  },{once:true});
 
   // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
   $("forceUpdateBtn").onclick=async()=>{
