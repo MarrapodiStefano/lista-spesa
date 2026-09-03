@@ -118,21 +118,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const $=id=>document.getElementById(id);
   $("syncMasterLibraryBtn").onclick=()=>syncMasterLibrary();
 
-  // Accesso amministratore: tap prolungato sul titolo della Libreria.
+  // Accesso amministratore: tap prolungato sul vero titolo del pannello Libreria.
   let adminPressTimer=null;
-  const adminTitle=$("libraryAdminTitle");
+  const adminTitle=$("productPanelTitle");
   if(adminTitle){
-    const startAdminPress=()=>{
+    const startAdminPress=e=>{
+      // Evita la selezione del testo su iPhone durante il tap prolungato.
+      e.preventDefault();
+      if(adminPressTimer)clearTimeout(adminPressTimer);
       adminPressTimer=setTimeout(()=>{
         adminPressTimer=null;
         if(!isAdminMode())openAdminLogin();
-      },850);
+      },750);
     };
     const cancelAdminPress=()=>{if(adminPressTimer){clearTimeout(adminPressTimer);adminPressTimer=null;}};
-    adminTitle.addEventListener("pointerdown",startAdminPress);
+    adminTitle.addEventListener("pointerdown",startAdminPress,{passive:false});
     adminTitle.addEventListener("pointerup",cancelAdminPress);
     adminTitle.addEventListener("pointerleave",cancelAdminPress);
     adminTitle.addEventListener("pointercancel",cancelAdminPress);
+    adminTitle.addEventListener("contextmenu",e=>e.preventDefault());
+    adminTitle.addEventListener("selectstart",e=>e.preventDefault());
   }
   $("adminCancelBtn").onclick=closeAdminLogin;
   $("adminConfirmBtn").onclick=confirmAdminLogin;
