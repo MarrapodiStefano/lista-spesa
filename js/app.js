@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=86", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=88", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -31,6 +31,31 @@ if ("serviceWorker" in navigator) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
+
+  let pendingPhoto="";
+  let editingProductId=null;
+  let editingShoppingId=null;
+  let editingReminderId=null;
+  let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
+  const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
+  if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
+  if(!state.currentShoppingName) state.currentShoppingName="La mia spesa";
+  if(state.currentShoppingStore===undefined) state.currentShoppingStore="";
+  if(state.currentShoppingDate===undefined) state.currentShoppingDate="";
+  if(!Array.isArray(state.purchasedShopping)) state.purchasedShopping=[];
+  if(!Array.isArray(state.reminders)) state.reminders=[];
+  const migrateProductFields=items=>items.forEach(p=>{
+    if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
+    if(p.pieces===undefined||p.pieces===null) p.pieces=1;
+    if(p.store===undefined||p.store===null) p.store="";
+  });
+  migrateProductFields(state.products);
+  migrateProductFields(state.currentShopping);
+  migrateProductFields(state.purchasedShopping);
+  const ensureShoppingIds=items=>items.forEach((p,i)=>{if(!p._shoppingId)p._shoppingId="shop-"+Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,8);});
+  ensureShoppingIds(state.currentShopping);
+  ensureShoppingIds(state.purchasedShopping);
+  const $=id=>document.getElementById(id);
   // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
   $("forceUpdateBtn").onclick=async()=>{
     const btn=$("forceUpdateBtn");
@@ -65,30 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.reload();
     }
   };
-  let pendingPhoto="";
-  let editingProductId=null;
-  let editingShoppingId=null;
-  let editingReminderId=null;
-  let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
-  const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
-  if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
-  if(!state.currentShoppingName) state.currentShoppingName="La mia spesa";
-  if(state.currentShoppingStore===undefined) state.currentShoppingStore="";
-  if(state.currentShoppingDate===undefined) state.currentShoppingDate="";
-  if(!Array.isArray(state.purchasedShopping)) state.purchasedShopping=[];
-  if(!Array.isArray(state.reminders)) state.reminders=[];
-  const migrateProductFields=items=>items.forEach(p=>{
-    if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
-    if(p.pieces===undefined||p.pieces===null) p.pieces=1;
-    if(p.store===undefined||p.store===null) p.store="";
-  });
-  migrateProductFields(state.products);
-  migrateProductFields(state.currentShopping);
-  migrateProductFields(state.purchasedShopping);
-  const ensureShoppingIds=items=>items.forEach((p,i)=>{if(!p._shoppingId)p._shoppingId="shop-"+Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,8);});
-  ensureShoppingIds(state.currentShopping);
-  ensureShoppingIds(state.purchasedShopping);
-  const $=id=>document.getElementById(id);
   const save=()=>{
     try{
       localStorage.setItem(DB_KEY,JSON.stringify(state));
