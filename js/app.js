@@ -34,8 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
   $("forceUpdateBtn").onclick=async()=>{
     const btn=$("forceUpdateBtn");
+    if(btn.classList.contains("is-updating"))return;
+
+    // Feedback visivo immediato: l'icona gira per tutta la durata
+    // dell'operazione, prima del riavvio della PWA.
     btn.classList.add("is-updating");
     btn.disabled=true;
+    btn.setAttribute("aria-label","Aggiornamento in corso");
+
     try{
       if("serviceWorker" in navigator){
         const registration=await navigator.serviceWorker.getRegistration();
@@ -44,12 +50,18 @@ document.addEventListener("DOMContentLoaded", () => {
           if(registration.waiting)registration.waiting.postMessage({type:"SKIP_WAITING"});
         }
       }
+
+      // Manteniamo l'animazione visibile abbastanza a lungo da rendere
+      // chiaramente percepibile l'aggiornamento, anche se è molto rapido.
+      await new Promise(resolve=>setTimeout(resolve,900));
+
       // Bypass della cache mantenendo intatti tutti i dati salvati in localStorage.
       const url=new URL(window.location.href);
       url.searchParams.set("_update",Date.now().toString());
       window.location.replace(url.toString());
     }catch(error){
       console.error("Aggiornamento manuale:",error);
+      await new Promise(resolve=>setTimeout(resolve,500));
       window.location.reload();
     }
   };
