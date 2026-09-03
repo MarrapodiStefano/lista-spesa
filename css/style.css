@@ -2784,3 +2784,5 @@ body{
 
 /* V2.12 — Libreria Master GitHub */
 .library-footer-actions{display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px}.master-library-btn{min-height:40px;border:1px solid rgba(36,129,67,.18);border-radius:13px;background:#eef8f1;color:#248143;font-size:13px;font-weight:700;cursor:pointer}.master-library-btn:disabled{opacity:.7}.master-library-btn.is-syncing{animation:masterPulse .9s ease-in-out infinite}@keyframes masterPulse{50%{opacity:.45}}
+
+.export-master-btn{min-height:40px;border:1px solid rgba(80,90,105,.14);border-radius:13px;background:#f4f5f6;color:#59616d;font-size:13px;font-weight:700;cursor:pointer}
