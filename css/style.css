@@ -2777,4 +2777,6 @@ body{
 }
 .force-update-btn:active{transform:scale(.92)}
 .force-update-btn.is-updating{animation:forceUpdateSpin .8s linear infinite;color:#248143}
-@keyframes forceUpdateSpin{to{transform:rotate(360deg)}}
+@keyframes forceUpdateSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.force-update-btn.is-updating{pointer-events:none;opacity:.9;animation:forceUpdateSpin .55s linear infinite!important}
