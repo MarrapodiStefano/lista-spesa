@@ -2804,3 +2804,14 @@ body{
 #adminCancelBtn{background:#eef0f2;color:#59616d}
 #adminConfirmBtn{background:#248143;color:#fff}
 .admin-login-error{margin-top:10px;color:#c0392b;font-size:12px;font-weight:700}
+
+
+/* V2.15 — tap prolungato amministratore su iPhone */
+.library-admin-title,
+#productPanelTitle{
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-touch-callout:none!important;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
