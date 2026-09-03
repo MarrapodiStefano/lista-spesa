@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=89", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=90", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -100,6 +100,68 @@ document.addEventListener("DOMContentLoaded", () => {
       return false;
     }
   };
+
+  // Migrazione una tantum: comprime anche le foto già presenti nella libreria,
+  // create prima dell'introduzione della compressione automatica.
+  const recompressStoredPhoto=dataUrl=>new Promise(resolve=>{
+    if(!dataUrl||!String(dataUrl).startsWith("data:image/")) return resolve(dataUrl);
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const MAX_SIDE=900;
+        const scale=Math.min(1,MAX_SIDE/Math.max(img.width||1,img.height||1));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        const ctx=canvas.getContext("2d",{alpha:false});
+        ctx.fillStyle="#fff";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        let quality=.78;
+        let output=canvas.toDataURL("image/jpeg",quality);
+        while(output.length>600000&&quality>.35){
+          quality-=.08;
+          output=canvas.toDataURL("image/jpeg",quality);
+        }
+        resolve(output);
+      }catch(error){
+        console.error("Compressione foto esistente:",error);
+        resolve(dataUrl);
+      }
+    };
+    img.onerror=()=>resolve(dataUrl);
+    img.src=dataUrl;
+  });
+
+  const migrateStoredPhotos=async()=>{
+    const MIGRATION_KEY="listaSpesaPhotoMigrationV2_11";
+    if(localStorage.getItem(MIGRATION_KEY)==="done") return;
+    const lists=[state.products,state.currentShopping,state.purchasedShopping,state.reminders];
+    const seen=new Map();
+    lists.forEach(list=>(Array.isArray(list)?list:[]).forEach(item=>{
+      if(item&&item.photo&&item.id&&!seen.has(item.id)) seen.set(item.id,item.photo);
+    }));
+    if(!seen.size){localStorage.setItem(MIGRATION_KEY,"done");return;}
+
+    const compressed=new Map();
+    for(const [id,photo] of seen) compressed.set(id,await recompressStoredPhoto(photo));
+    let changed=false;
+    lists.forEach(list=>(Array.isArray(list)?list:[]).forEach(item=>{
+      if(item&&compressed.has(item.id)){
+        const next=compressed.get(item.id);
+        if(item.photo!==next){item.photo=next;changed=true;}
+      }
+    }));
+
+    if(changed&&save()){
+      console.log("Foto esistenti ottimizzate.");
+      localStorage.setItem(MIGRATION_KEY,"done");
+    }else if(!changed){
+      localStorage.setItem(MIGRATION_KEY,"done");
+    }
+  };
+  // Non blocca l'avvio dell'app: parte subito dopo il caricamento dell'interfaccia.
+  setTimeout(()=>{migrateStoredPhotos().catch(error=>console.error("Migrazione foto:",error));},300);
   const renderHomeCurrentShopping=()=>{
     const btn=$("openCurrentShoppingBtn");
     const meta=$("currentShoppingHomeMeta");
