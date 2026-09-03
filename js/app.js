@@ -55,7 +55,16 @@ document.addEventListener("DOMContentLoaded", () => {
   ensureShoppingIds(state.currentShopping);
   ensureShoppingIds(state.purchasedShopping);
   const $=id=>document.getElementById(id);
-  const save=()=>localStorage.setItem(DB_KEY,JSON.stringify(state));
+  const save=()=>{
+    try{
+      localStorage.setItem(DB_KEY,JSON.stringify(state));
+      return true;
+    }catch(error){
+      console.error("Errore nel salvataggio dei dati",error);
+      alert("⚠️ Non riesco a salvare il prodotto. Riprova senza una foto troppo grande oppure libera spazio sul dispositivo.");
+      return false;
+    }
+  };
   const renderHomeCurrentShopping=()=>{
     const btn=$("openCurrentShoppingBtn");
     const meta=$("currentShoppingHomeMeta");
@@ -861,11 +870,14 @@ document.addEventListener("DOMContentLoaded", () => {
       state.products.push(product);
     }
 
-    save();
+    // Salviamo prima di modificare l'interfaccia: così un eventuale errore
+    // non fa sembrare il prodotto aggiunto quando in realtà non è stato memorizzato.
+    if(!save())return;
     resetProductForm();
     close("newProductPanel");
     renderLibrary($("productSearch").value);
     renderShopping();
+    renderReminders();
   };
   $("deleteProductBtn").onclick=()=>{
     if(!editingProductId)return;
