@@ -2786,3 +2786,21 @@ body{
 .library-footer-actions{display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px}.master-library-btn{min-height:40px;border:1px solid rgba(36,129,67,.18);border-radius:13px;background:#eef8f1;color:#248143;font-size:13px;font-weight:700;cursor:pointer}.master-library-btn:disabled{opacity:.7}.master-library-btn.is-syncing{animation:masterPulse .9s ease-in-out infinite}@keyframes masterPulse{50%{opacity:.45}}
 
 .export-master-btn{min-height:40px;border:1px solid rgba(80,90,105,.14);border-radius:13px;background:#f4f5f6;color:#59616d;font-size:13px;font-weight:700;cursor:pointer}
+
+
+/* V2.14 — Modalità amministratore Libreria Master */
+.admin-only[hidden]{display:none!important}
+#libraryAdminTitle{-webkit-user-select:none;user-select:none}
+.admin-login-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(20,25,30,.42);backdrop-filter:blur(5px)}
+.admin-login-modal[aria-hidden="true"]{display:none}
+.admin-login-card{width:min(100%,340px);padding:22px 18px 16px;border-radius:22px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.22);text-align:center}
+.admin-login-icon{font-size:30px;margin-bottom:4px}
+.admin-login-card h3{margin:0 0 7px;font-size:18px}
+.admin-login-card p{margin:0 0 15px;color:#6b7280;font-size:13px;line-height:1.35}
+#adminPinInput{width:100%;box-sizing:border-box;padding:12px;border:1px solid #d9dde2;border-radius:12px;text-align:center;font-size:18px;letter-spacing:4px;outline:none}
+#adminPinInput:focus{border-color:#248143}
+.admin-login-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.admin-login-actions button{min-height:42px;border:0;border-radius:12px;font-weight:700;font-size:14px}
+#adminCancelBtn{background:#eef0f2;color:#59616d}
+#adminConfirmBtn{background:#248143;color:#fff}
+.admin-login-error{margin-top:10px;color:#c0392b;font-size:12px;font-weight:700}
