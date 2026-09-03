@@ -31,6 +31,32 @@ if ("serviceWorker" in navigator) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
+  const MASTER_PRODUCTS_URL="https://raw.githubusercontent.com/MarrapodiStefano/lista-spesa/main/products-master.json";
+  const normalizeProductName=name=>String(name||"").trim().toLocaleLowerCase("it-IT").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
+  const syncMasterLibrary=async({silent=false}={})=>{
+    const btn=$("syncMasterLibraryBtn");
+    if(btn){btn.disabled=true;btn.classList.add("is-syncing");btn.textContent="↻ Aggiornamento...";}
+    try{
+      const response=await fetch(MASTER_PRODUCTS_URL+"?v="+Date.now(),{cache:"no-store"});
+      if(!response.ok)throw new Error("HTTP "+response.status);
+      const master=await response.json();
+      if(!Array.isArray(master))throw new Error("Formato non valido");
+      const existing=new Set(state.products.map(p=>normalizeProductName(p.name)));
+      let added=0,skipped=0;
+      master.forEach((raw,index)=>{
+        if(!raw||!String(raw.name||"").trim())return;
+        const key=normalizeProductName(raw.name);
+        if(existing.has(key)){skipped++;return;}
+        state.products.push({id:raw.id||("master-"+Date.now()+"-"+index+"-"+Math.random().toString(36).slice(2,7)),name:String(raw.name).trim(),price:raw.price??"",weight:raw.weight??raw.quantity??"",pieces:raw.pieces??1,store:raw.store??"",photo:raw.photo??"",barcode:raw.barcode??""});
+        existing.add(key);added++;
+      });
+      save();
+      if($("productPanel").getAttribute("aria-hidden")==="false")renderLibrary($("productSearch").value);
+      if(!silent)alert("📦 Libreria Master aggiornata\n\n✅ "+added+" nuovi prodotti aggiunti\n⏭️ "+skipped+" prodotti già presenti");
+      return {added,skipped};
+    }catch(error){console.error("Errore Libreria Master:",error);if(!silent)alert("⚠️ Non riesco a scaricare la Libreria Master. Riprova.");return null;}
+    finally{if(btn){btn.disabled=false;btn.classList.remove("is-syncing");btn.textContent="☁️ Aggiorna libreria Master";}}
+  };
 
   let pendingPhoto="";
   let editingProductId=null;
@@ -56,6 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
   ensureShoppingIds(state.currentShopping);
   ensureShoppingIds(state.purchasedShopping);
   const $=id=>document.getElementById(id);
+  $("syncMasterLibraryBtn").onclick=()=>syncMasterLibrary();
+  window.addEventListener("load",()=>{if(state.products.length===0)syncMasterLibrary({silent:true});},{once:true});
+
   // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
   $("forceUpdateBtn").onclick=async()=>{
     const btn=$("forceUpdateBtn");
