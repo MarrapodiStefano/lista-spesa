@@ -2763,3 +2763,18 @@ body{
 .shopping-add-control.is-added{
   line-height:0 !important;
 }
+
+
+/* V2.7 — Pulsante aggiornamento manuale PWA */
+.force-update-btn{
+  position:absolute;top:0;right:2px;z-index:5;
+  width:38px;height:38px;border:0;border-radius:50%;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.82);color:#59616d;
+  box-shadow:0 4px 12px rgba(20,30,40,.12);
+  font-size:25px;font-weight:700;line-height:1;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.force-update-btn:active{transform:scale(.92)}
+.force-update-btn.is-updating{animation:forceUpdateSpin .8s linear infinite;color:#248143}
+@keyframes forceUpdateSpin{to{transform:rotate(360deg)}}
