@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="icon-192.png?v=80">
   <link rel="manifest" href="manifest.json?v=80">
   <title>La mia spesa</title>
-  <link rel="stylesheet" href="css/style.css?v=88">
+  <link rel="stylesheet" href="css/style.css?v=89">
   <script src="https://unpkg.com/@zxing/browser@0.2.1" defer></script>
 </head>
 <body>
@@ -19,7 +19,7 @@
       <header class="home-header">
         <div>
           <h1>La Mia Spesa</h1>
-          <p>V2.13</p>
+          <p>V2.14</p>
         </div>
         <button class="force-update-btn" id="forceUpdateBtn" type="button" aria-label="Aggiorna l’app" title="Aggiorna l’app">↻</button>
         <div class="home-groceries" aria-hidden="true"><span>🥖</span><span>🥕</span><span>🍅</span><span>🥬</span></div>
@@ -115,7 +115,7 @@
 
           <section class="guide-section" id="guide-products">
             <div class="guide-number">2</div>
-            <div><h2>I miei prodotti</h2>
+            <div><h2 id="libraryAdminTitle">I miei prodotti</h2>
             <p>È la tua libreria personale: qui conservi i prodotti che utilizzi più spesso.</p>
             <div class="guide-tip"><strong>✏️ Modificare un prodotto</strong><br>Usa la matita per cambiare nome, prezzo di riferimento, negozio, quantità, peso e altre informazioni disponibili.</div>
             <p><strong>Il prezzo nella libreria è il prezzo di riferimento.</strong> Quando aggiungi il prodotto a una spesa o al Promemoria puoi modificarne il prezzo senza cambiare quello salvato nella libreria.</p>
@@ -341,7 +341,7 @@
         <div class="panel-header"><div><p class="eyebrow" id="productPanelEyebrow">LIBRERIA PRODOTTI</p><h1 id="productPanelTitle">Aggiungi prodotti</h1></div><button class="close-btn" id="closeProductsBtn" type="button">×</button></div>
         <input class="search-input" id="productSearch" type="search" placeholder="Cerca un prodotto">
         <div class="library-list" id="libraryList"></div>
-        <div class="library-footer-actions"><button class="master-library-btn" id="syncMasterLibraryBtn" type="button">☁️ Aggiorna libreria Master</button><button class="export-master-btn" id="exportMasterLibraryBtn" type="button">📤 Esporta la mia libreria Master</button><button class="new-product-btn" id="newProductBtn" type="button">＋ Nuovo prodotto</button></div>
+        <div class="library-footer-actions"><button class="master-library-btn" id="syncMasterLibraryBtn" type="button">☁️ Aggiorna libreria Master</button><button class="export-master-btn admin-only" id="exportMasterLibraryBtn" type="button" hidden>📤 Esporta la mia libreria Master</button><button class="new-product-btn" id="newProductBtn" type="button">＋ Nuovo prodotto</button></div>
       </div>
     </section>
 
@@ -415,5 +415,19 @@
 
     <section class="scanner-panel" id="scannerPanel" aria-hidden="true"><div class="panel-backdrop" id="closeScanner"></div><div class="panel-sheet scanner-sheet"><div class="panel-handle"></div><div class="panel-header"><div><p class="eyebrow">SCANSIONE</p><h1>Codice a barre</h1></div><button class="close-btn" id="closeScannerBtn" type="button">×</button></div><p class="scanner-help">Inquadra il codice a barre del prodotto.</p><div id="barcodeReader"></div><div class="scanner-status" id="scannerStatus">Preparazione fotocamera…</div></div></section>
   </main>
-  <script src="js/app.js?v=88"></script>
+  <script src="js/app.js?v=89"></script>
+
+  <div class="admin-login-modal" id="adminLoginModal" aria-hidden="true">
+    <div class="admin-login-card">
+      <div class="admin-login-icon">👑</div>
+      <h3>Modalità amministratore</h3>
+      <p>Inserisci il PIN per gestire la Libreria Master.</p>
+      <input id="adminPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="PIN">
+      <div class="admin-login-actions">
+        <button id="adminCancelBtn" type="button">Annulla</button>
+        <button id="adminConfirmBtn" type="button">Accedi</button>
+      </div>
+      <div class="admin-login-error" id="adminLoginError" hidden>PIN non corretto.</div>
+    </div>
+  </div>
 </body></html>
