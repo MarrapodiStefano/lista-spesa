@@ -72,6 +72,32 @@ document.addEventListener("DOMContentLoaded", () => {
   let editingReminderId=null;
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
+  // Modalità amministratore: resta attiva solo su questo dispositivo.
+  const ADMIN_PIN="2708";
+  const ADMIN_KEY="listaSpesaAdminMode";
+  const isAdminMode=()=>localStorage.getItem(ADMIN_KEY)==="true";
+  const updateAdminUI=()=>{
+    const exportBtn=$("exportMasterLibraryBtn");
+    if(exportBtn)exportBtn.hidden=!isAdminMode();
+  };
+  const openAdminLogin=()=>{
+    $("adminPinInput").value="";
+    $("adminLoginError").hidden=true;
+    $("adminLoginModal").setAttribute("aria-hidden","false");
+    setTimeout(()=>$("adminPinInput").focus(),50);
+  };
+  const closeAdminLogin=()=>$("adminLoginModal").setAttribute("aria-hidden","true");
+  const confirmAdminLogin=()=>{
+    if($("adminPinInput").value===ADMIN_PIN){
+      localStorage.setItem(ADMIN_KEY,"true");
+      updateAdminUI();
+      closeAdminLogin();
+      alert("👑 Modalità amministratore attivata su questo dispositivo.");
+    }else{
+      $("adminLoginError").hidden=false;
+      $("adminPinInput").select();
+    }
+  };
   if(!Array.isArray(state.currentShopping)) state.currentShopping=[];
   if(!state.currentShoppingName) state.currentShoppingName="La mia spesa";
   if(state.currentShoppingStore===undefined) state.currentShoppingStore="";
@@ -91,6 +117,28 @@ document.addEventListener("DOMContentLoaded", () => {
   ensureShoppingIds(state.purchasedShopping);
   const $=id=>document.getElementById(id);
   $("syncMasterLibraryBtn").onclick=()=>syncMasterLibrary();
+
+  // Accesso amministratore: tap prolungato sul titolo della Libreria.
+  let adminPressTimer=null;
+  const adminTitle=$("libraryAdminTitle");
+  if(adminTitle){
+    const startAdminPress=()=>{
+      adminPressTimer=setTimeout(()=>{
+        adminPressTimer=null;
+        if(!isAdminMode())openAdminLogin();
+      },850);
+    };
+    const cancelAdminPress=()=>{if(adminPressTimer){clearTimeout(adminPressTimer);adminPressTimer=null;}};
+    adminTitle.addEventListener("pointerdown",startAdminPress);
+    adminTitle.addEventListener("pointerup",cancelAdminPress);
+    adminTitle.addEventListener("pointerleave",cancelAdminPress);
+    adminTitle.addEventListener("pointercancel",cancelAdminPress);
+  }
+  $("adminCancelBtn").onclick=closeAdminLogin;
+  $("adminConfirmBtn").onclick=confirmAdminLogin;
+  $("adminPinInput").addEventListener("keydown",e=>{if(e.key==="Enter")confirmAdminLogin();});
+  $("adminLoginModal").addEventListener("click",e=>{if(e.target===$("adminLoginModal"))closeAdminLogin();});
+  updateAdminUI();
 
   // Esporta la libreria locale nel formato della Libreria Master.
   $("exportMasterLibraryBtn").onclick=()=>{
