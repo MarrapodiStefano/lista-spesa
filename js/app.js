@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(!silent)alert("📦 Libreria Master aggiornata\n\n✅ "+added+" nuovi prodotti aggiunti\n⏭️ "+skipped+" prodotti già presenti");
       return {added,skipped};
     }catch(error){console.error("Errore Libreria Master:",error);if(!silent)alert("⚠️ Non riesco a scaricare la Libreria Master. Riprova.");return null;}
-    finally{if(btn){btn.disabled=false;btn.classList.remove("is-syncing");btn.textContent="☁️ Aggiorna libreria Master";}}
+    finally{if(btn){btn.disabled=false;btn.classList.remove("is-syncing");btn.textContent="↻ Aggiorna libreria prodotti";}}
   };
 
   // Controllo automatico degli aggiornamenti della Libreria Master.
