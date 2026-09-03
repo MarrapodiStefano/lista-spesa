@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=78", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=86", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -31,6 +31,28 @@ if ("serviceWorker" in navigator) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const DB_KEY="listaSpesaDB";
+  // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
+  $("forceUpdateBtn").onclick=async()=>{
+    const btn=$("forceUpdateBtn");
+    btn.classList.add("is-updating");
+    btn.disabled=true;
+    try{
+      if("serviceWorker" in navigator){
+        const registration=await navigator.serviceWorker.getRegistration();
+        if(registration){
+          await registration.update();
+          if(registration.waiting)registration.waiting.postMessage({type:"SKIP_WAITING"});
+        }
+      }
+      // Bypass della cache mantenendo intatti tutti i dati salvati in localStorage.
+      const url=new URL(window.location.href);
+      url.searchParams.set("_update",Date.now().toString());
+      window.location.replace(url.toString());
+    }catch(error){
+      console.error("Aggiornamento manuale:",error);
+      window.location.reload();
+    }
+  };
   let pendingPhoto="";
   let editingProductId=null;
   let editingShoppingId=null;
