@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=88", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=89", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return true;
     }catch(error){
       console.error("Errore nel salvataggio dei dati",error);
-      alert("⚠️ Non riesco a salvare il prodotto. Riprova senza una foto troppo grande oppure libera spazio sul dispositivo.");
+      alert("⚠️ Non riesco a salvare il prodotto perché lo spazio dati dell'app è pieno. Le nuove foto ora vengono compresse automaticamente; se l'errore continua, elimina qualche vecchia foto dalla libreria.");
       return false;
     }
   };
@@ -690,7 +690,61 @@ document.addEventListener("DOMContentLoaded", () => {
     $("customStoreWrap").hidden=!isOther;
     if(!isOther)$("productCustomStore").value="";
   };
-  $("productPhoto").onchange=e=>{const file=e.target.files&&e.target.files[0];if(!file){pendingPhoto="";$("photoPreview").hidden=true;return;}const reader=new FileReader();reader.onload=()=>{pendingPhoto=reader.result;$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;};reader.readAsDataURL(file);};
+  // Le foto vengono ridotte prima di essere salvate. Su iPhone le immagini originali
+  // possono occupare molti MB e saturare rapidamente lo spazio disponibile in localStorage.
+  const compressProductPhoto=file=>new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("Impossibile leggere la foto"));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Impossibile elaborare la foto"));
+      img.onload=()=>{
+        const MAX_SIDE=900;
+        const scale=Math.min(1,MAX_SIDE/Math.max(img.width,img.height));
+        const canvas=document.createElement("canvas");
+        canvas.width=Math.max(1,Math.round(img.width*scale));
+        canvas.height=Math.max(1,Math.round(img.height*scale));
+        const ctx=canvas.getContext("2d",{alpha:false});
+        ctx.fillStyle="#ffffff";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+        let quality=.78;
+        let result=canvas.toDataURL("image/jpeg",quality);
+        // Manteniamo ogni foto entro circa 450 KB per lasciare spazio a molti prodotti.
+        while(result.length>600000&&quality>.35){
+          quality-=.08;
+          result=canvas.toDataURL("image/jpeg",quality);
+        }
+        resolve(result);
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $("productPhoto").onchange=async e=>{
+    const file=e.target.files&&e.target.files[0];
+    if(!file){
+      pendingPhoto="";
+      $("photoPreview").hidden=true;
+      return;
+    }
+    try{
+      const input=e.target;
+      input.disabled=true;
+      pendingPhoto=await compressProductPhoto(file);
+      $("photoPreviewImg").src=pendingPhoto;
+      $("photoPreview").hidden=false;
+    }catch(error){
+      console.error("Compressione foto:",error);
+      pendingPhoto="";
+      $("photoPreview").hidden=true;
+      alert("⚠️ Non riesco a preparare questa foto. Prova a sceglierne un'altra.");
+    }finally{
+      e.target.disabled=false;
+    }
+  };
   let scannerTarget=null;
 
   const stopScanner=async()=>{
