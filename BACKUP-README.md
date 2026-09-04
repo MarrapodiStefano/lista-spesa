@@ -26,3 +26,6 @@ I segreti non sono inclusi in questo backup:
 Devono essere conservati separatamente e reinseriti nel nuovo Worker.
 
 Backup creato dal repository MarrapodiStefano/lista-spesa, branch main, versione applicazione V3.0.
+
+## Ultimo aggiornamento backup
+Include l'ultima modifica della modalità amministratore: pulsante “Esci dalla modalità amministratore”, correzione CSS e aggiornamento cache PWA.
