@@ -2815,3 +2815,19 @@ body{
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
+
+/* Pulsante uscita modalità amministratore */
+.exit-admin-btn{
+  border:1px solid rgba(120,120,120,.35);
+  background:var(--card,#fff);
+  color:inherit;
+  border-radius:12px;
+  padding:12px 14px;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+  width:100%;
+}
+.exit-admin-btn[hidden]{
+  display:none !important;
+}
