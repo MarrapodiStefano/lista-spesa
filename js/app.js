@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
   const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
   // Modalità amministratore: resta attiva solo su questo dispositivo.
-  const ADMIN_PIN="2708";
+  const ADMIN_PIN="6414";
   const ADMIN_KEY="listaSpesaAdminMode";
   const isAdminMode=()=>localStorage.getItem(ADMIN_KEY)==="true";
   const updateAdminUI=()=>{
