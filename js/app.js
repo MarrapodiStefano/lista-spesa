@@ -114,7 +114,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const isAdminMode=()=>localStorage.getItem(ADMIN_KEY)==="true";
   const updateAdminUI=()=>{
     const exportBtn=$("exportMasterLibraryBtn");
-    if(exportBtn)exportBtn.hidden=!isAdminMode();
+    const syncBtn=$("syncMasterLibraryBtn");
+    const admin=isAdminMode();
+
+    // La pubblicazione è riservata all'amministratore.
+    if(exportBtn) exportBtn.hidden=!admin;
+
+    // In modalità amministratore nascondiamo l'aggiornamento della Libreria Master:
+    // evita confusione, perché l'amministratore gestisce e pubblica la libreria.
+    if(syncBtn) syncBtn.hidden=admin;
   };
   const openAdminLogin=()=>{
     $("adminPinInput").value="";
