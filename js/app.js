@@ -115,14 +115,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const updateAdminUI=()=>{
     const exportBtn=$("exportMasterLibraryBtn");
     const syncBtn=$("syncMasterLibraryBtn");
+    const exitBtn=$("exitAdminModeBtn");
     const admin=isAdminMode();
 
-    // La pubblicazione è riservata all'amministratore.
+    // Solo l'amministratore può pubblicare la Libreria Master.
     if(exportBtn) exportBtn.hidden=!admin;
 
-    // In modalità amministratore nascondiamo l'aggiornamento della Libreria Master:
-    // evita confusione, perché l'amministratore gestisce e pubblica la libreria.
+    // L'amministratore non deve vedere il pulsante di aggiornamento.
     if(syncBtn) syncBtn.hidden=admin;
+
+    // Il pulsante di uscita è visibile solo in modalità amministratore.
+    if(exitBtn) exitBtn.hidden=!admin;
+  };
+
+  const exitAdminMode=()=>{
+    localStorage.removeItem(ADMIN_KEY);
+    updateAdminUI();
+    alert("🔒 Modalità amministratore disattivata. Questo dispositivo è tornato alla modalità utente.");
   };
   const openAdminLogin=()=>{
     $("adminPinInput").value="";
@@ -187,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("adminConfirmBtn").onclick=confirmAdminLogin;
   $("adminPinInput").addEventListener("keydown",e=>{if(e.key==="Enter")confirmAdminLogin();});
   $("adminLoginModal").addEventListener("click",e=>{if(e.target===$("adminLoginModal"))closeAdminLogin();});
+  $("exitAdminModeBtn").onclick=exitAdminMode;
   updateAdminUI();
 
   // Solo l'amministratore può pubblicare la libreria locale nella Libreria Master.
