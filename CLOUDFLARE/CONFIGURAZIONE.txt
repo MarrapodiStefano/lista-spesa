@@ -1,0 +1,31 @@
+CONFIGURAZIONE CLOUDFLARE — La Mia Spesa V3.0
+
+WORKER
+Il codice completo è in: worker.js
+
+VARIABILI / SECRETS DA CONFIGURARE
+1. GITHUB_OWNER
+   Valore: MarrapodiStefano
+
+2. GITHUB_REPO
+   Valore: lista-spesa
+
+3. GITHUB_TOKEN
+   Secret: il token GitHub personale con permessi necessari per leggere e aggiornare il repository.
+   NON è incluso nel backup per sicurezza.
+
+4. ADMIN_KEY
+   Secret: la chiave amministratore usata dalla PWA per autorizzare la pubblicazione.
+   NON è inclusa nel backup per sicurezza.
+
+ENDPOINT
+GET  /master  -> scarica la Libreria Master
+POST /master  -> pubblica la Libreria Master (richiede X-Admin-Key)
+
+FILE MASTER
+products-master.json
+Branch: main
+
+NOTA SUL RIPRISTINO
+Se il repository cambia proprietario o nome, aggiornare GITHUB_OWNER e GITHUB_REPO nel Worker.
+Se il Worker cambia URL, aggiornare il relativo URL API in js/app.js.
