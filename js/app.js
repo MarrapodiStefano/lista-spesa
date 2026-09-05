@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=99", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=100", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
   // Non blocca l'avvio dell'app: parte subito dopo il caricamento dell'interfaccia.
-  // IndexedDB V3.4: non eseguiamo più la vecchia migrazione/compressione da localStorage.
+  // IndexedDB V3.5: non eseguiamo più la vecchia migrazione/compressione da localStorage.
   const renderHomeCurrentShopping=()=>{
     const btn=$("openCurrentShoppingBtn");
     const meta=$("currentShoppingHomeMeta");
