@@ -255,8 +255,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const adminKey=prompt("Chiave amministratore per pubblicare la Libreria Master:");
     if(!adminKey)return;
 
-    const master=state.products.map(({id,name,price,weight,pieces,store,photo,barcode})=>({
-      id,name,price,weight,pieces,store,photo,barcode
+    const master=state.products.map(({id,name,price,promoPrice,weight,pieces,store,photo,barcode})=>({
+      id,name,price,promoPrice,weight,pieces,store,photo,barcode
     }));
 
     const btn=$("exportMasterLibraryBtn");
