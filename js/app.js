@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=102", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=103", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -33,14 +33,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   const DB_KEY="listaSpesaDB";
   const MASTER_API_URL="https://lista-spesa-master.stef976.workers.dev/master";
   const normalizeProductName=name=>String(name||"").trim().toLocaleLowerCase("it-IT").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
-  // Un prodotto è duplicato solo se coincidono nome E formato.
-  // Esempio: Nutella 200g e Nutella 300g sono due prodotti diversi.
-  const getProductFormat=p=>{
-    const weight=p?.weight??p?.quantity??"";
-    const pieces=p?.pieces??"";
-    return normalizeProductName(String(weight)+"|"+String(pieces));
+  // Due prodotti sono duplicati quando hanno lo stesso nome e, se il peso
+  // è disponibile in ENTRAMBI, anche lo stesso peso. In questo modo Nutella
+  // 200 g e Nutella 500 g restano prodotti diversi senza obbligare a inserire
+  // il peso nel nome.
+  const normalizeProductWeight=p=>normalizeProductName(String(p?.weight??p?.quantity??""))
+    .replace(/\\bgr\\b/g,"g")
+    .replace(/\\bgrammi\\b/g,"g")
+    .replace(/\\s+/g,"");
+  const isDuplicateProduct=(a,b)=>{
+    if(normalizeProductName(a?.name)!==normalizeProductName(b?.name))return false;
+    const weightA=normalizeProductWeight(a);
+    const weightB=normalizeProductWeight(b);
+    // Se manca il peso da una delle due parti non blocchiamo l'importazione:
+    // non possiamo sapere con certezza se sia la stessa confezione.
+    if(!weightA||!weightB)return false;
+    return weightA===weightB;
   };
-  const getProductDuplicateKey=p=>normalizeProductName(p?.name)+"||"+getProductFormat(p);
+  const getProductDuplicateKey=p=>normalizeProductName(p?.name)+"||"+normalizeProductWeight(p);
   const syncMasterLibrary=async({silent=false}={})=>{
     const btn=$("syncMasterLibraryBtn");
     if(btn){btn.disabled=true;btn.classList.add("is-syncing");btn.textContent="↻ Aggiornamento...";}
@@ -50,12 +60,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const payload=await response.json();
       if(!payload.success||!Array.isArray(payload.products))throw new Error(payload.error||"Formato non valido");
       const master=payload.products;
-      const existing=new Set(state.products.map(getProductDuplicateKey));
       let added=0,skipped=0;
       master.forEach((raw,index)=>{
         if(!raw||!String(raw.name||"").trim())return;
-        const key=getProductDuplicateKey(raw);
-        if(existing.has(key)){skipped++;return;}
+        if(state.products.some(existing=>isDuplicateProduct(existing,raw))){skipped++;return;}
         state.products.push({id:raw.id||("master-"+Date.now()+"-"+index+"-"+Math.random().toString(36).slice(2,7)),name:String(raw.name).trim(),price:raw.price??"",promoPrice:raw.promoPrice??"",weight:raw.weight??raw.quantity??"",pieces:raw.pieces??1,store:raw.store??"",photo:raw.photo??"",barcode:raw.barcode??""});
         existing.add(key);added++;
       });
@@ -112,8 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if(!payload.success||!Array.isArray(payload.products))return;
 
       const master=payload.products.filter(p=>p&&String(p.name||"").trim());
-      const localKeys=new Set(state.products.map(getProductDuplicateKey));
-      const missing=master.filter(p=>!localKeys.has(getProductDuplicateKey(p)));
+      const missing=master.filter(p=>!state.products.some(existing=>isDuplicateProduct(existing,p)));
 
       // Il badge rende visibile la disponibilità anche dopo la chiusura dell'alert.
       updateProductsBadge(missing.length);
