@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=95", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=96", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -68,9 +68,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Controllo automatico degli aggiornamenti della Libreria Master.
-  // Il messaggio viene mostrato una sola volta per ogni nuova versione trovata su GitHub.
-  const MASTER_SIGNATURE_KEY="listaSpesaMasterSignature";
+  // La firma viene calcolata dai prodotti stessi, senza dipendere da updatedAt del Worker.
+  const MASTER_SIGNATURE_KEY="listaSpesaMasterSignatureV2";
+  let masterCheckRunning=false;
   const checkMasterUpdate=async()=>{
+    if(masterCheckRunning)return;
+    masterCheckRunning=true;
     try{
       const response=await fetch(MASTER_API_URL+"?check="+Date.now(),{cache:"no-store"});
       if(!response.ok)throw new Error("HTTP "+response.status);
@@ -80,25 +83,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       const master=payload.products.filter(p=>p&&String(p.name||"").trim());
       const localKeys=new Set(state.products.map(getProductDuplicateKey));
       const missing=master.filter(p=>!localKeys.has(getProductDuplicateKey(p)));
-      const signature=payload.updatedAt||JSON.stringify(master);
+
+      // Firma stabile: se il Worker restituisce gli stessi prodotti, la firma è identica.
+      const signature=master
+        .map(p=>getProductDuplicateKey(p))
+        .sort()
+        .join("§");
+
       const previous=localStorage.getItem(MASTER_SIGNATURE_KEY);
 
-      // La notifica viene mostrata solo se nella Libreria Master esistono
-      // prodotti che questo dispositivo non possiede ancora.
-      // In questo modo non dipendiamo dalla sola data/firma della libreria.
+      // Avvisa quando esistono prodotti Master non presenti sul dispositivo.
       if(missing.length>0 && previous!==signature && !isAdminMode()){
         localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
         setTimeout(()=>{
           alert("☁️ Nuovi prodotti disponibili!\n\nCi sono "+missing.length+" nuovi prodotti nella Libreria Master. Entra in “I miei prodotti” e premi “Aggiorna libreria prodotti” per importarli.");
         },500);
-        return;
+      }else if(missing.length===0){
+        // Quando il dispositivo è allineato, questa versione diventa il riferimento.
+        localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
       }
-
-      // Se non ci sono prodotti mancanti, questa è la versione già allineata
-      // con il dispositivo e può diventare il nuovo riferimento.
-      if(missing.length===0) localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
     }catch(error){
       console.warn("Controllo aggiornamenti Libreria Master:",error);
+    }finally{
+      masterCheckRunning=false;
     }
   };
 
@@ -268,10 +275,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.textContent=originalText;
     }
   };
-  window.addEventListener("load",async()=>{
-    if(state.products.length===0) await syncMasterLibrary({silent:true});
-    await checkMasterUpdate();
-  },{once:true});
+  // Il controllo parte subito e viene ripetuto quando la PWA torna in primo piano.
+  // Non importiamo automaticamente i prodotti: l'utente deve prima ricevere la notifica
+  // e decidere quando aggiornare la propria libreria.
+  checkMasterUpdate();
+  window.addEventListener("pageshow",()=>{checkMasterUpdate();});
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible") checkMasterUpdate();
+  });
 
   // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
   $("forceUpdateBtn").onclick=async()=>{
