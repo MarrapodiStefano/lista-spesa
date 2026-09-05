@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=94", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=95", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -29,7 +29,7 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const DB_KEY="listaSpesaDB";
   const MASTER_API_URL="https://lista-spesa-master.stef976.workers.dev/master";
   const normalizeProductName=name=>String(name||"").trim().toLocaleLowerCase("it-IT").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
@@ -107,7 +107,39 @@ document.addEventListener("DOMContentLoaded", () => {
   let editingShoppingId=null;
   let editingReminderId=null;
   let scanner=null; let scannerControls=null; let scannerRunning=false; let processingBarcode=false; let scanLoopId=null; let scannerStream=null;
-  const state=JSON.parse(localStorage.getItem(DB_KEY)||'{"products":[],"currentShopping":[],"purchasedShopping":[],"currentShoppingName":"La mia spesa","history":[],"reminders":[]}');
+  const DEFAULT_STATE={products:[],currentShopping:[],purchasedShopping:[],currentShoppingName:"La mia spesa",history:[],reminders:[]};
+  const IDB_NAME="listaSpesaIndexedDB";
+  const IDB_VERSION=1;
+  const IDB_STORE="appState";
+  const IDB_STATE_KEY="main";
+
+  const openDatabase=()=>new Promise((resolve,reject)=>{
+    const request=indexedDB.open(IDB_NAME,IDB_VERSION);
+    request.onupgradeneeded=()=>{
+      const db=request.result;
+      if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+
+  const loadState=async()=>{
+    try{
+      const db=await openDatabase();
+      const value=await new Promise((resolve,reject)=>{
+        const request=db.transaction(IDB_STORE,"readonly").objectStore(IDB_STORE).get(IDB_STATE_KEY);
+        request.onsuccess=()=>resolve(request.result);
+        request.onerror=()=>reject(request.error);
+      });
+      db.close();
+      return value&&typeof value==="object"?{...DEFAULT_STATE,...value}:structuredClone(DEFAULT_STATE);
+    }catch(error){
+      console.error("Errore apertura archivio IndexedDB",error);
+      return structuredClone(DEFAULT_STATE);
+    }
+  };
+
+  let state=await loadState();
   // Modalità amministratore: resta attiva solo su questo dispositivo.
   const ADMIN_PIN="6414";
   const ADMIN_KEY="listaSpesaAdminMode";
@@ -275,16 +307,47 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.reload();
     }
   };
-  const save=()=>{
-    try{
-      localStorage.setItem(DB_KEY,JSON.stringify(state));
-      return true;
-    }catch(error){
-      console.error("Errore nel salvataggio dei dati",error);
-      alert("⚠️ Non riesco a salvare il prodotto perché lo spazio dati dell'app è pieno. Le nuove foto ora vengono compresse automaticamente; se l'errore continua, elimina qualche vecchia foto dalla libreria.");
-      return false;
-    }
+  let saveTimer=null;
+  let saveInProgress=Promise.resolve();
+
+  const persistState=async snapshot=>{
+    const db=await openDatabase();
+    await new Promise((resolve,reject)=>{
+      const request=db.transaction(IDB_STORE,"readwrite").objectStore(IDB_STORE).put(snapshot,IDB_STATE_KEY);
+      request.onsuccess=()=>resolve();
+      request.onerror=()=>reject(request.error);
+    });
+    db.close();
   };
+
+  const save=()=>{
+    // IndexedDB non ha il piccolo limite di localStorage e salva anche foto e librerie grandi.
+    const snapshot=structuredClone(state);
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{
+      saveInProgress=saveInProgress
+        .catch(()=>{})
+        .then(()=>persistState(snapshot))
+        .catch(error=>console.error("Errore nel salvataggio IndexedDB",error));
+    },50);
+    return true;
+  };
+
+  // Salvataggio immediato, usato quando l'app viene chiusa o passa in background.
+  const saveNow=()=>{
+    const snapshot=structuredClone(state);
+    clearTimeout(saveTimer);
+    saveInProgress=saveInProgress
+      .catch(()=>{})
+      .then(()=>persistState(snapshot))
+      .catch(error=>console.error("Errore nel salvataggio IndexedDB",error));
+    return saveInProgress;
+  };
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="hidden") saveNow();
+  });
+  window.addEventListener("pagehide",()=>{saveNow();});
 
   // Migrazione una tantum: comprime anche le foto già presenti nella libreria,
   // create prima dell'introduzione della compressione automatica.
@@ -346,7 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
   // Non blocca l'avvio dell'app: parte subito dopo il caricamento dell'interfaccia.
-  setTimeout(()=>{migrateStoredPhotos().catch(error=>console.error("Migrazione foto:",error));},300);
+  // IndexedDB V3.2: non eseguiamo più la vecchia migrazione/compressione da localStorage.
   const renderHomeCurrentShopping=()=>{
     const btn=$("openCurrentShoppingBtn");
     const meta=$("currentShoppingHomeMeta");
