@@ -1,0 +1,32 @@
+# CONFIGURAZIONE CLOUDFLARE — LISTA SPESA MASTER
+
+Worker:
+lista-spesa-master
+
+URL attuale:
+https://lista-spesa-master.stef976.workers.dev/master
+
+Runtime variables and secrets:
+1. ADMIN_KEY
+   Tipo: Secret
+   Valore: NON incluso nel backup. Deve essere conservato o rigenerato.
+
+2. GITHUB_OWNER
+   Tipo: Text
+   Valore: MarrapodiStefano
+
+3. GITHUB_REPO
+   Tipo: Text
+   Valore: lista-spesa
+
+4. GITHUB_TOKEN
+   Tipo: Secret
+   Valore: NON incluso nel backup. Deve essere conservato o rigenerato.
+
+Il Worker usa:
+- GET /master  -> legge products-master.json dal repository GitHub
+- POST /master -> aggiorna products-master.json dopo verifica della X-Admin-Key
+
+IMPORTANTE:
+I Secret di Cloudflare non sono leggibili/esportabili in chiaro dal dashboard.
+Per un ripristino totale è necessario reinserire ADMIN_KEY e GITHUB_TOKEN.
