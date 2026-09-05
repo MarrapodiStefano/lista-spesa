@@ -76,28 +76,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       if(!response.ok)throw new Error("HTTP "+response.status);
       const payload=await response.json();
       if(!payload.success||!Array.isArray(payload.products))return;
-      const master=payload.products;
 
+      const master=payload.products.filter(p=>p&&String(p.name||"").trim());
+      const localKeys=new Set(state.products.map(getProductDuplicateKey));
+      const missing=master.filter(p=>!localKeys.has(getProductDuplicateKey(p)));
       const signature=payload.updatedAt||JSON.stringify(master);
       const previous=localStorage.getItem(MASTER_SIGNATURE_KEY);
 
-      // Prima apertura su questo dispositivo: memorizza la versione senza mostrare avvisi.
-      if(previous===null){
+      // La notifica viene mostrata solo se nella Libreria Master esistono
+      // prodotti che questo dispositivo non possiede ancora.
+      // In questo modo non dipendiamo dalla sola data/firma della libreria.
+      if(missing.length>0 && previous!==signature && !isAdminMode()){
         localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
+        setTimeout(()=>{
+          alert("☁️ Nuovi prodotti disponibili!\n\nCi sono "+missing.length+" nuovi prodotti nella Libreria Master. Entra in “I miei prodotti” e premi “Aggiorna libreria prodotti” per importarli.");
+        },500);
         return;
       }
 
-      // Nuova versione trovata: avvisa gli utenti normali una sola volta.
-      if(previous!==signature){
-        localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
-        if(!isAdminMode()){
-          setTimeout(()=>{
-            alert('☁️ Nuovi prodotti disponibili!\n\nEntra nella sezione “I miei prodotti” e premi “Aggiorna libreria prodotti” per importarli.');
-          },500);
-        }
-      }
+      // Se non ci sono prodotti mancanti, questa è la versione già allineata
+      // con il dispositivo e può diventare il nuovo riferimento.
+      if(missing.length===0) localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
     }catch(error){
-      // Il controllo è informativo: se GitHub non è raggiungibile l'app continua normalmente.
       console.warn("Controllo aggiornamenti Libreria Master:",error);
     }
   };
@@ -268,9 +268,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.textContent=originalText;
     }
   };
-  window.addEventListener("load",()=>{
-    if(state.products.length===0)syncMasterLibrary({silent:true});
-    checkMasterUpdate();
+  window.addEventListener("load",async()=>{
+    if(state.products.length===0) await syncMasterLibrary({silent:true});
+    await checkMasterUpdate();
   },{once:true});
 
   // Aggiornamento manuale della PWA: utile su iPhone dove non esiste il classico refresh.
