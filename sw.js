@@ -1,12 +1,12 @@
-const CACHE_NAME = "lista-spesa-v100";
+const CACHE_NAME = "lista-spesa-v101";
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./css/style.css?v=100",
-  "./js/app.js?v=100",
-  "./manifest.json?v=100",
-  "./icon-192.png?v=100"
+  "./css/style.css?v=101",
+  "./js/app.js?v=101",
+  "./manifest.json?v=101",
+  "./icon-192.png?v=101"
 ];
 
 self.addEventListener("install", event => {
@@ -46,8 +46,6 @@ self.addEventListener("fetch", event => {
       url.pathname.endsWith("/manifest.json")
     ));
 
-  // Online: usa sempre la versione più recente del server e aggiorna la cache.
-  // Offline: torna automaticamente all'ultima versione disponibile sul telefono.
   if (isAppAsset) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
@@ -71,7 +69,6 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Per le altre risorse manteniamo il comportamento offline-first.
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true })
       .then(cached => cached || fetch(event.request)
@@ -82,6 +79,5 @@ self.addEventListener("fetch", event => {
           return response;
         })
       )
-    )
   );
 });
