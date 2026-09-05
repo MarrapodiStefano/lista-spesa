@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=98", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=99", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
   // Non blocca l'avvio dell'app: parte subito dopo il caricamento dell'interfaccia.
-  // IndexedDB V3.3: non eseguiamo più la vecchia migrazione/compressione da localStorage.
+  // IndexedDB V3.4: non eseguiamo più la vecchia migrazione/compressione da localStorage.
   const renderHomeCurrentShopping=()=>{
     const btn=$("openCurrentShoppingBtn");
     const meta=$("currentShoppingHomeMeta");
@@ -552,7 +552,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("purchaseUsePromo").checked=Boolean(item.usePromo&&item.promoPrice!==""&&item.promoPrice!==undefined);
     $("purchasePriceInput").value=item.price??item.regularPrice??"";
     $("purchaseNoteInput").value=item.note??"";
-    $("purchasePromoWrap").hidden=!String(item.promoPrice??"").trim();
+    const hasPromo=String(item.promoPrice??"").trim()!=="";
+    $("purchasePromoPrice").placeholder=hasPromo?"":"Nessun prezzo promo";
+    $("purchaseUsePromo").disabled=!hasPromo;
+    if(!hasPromo)$("purchaseUsePromo").checked=false;
     updatePurchasePromoPreview();
     open("purchaseEditPanel");
   };
