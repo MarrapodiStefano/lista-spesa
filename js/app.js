@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=101", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=102", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -60,6 +60,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         existing.add(key);added++;
       });
       save();
+      // Dopo l'importazione la libreria locale è aggiornata: il controllo successivo
+      // riallineerà il badge. Lo azzeriamo subito per evitare che resti visibile.
+      updateProductsBadge(0);
       if($("productPanel").getAttribute("aria-hidden")==="false")renderLibrary($("productSearch").value);
       if(!silent)alert("📦 Libreria Master aggiornata\n\n✅ "+added+" nuovi prodotti aggiunti\n⏭️ "+skipped+" prodotti già presenti");
       return {added,skipped};
@@ -74,6 +77,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   // nascondere un aggiornamento ancora non importato.
   let masterCheckRunning=false;
   let lastMissingAlertSignature="";
+
+  // Badge permanente sul pulsante "I miei prodotti" quando esistono prodotti
+  // della Libreria Master ancora non importati.
+  const updateProductsBadge=(count=0)=>{
+    const candidates=[...document.querySelectorAll("button,a")];
+    const target=candidates.find(el=>{
+      const label=(el.textContent||"").replace(/\s+/g," ").trim().toLocaleLowerCase("it-IT");
+      return label==="i miei prodotti" || label.includes("i miei prodotti");
+    });
+    if(!target)return;
+    let badge=target.querySelector(".master-products-badge");
+    if(count>0){
+      if(!badge){
+        badge=document.createElement("span");
+        badge.className="master-products-badge";
+        badge.setAttribute("aria-label",count+" nuovi prodotti disponibili");
+        target.appendChild(badge);
+      }
+      badge.textContent=count>99?"99+":String(count);
+      badge.hidden=false;
+    }else if(badge){
+      badge.hidden=true;
+    }
+  };
+
   const checkMasterUpdate=async()=>{
     if(masterCheckRunning)return;
     masterCheckRunning=true;
@@ -86,6 +114,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const master=payload.products.filter(p=>p&&String(p.name||"").trim());
       const localKeys=new Set(state.products.map(getProductDuplicateKey));
       const missing=master.filter(p=>!localKeys.has(getProductDuplicateKey(p)));
+
+      // Il badge rende visibile la disponibilità anche dopo la chiusura dell'alert.
+      updateProductsBadge(missing.length);
 
       // Firma della situazione effettivamente mancante sul dispositivo.
       // Serve solo in memoria per evitare avvisi duplicati durante la stessa apertura.
@@ -223,6 +254,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   ensureShoppingIds(state.currentShopping);
   ensureShoppingIds(state.purchasedShopping);
   const $=id=>document.getElementById(id);
+
+  const masterBadgeStyle=document.createElement("style");
+  masterBadgeStyle.textContent=`
+    .master-products-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:7px;border-radius:999px;background:#e53935;color:#fff;font-size:12px;font-weight:800;line-height:1;vertical-align:middle;box-sizing:border-box;}
+  `;
+  document.head.appendChild(masterBadgeStyle);
   $("syncMasterLibraryBtn").onclick=()=>syncMasterLibrary();
 
   // Accesso amministratore: tap prolungato sul vero titolo del pannello Libreria.
