@@ -2831,3 +2831,60 @@ body{
 .exit-admin-btn[hidden]{
   display:none !important;
 }
+
+
+/* V3.4 — Prezzo Promo e Note nella modifica acquisto */
+.purchase-edit-sheet .purchase-price-label,
+.purchase-edit-sheet .purchase-note-label{
+  display:grid;
+  width:100%;
+  gap:8px;
+  margin-top:18px;
+  font-size:18px;
+  font-weight:700;
+}
+.purchase-edit-sheet .purchase-price-label input,
+.purchase-edit-sheet .purchase-note-label textarea{
+  width:100%;
+  min-height:58px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  color:var(--text);
+  font:inherit;
+  font-size:18px;
+  font-weight:650;
+}
+.purchase-edit-sheet .purchase-price-label input{
+  padding:0 18px;
+}
+.purchase-edit-sheet .purchase-note-label textarea{
+  min-height:110px;
+  padding:16px 18px;
+  resize:vertical;
+  line-height:1.4;
+}
+.purchase-edit-sheet .purchase-promo-price-label{
+  margin-top:18px;
+}
+.purchase-edit-sheet .purchase-promo-toggle{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:16px;
+  padding:17px 18px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  font-size:17px;
+  font-weight:700;
+}
+.purchase-edit-sheet .purchase-promo-toggle input{
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+}
+.purchase-edit-sheet .purchase-promo-toggle input:disabled{
+  opacity:.35;
+}
