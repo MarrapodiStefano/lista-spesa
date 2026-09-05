@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=96", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=97", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(!raw||!String(raw.name||"").trim())return;
         const key=getProductDuplicateKey(raw);
         if(existing.has(key)){skipped++;return;}
-        state.products.push({id:raw.id||("master-"+Date.now()+"-"+index+"-"+Math.random().toString(36).slice(2,7)),name:String(raw.name).trim(),price:raw.price??"",weight:raw.weight??raw.quantity??"",pieces:raw.pieces??1,store:raw.store??"",photo:raw.photo??"",barcode:raw.barcode??""});
+        state.products.push({id:raw.id||("master-"+Date.now()+"-"+index+"-"+Math.random().toString(36).slice(2,7)),name:String(raw.name).trim(),price:raw.price??"",promoPrice:raw.promoPrice??"",weight:raw.weight??raw.quantity??"",pieces:raw.pieces??1,store:raw.store??"",photo:raw.photo??"",barcode:raw.barcode??""});
         existing.add(key);added++;
       });
       save();
@@ -200,11 +200,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     if(p.weight===undefined||p.weight===null) p.weight=p.quantity??"";
     if(p.pieces===undefined||p.pieces===null) p.pieces=1;
     if(p.store===undefined||p.store===null) p.store="";
+    if(p.promoPrice===undefined||p.promoPrice===null) p.promoPrice="";
+    if(p.note===undefined||p.note===null) p.note="";
   });
   migrateProductFields(state.products);
   migrateProductFields(state.currentShopping);
   migrateProductFields(state.purchasedShopping);
   const ensureShoppingIds=items=>items.forEach((p,i)=>{if(!p._shoppingId)p._shoppingId="shop-"+Date.now()+"-"+i+"-"+Math.random().toString(36).slice(2,8);});
+  const migrateShoppingPriceFields=items=>items.forEach(p=>{
+    if(p.regularPrice===undefined||p.regularPrice===null) p.regularPrice=p.price??"";
+    if(p.promoPrice===undefined||p.promoPrice===null) p.promoPrice="";
+    if(p.usePromo===undefined||p.usePromo===null) p.usePromo=false;
+    if(p.note===undefined||p.note===null) p.note="";
+  });
+  migrateShoppingPriceFields(state.currentShopping);
+  migrateShoppingPriceFields(state.purchasedShopping);
   ensureShoppingIds(state.currentShopping);
   ensureShoppingIds(state.purchasedShopping);
   const $=id=>document.getElementById(id);
@@ -524,13 +534,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert('✓ "'+item.name+'" è stato spostato nei Promemoria.');
   };
 
+  const updatePurchasePromoPreview=()=>{
+    const usePromo=$("purchaseUsePromo").checked;
+    const regular=$("purchaseRegularPrice").value.trim();
+    const promo=$("purchasePromoPrice").value.trim();
+    $("purchasePriceInput").value=usePromo&&promo!==""?promo:regular;
+  };
+
   const openPurchaseEditor=id=>{
     const item=state.currentShopping.find(p=>p._shoppingId===id);
     if(!item)return;
     editingShoppingId=id;
     $("purchaseEditName").textContent=item.name;
     $("purchasePiecesInput").value=Math.max(1,parseInt(item.pieces,10)||1);
-    $("purchasePriceInput").value=item.price??"";
+    $("purchaseRegularPrice").value=item.regularPrice??item.price??"";
+    $("purchasePromoPrice").value=item.promoPrice??"";
+    $("purchaseUsePromo").checked=Boolean(item.usePromo&&item.promoPrice!==""&&item.promoPrice!==undefined);
+    $("purchasePriceInput").value=item.price??item.regularPrice??"";
+    $("purchaseNoteInput").value=item.note??"";
+    $("purchasePromoWrap").hidden=!String(item.promoPrice??"").trim();
+    updatePurchasePromoPreview();
     open("purchaseEditPanel");
   };
 
@@ -543,7 +566,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const item=state.currentShopping.find(p=>p._shoppingId===editingShoppingId);
     if(!item)return closePurchaseEditor();
     item.pieces=Math.max(1,parseInt($("purchasePiecesInput").value,10)||1);
-    item.price=$("purchasePriceInput").value.trim().replace(",",".");
+    item.regularPrice=$("purchaseRegularPrice").value.trim().replace(",",".");
+    item.promoPrice=$("purchasePromoPrice").value.trim().replace(",",".");
+    item.usePromo=Boolean($("purchaseUsePromo").checked&&item.promoPrice!=="");
+    item.price=(item.usePromo?item.promoPrice:item.regularPrice);
+    item.note=$("purchaseNoteInput").value.trim();
     save();
     closePurchaseEditor();
     renderShopping();
@@ -815,7 +842,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      state.currentShopping.push({...p,_shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)});
+      state.currentShopping.push({...p,price:p.price??"",usePromo:false,note:"",_shoppingId:"shop-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)});
       save();
       renderShopping();
       // Restiamo nella libreria: il + diventa immediatamente una ✓, come nei Promemoria.
@@ -828,6 +855,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       editingProductId=p.id;
       $("productName").value=p.name||"";
       $("productPrice").value=p.price||"";
+      $("productPromoPrice").value=p.promoPrice||"";
       $("productWeight").value=p.weight??p.quantity??"";
       $("productPieces").value=p.pieces||1;
       const knownStores=["Conad","Triscount","Alimentarista","Todis","Garanzia"];
@@ -886,6 +914,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   $("closePurchaseEdit").onclick=$("closePurchaseEditBtn").onclick=closePurchaseEditor;
   $("savePurchaseEditBtn").onclick=savePurchaseEditor;
+  $("purchaseUsePromo").onchange=updatePurchasePromoPreview;
   $("closeShoppingAction").onclick=$("closeShoppingActionBtn").onclick=closeShoppingActions;
   $("moveShoppingToReminderBtn").onclick=()=>{if(shoppingActionId)moveShoppingItemToReminder(shoppingActionId);};
   $("deleteShoppingItemBtn").onclick=()=>{const id=shoppingActionId;closeShoppingActions();if(id)removeShoppingItem(id);};
@@ -1117,6 +1146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         $("productWeight").value=local.weight??local.quantity??"";
         $("productPieces").value=local.pieces||1;
         $("productPrice").value=local.price||"";
+        $("productPromoPrice").value=local.promoPrice||"";
         pendingPhoto=local.photo||"";
         if(pendingPhoto){$("photoPreviewImg").src=pendingPhoto;$("photoPreview").hidden=false;}
         return;
@@ -1239,6 +1269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     const name=$("productName").value.trim();
     const price=$("productPrice").value.trim().replace(",",".");
+    const promoPrice=$("productPromoPrice").value.trim().replace(",",".");
     const weight=$("productWeight").value.trim().replace(",",".");
     const pieces=Math.max(1,parseInt($("productPieces").value,10)||1);
     const selectedStore=$("productStore").value;
@@ -1249,6 +1280,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       id:editingProductId||Date.now().toString(),
       name,
       price,
+      promoPrice,
       weight,
       pieces,
       store,
