@@ -1,0 +1,18 @@
+{
+  "backup_name": "Backup completo La mia spesa",
+  "backup_date": "2026-09-05",
+  "application_repository": "MarrapodiStefano/lista-spesa",
+  "snapshot_source_branch": "main",
+  "snapshot_source_commit": "981f835f011a13e4d7516f6339c18a6c8351e7cd",
+  "cloudflare_worker": "lista-spesa-master",
+  "cloudflare_endpoint": "https://lista-spesa-master.stef976.workers.dev/master",
+  "cloudflare_backup_files": [
+    "BACKUP_CLOUDFLARE/worker.js",
+    "BACKUP_CLOUDFLARE/configurazione.txt"
+  ],
+  "recovery_guide": "GUIDA_RIPRISTINO_COMPLETO.md",
+  "secrets_not_stored_in_cleartext": [
+    "ADMIN_KEY",
+    "GITHUB_TOKEN"
+  ]
+}
