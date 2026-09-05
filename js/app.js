@@ -1,7 +1,7 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js?v=100", { updateViaCache: "none" });
+      const registration = await navigator.serviceWorker.register("./sw.js?v=101", { updateViaCache: "none" });
       await registration.update();
 
       if (registration.waiting) {
@@ -68,9 +68,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Controllo automatico degli aggiornamenti della Libreria Master.
-  // La firma viene calcolata dai prodotti stessi, senza dipendere da updatedAt del Worker.
-  const MASTER_SIGNATURE_KEY="listaSpesaMasterSignatureV2";
+  // La verifica confronta SEMPRE la Libreria Master con i prodotti realmente
+  // presenti su questo dispositivo. Non usiamo più una firma persistente in
+  // localStorage per decidere se mostrare l'avviso: quella logica poteva
+  // nascondere un aggiornamento ancora non importato.
   let masterCheckRunning=false;
+  let lastMissingAlertSignature="";
   const checkMasterUpdate=async()=>{
     if(masterCheckRunning)return;
     masterCheckRunning=true;
@@ -84,24 +87,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       const localKeys=new Set(state.products.map(getProductDuplicateKey));
       const missing=master.filter(p=>!localKeys.has(getProductDuplicateKey(p)));
 
-      // Firma stabile: se il Worker restituisce gli stessi prodotti, la firma è identica.
-      const signature=master
+      // Firma della situazione effettivamente mancante sul dispositivo.
+      // Serve solo in memoria per evitare avvisi duplicati durante la stessa apertura.
+      const missingSignature=missing
         .map(p=>getProductDuplicateKey(p))
         .sort()
         .join("§");
 
-      const previous=localStorage.getItem(MASTER_SIGNATURE_KEY);
-
-      // Avvisa quando esistono prodotti Master non presenti sul dispositivo.
-      if(missing.length>0 && previous!==signature && !isAdminMode()){
-        localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
+      // Se esistono prodotti Master mancanti, avvisiamo sempre all'apertura
+      // della PWA. Il confronto è diretto Master ↔ IndexedDB, quindi non può
+      // essere bloccato da una vecchia firma salvata sul telefono.
+      if(missing.length>0 && !isAdminMode() && lastMissingAlertSignature!==missingSignature){
+        lastMissingAlertSignature=missingSignature;
         setTimeout(()=>{
           alert("☁️ Nuovi prodotti disponibili!\n\nCi sono "+missing.length+" nuovi prodotti nella Libreria Master. Entra in “I miei prodotti” e premi “Aggiorna libreria prodotti” per importarli.");
         },500);
-      }else if(missing.length===0){
-        // Quando il dispositivo è allineato, questa versione diventa il riferimento.
-        localStorage.setItem(MASTER_SIGNATURE_KEY,signature);
       }
+
+      // Quando l'utente è completamente allineato, azzeriamo il riferimento
+      // temporaneo: eventuali nuovi prodotti successivi genereranno un nuovo avviso.
+      if(missing.length===0) lastMissingAlertSignature="";
     }catch(error){
       console.warn("Controllo aggiornamenti Libreria Master:",error);
     }finally{
@@ -275,7 +280,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const result=await response.json().catch(()=>({success:false,error:"Risposta non valida"}));
       if(!response.ok||!result.success)throw new Error(result.error||"Pubblicazione non riuscita");
 
-      localStorage.setItem(MASTER_SIGNATURE_KEY,result.updatedAt||JSON.stringify(master));
+      // La notifica sui dispositivi utenti è basata sul confronto diretto Master ↔ IndexedDB.
+      // Non salviamo più una firma persistente che potrebbe nascondere nuovi prodotti.
+      lastMissingAlertSignature="";
       alert("☁️ Libreria Master pubblicata correttamente su GitHub.");
     }catch(error){
       console.error("Pubblicazione Libreria Master:",error);
